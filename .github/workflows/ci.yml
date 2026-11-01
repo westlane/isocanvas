@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+      - run: corepack enable
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: pino-blanc
+      - run: yarn install --immutable
+      - run: yarn typecheck
+      - run: yarn test
