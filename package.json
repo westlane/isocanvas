@@ -1,0 +1,63 @@
+{
+  "name": "@westlane/isocanvas",
+  "version": "0.1.0",
+  "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "packageManager": "yarn@4.9.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/westlane/isocanvas.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./dot-grid.css": "./theme/layout/dot-grid.css",
+    "./layout.css": "./theme/layout/layout.css",
+    "./camera.css": "./theme/camera/camera.css",
+    "./canvas-chrome.css": "./theme/canvas-chrome.css",
+    "./theme/tokens.css": "./theme/tokens.css",
+    "./theme/schemes.css": "./theme/schemes.css",
+    "./theme/diagram-surfaces.css": "./theme/diagram-surfaces.css",
+    "./theme/wireframe.css": "./theme/wireframe.css"
+  },
+  "files": [
+    "src",
+    "theme",
+    "README.md",
+    "docs/architecture.md",
+    "docs/persistence.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "demo": "vite",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.check.json",
+    "test": "vitest run",
+    "build:theme-schemes": "IC_GENERATE=1 vitest run"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "ic-canvas": "npm:@elchininet/isometric@^4.0.0",
+    "loro.js": "^0.4.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/feather-icons": "^4",
+    "@types/node": "^22.15.0",
+    "@westlane/pino-blanc": "github:westlane/pino-blanc",
+    "feather-icons": "^4.29.2",
+    "happy-dom": "^20.0.10",
+    "typescript": "^5.8.3",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}

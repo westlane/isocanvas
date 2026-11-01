@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "paths": {
+      "@westlane/isocanvas": ["./src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "demo/scripts/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"]
+}
