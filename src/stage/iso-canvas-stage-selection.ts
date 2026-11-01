@@ -15,6 +15,7 @@ export type AttachIsoCanvasStageNodeSelectionOptions = {
   stage: IsoCanvasStage;
   surface: HTMLElement;
   initialSelection?: readonly string[];
+  /** @deprecated Ignored — pan chrome is applied after pointerdown; do not gate taps on it. */
   panningClass?: string;
   onSelectionChange?: (selectedIds: readonly string[]) => void;
 };
@@ -79,17 +80,8 @@ export function attachIsoCanvasStageNodeSelection(
 
   applyAll();
 
-  const panningClass = options.panningClass ?? "is-panning";
-
   const onPointerDown = (event: PointerEvent): void => {
     if (event.button !== 0) {
-      return;
-    }
-    if (
-      options.surface.classList.contains(panningClass) ||
-      (event.target instanceof Element && event.target.closest(`.${panningClass}`))
-    ) {
-      tapGesture = null;
       return;
     }
     tapGesture = {
