@@ -3,6 +3,7 @@
 import type { IsoCanvasTheme } from "../types/theme.js";
 import {
   artboardSurfaceFillOnCanvas,
+  artboardFrontEdgeLightCss,
   isoSolidFaceStrokeCssFromFill,
   isoSlabVisibleFacesFromTop,
   isLightHex,
@@ -63,6 +64,7 @@ export const ZUI_THEME_CSS_VARS = {
   wireframeLabelFill: "--ic-wireframe-label-fill",
   artboardSurfaceFill: "--ic-artboard-surface-fill",
   artboardFrontFill: "--ic-artboard-front-fill",
+  artboardFrontStroke: "--ic-artboard-front-stroke",
   artboardSideFill: "--ic-artboard-side-fill",
 } as const;
 
@@ -147,6 +149,7 @@ export function themeToCssCustomProperties(theme: IsoCanvasTheme): Record<string
     ),
     [ZUI_THEME_CSS_VARS.artboardSurfaceFill]: artboardTop,
     [ZUI_THEME_CSS_VARS.artboardFrontFill]: artboardSlab.front,
+    [ZUI_THEME_CSS_VARS.artboardFrontStroke]: artboardFrontEdgeLightCss(artboardTop),
     [ZUI_THEME_CSS_VARS.artboardSideFill]: artboardSlab.side,
   };
 }

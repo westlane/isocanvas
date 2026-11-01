@@ -134,6 +134,21 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
     --ic-artboard-front-fill,
     color-mix(in oklch, var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 88%, black)
   );
+  stroke: var(
+    --ic-artboard-front-stroke,
+    var(
+      --ic-artboard-front-edge-light,
+      color-mix(
+        in oklch,
+        var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 46%,
+        white
+      )
+    )
+  );
+  stroke-width: var(--ic-artboard-front-stroke-width, 1.5px);
+  vector-effect: non-scaling-stroke;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 3px var(--ic-artboard-front-edge-glow, transparent));
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
@@ -217,6 +232,6 @@ svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-
   pointer-events: none;
 }
 
-.ic-artboard-dot {
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-dot {
   fill: var(--ic-dot-grid-dot);
 }

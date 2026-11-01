@@ -64,8 +64,19 @@
   display: none;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face {
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
   stroke: none !important;
+}
+
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
+  stroke: var(
+    --ic-artboard-front-stroke,
+    var(--ic-artboard-front-edge-light, var(--ic-artboard-front-fill))
+  ) !important;
+  stroke-width: var(--ic-artboard-front-stroke-width, 1.5px) !important;
+  vector-effect: non-scaling-stroke;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 3px var(--ic-artboard-front-edge-glow, transparent));
 }
 
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] :is(path, polygon, rect):not(.ic-cube-canvas-bg):not(.ic-svg-dot-grid):not(.ic-artboard-dot-grid-fill):not(.ic-iso-cube-face):not(.ic-artboard-outline):not(.ic-artboard-outline-layer):not(.ic-artboard-face):not(.ic-artboard-guide):not(.ic-artboard-subguide):not(.ic-artboard-fineguide) {

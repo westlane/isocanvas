@@ -6,10 +6,8 @@ import { defaultDotGridPhase, DEFAULT_DOT_GRID_SIZE_PX } from "./surface.js";
 import { isometricDotGridPlaneMatrix } from "./projection.js";
 import { DEFAULT_ARTBOARD_DOTS_PER_CELL, DEFAULT_ARTBOARD_DOT_LATTICE_PHASE } from "../layout/artboard.js";
 import { artboardDotLatticeOriginInCell } from "../layout/lattice-plane.js";
-import {
-  parseSvgPathMoveLinePoints,
-} from "../layout/artboard-ground-path.js";
 import { IC_ARTBOARD_OUTLINE_LAYER_CLASS } from "../layout/artboard-outline.js";
+import { parseSvgPathMoveLinePoints } from "../layout/artboard-ground-path.js";
 
 export type SyncSvgDotGridOptions = {
   cellSize?: number;
@@ -73,7 +71,7 @@ function upsertPattern(
 
   let mark = pattern.querySelector("rect");
   if (!(mark instanceof SVGRectElement)) {
-    pattern.querySelector("circle")?.remove();
+    pattern.replaceChildren();
     mark = document.createElementNS(SVG_NS, "rect");
     pattern.appendChild(mark);
   }

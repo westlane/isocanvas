@@ -562,6 +562,11 @@ export function artboardSurfaceFillOnCanvas(
   return artboardFillDistinctFromCanvas(surfaceHex, appearance);
 }
 
+/** Lit rim on the artboard front slab silhouette (mix toward white from the panel top). */
+export function artboardFrontEdgeLightCss(artboardTopFillHex: string): string {
+  return `color-mix(in oklch, ${normalizeHex(artboardTopFillHex)} 46%, white)`;
+}
+
 /** Visible iso box faces derived from one scheme accent via light/dark shading only. */
 export type IsoFaceFillSet = {
   top: string;
