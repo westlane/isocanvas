@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import type { IsometricOrientation } from "../../types/diagram.js";
+import type { IsoBoxSpec, IsometricOrientation } from "../../types/diagram.js";
 import { DEFAULT_CUBE_CANVAS_SCALE } from "./cube.js";
 import { isoCubeFaceRectLayoutForPlaneTopLeft } from "./cube-faces.js";
 import {
@@ -138,7 +138,7 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
 
 /** One font size for every cube label in a mount so titles stay on-face and match each other. */
 export function uniformIsoCubeTopLabelFontSizePx(
-  specs: readonly { label: string; width: number; depth: number }[],
+  specs: readonly Pick<IsoBoxSpec, "label" | "width" | "depth" | "omitCubeLabel">[],
   options?: {
     orientation?: IsometricOrientation;
     baseFontSizePx?: number;

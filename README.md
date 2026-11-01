@@ -83,7 +83,43 @@ stage.setActiveArtboard("inset");
 stage.getArtboards(); // programmatic access to every artboard + host
 ```
 
-Use `fitArtboard(id)` / `fitView()` for the default centered camera. Each artboard remembers its own view when you switch with `setActiveArtboard`.
+Use `fitArtboard(id)` / `fitView()` for the default centered camera. Each artboard remembers its own view when you switch with `setActiveArtboard` in **single** layout.
+
+**Row layout** — every artboard stays visible, side by side, with a shared isometric tilt on the row. Row layout equalizes logical artboard height so content shares a baseline (`row.alignUserHeights`, default on).
+
+```ts
+import {
+  createIsoCanvasStage,
+  mountDiagramScenesOnIsoCanvasStage,
+} from "@westlane/isocanvas";
+
+const stage = createIsoCanvasStage({
+  layout: "row",
+  row: { gapPx: 20, pitchDeg: 42, bearingDeg: 0 },
+});
+  stage,
+  [
+    { id: "person", label: "Person", scene: personScene, embedDotGrid: false },
+    { id: "place", label: "Place", scene: placeScene, embedDotGrid: false },
+  ],
+  { colors: theme.colors },
+);
+
+// Or manage the registry yourself:
+// syncIsoCanvasStageArtboardRegistry / renderDiagramScenesOnIsoCanvasStage
+
+stage.addArtboard({ id: "other", label: "Other", embedDotGrid: false });
+stage.setArtboardVisible("place", false); // hide column; diagram stays mounted
+stage.isArtboardVisible("place"); // false
+stage.setArtboardVisible("place", true);
+stage.removeArtboard("legacy"); // drops DOM + diagram for that id
+
+// Default: one global pan/zoom on the row (syncCamera defaults true).
+// Pass row: { syncCamera: false } for independent per-column cameras.
+
+stage.attachPanZoom({ surface: appViewport });
+stage.fitView();
+```
 
 3. **Tune** on a parent:
 

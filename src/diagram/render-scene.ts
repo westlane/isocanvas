@@ -27,11 +27,17 @@ import {
 } from "../isometric/stage/stage-shell.js";
 import type { IsoCanvasColors } from "../types/theme.js";
 import { DEFAULT_ISO_CANVAS_COLORS } from "../theme/defaults.js";
+import type { ArtboardUserSize } from "../types/artboard.js";
 import type { PlaneBoxSpec } from "../types/artboard.js";
 import type { ArtboardPlaneStage } from "../types/artboard.js";
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../layout/artboard.js";
 import { enforcePlaneBoxOnArtboardLattice } from "../layout/lattice.js";
 import { defaultIsoArtboardStage, mountIsometricCanvasOnHost } from "../isometric/stage/stage.js";
+import {
+  artboardLatticeStageForPlaneBoxInRow,
+  type PlaneRowColumnLayout,
+} from "../stage/stage-plane-row-scene.js";
+import { setViewportLeftBottomMeet } from "../camera/view-box/attributes.js";
 import { frameDiagramSceneCamera } from "./diagram-document.js";
 
 const MIN_EXTRUSION = 0.35;
@@ -141,9 +147,28 @@ export type RenderDiagramSceneOptions = {
   omitArtboardShell?: boolean;
   /** Override default {@link DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME} (use `"full"` for demo-style guides). */
   artboardShellChrome?: ArtboardStageShellChrome;
+  /** Iso ground / shell size (independent of scene content viewBox). */
+  artboardUserSize?: ArtboardUserSize;
+  /** Meet alignment for SVG in host (`min` = left/top in host, one plane row). */
+  viewportMeetAlign?: "min" | "mid";
+  /** Three (or N) iso ground slabs with plane-x gaps on one strip. */
+  planeRowColumns?: PlaneRowColumnLayout;
 };
 
-function artboardStageFromScene(scene: DiagramScene): ArtboardPlaneStage {
+function artboardStageFromScene(
+  scene: DiagramScene,
+  userSizeOverride?: ArtboardUserSize,
+): ArtboardPlaneStage {
+  if (userSizeOverride && userSizeOverride.width > 0 && userSizeOverride.height > 0) {
+    const stage: ArtboardPlaneStage = {
+      x: 0,
+      y: 0,
+      width: userSizeOverride.width,
+      height: userSizeOverride.height,
+      divisions: scene.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
+    };
+    return artboardStageWithFoundationSlabPad(scene, stage);
+  }
   const viewBox = scene.viewBox;
   let stage: ArtboardPlaneStage;
   if (viewBox && viewBox.w > 0 && viewBox.h > 0) {
@@ -160,6 +185,17 @@ function artboardStageFromScene(scene: DiagramScene): ArtboardPlaneStage {
   return artboardStageWithFoundationSlabPad(scene, stage);
 }
 
+function latticeStageForPlaneBox(
+  box: PlaneBoxSpec,
+  stage: ArtboardPlaneStage,
+  planeRow?: PlaneRowColumnLayout,
+): ArtboardPlaneStage {
+  if (planeRow) {
+    return artboardLatticeStageForPlaneBoxInRow(box, stage, planeRow);
+  }
+  return stage;
+}
+
 /** Mount a portable {@link DiagramScene} on an iso artboard stage (scene viewBox when present). */
 export function renderDiagramScene(
   host: HTMLElement,
@@ -167,7 +203,7 @@ export function renderDiagramScene(
   colors: IsoCanvasColors = DEFAULT_ISO_CANVAS_COLORS,
   options: RenderDiagramSceneOptions = {},
 ): SVGSVGElement {
-  const stage = artboardStageFromScene(scene);
+  const stage = artboardStageFromScene(scene, options.artboardUserSize);
   const canvas = mountIsometricCanvasOnHost(host, stage);
 
   for (const edge of scene.edges ?? []) {
@@ -212,12 +248,16 @@ export function renderDiagramScene(
     canvas,
     scene.nodes.flatMap((node) =>
       planeBoxesForSceneNode(node).map((box) =>
-        enforcePlaneBoxOnArtboardLattice(box, stage),
+        enforcePlaneBoxOnArtboardLattice(
+          box,
+          latticeStageForPlaneBox(box, stage, options.planeRowColumns),
+        ),
       ),
     ),
     colors,
     {
     stage,
+    ...(options.planeRowColumns ? { planeRowColumns: options.planeRowColumns } : {}),
     ...(options.omitArtboardShell
       ? { omitArtboardShell: true }
       : {
@@ -229,6 +269,12 @@ export function renderDiagramScene(
   mountFoundationSlabCaptions(canvas, scene, stage);
 
   const svg = decorateCubeCanvas(canvas);
+  if (options.viewportMeetAlign === "min") {
+    svg.dataset.icViewportMeet = "min";
+    setViewportLeftBottomMeet(svg);
+  } else {
+    svg.removeAttribute("data-ic-viewport-meet");
+  }
   frameDiagramSceneCamera(host);
   return svg;
 }

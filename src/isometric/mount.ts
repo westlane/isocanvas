@@ -22,6 +22,7 @@ import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
 import { uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
 import { addArtboardStageShell, createArtboardStageShell, DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME, type ArtboardStageShellChrome } from "./stage/stage-shell.js";
+import type { PlaneRowColumnLayout } from "../stage/stage-plane-row-scene.js";
 
 /** One deferred paint step on a cube canvas, ordered by `depth` then `layer`. */
 export type IsoCanvasMountEntry = {
@@ -179,6 +180,7 @@ export function mountPlaneBoxesOnCanvas(
     stage: ArtboardPlaneStage;
     omitArtboardShell?: boolean;
     artboardShellChrome?: ArtboardStageShellChrome;
+    planeRowColumns?: PlaneRowColumnLayout;
   },
 ): void {
   const stage = options.stage;
@@ -196,6 +198,7 @@ export function mountPlaneBoxesOnCanvas(
   const shellChrome =
     options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
   const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
+  const planeRow = options.planeRowColumns;
   const mountTarget = options.omitArtboardShell
     ? (() => {
         const anchor = new IsometricGroup({
@@ -206,11 +209,34 @@ export function mountPlaneBoxesOnCanvas(
         canvas.addChild(anchor);
         return anchor;
       })()
-    : (() => {
-        const shell = createArtboardStageShell(stage, orientation, shellChrome);
-        addArtboardStageShell(canvas, shell, stage);
-        return shell;
-      })();
+    : planeRow && planeRow.columnCount > 0
+      ? (() => {
+          const { cellWidth, cellHeight, gapPx, columnCount } = planeRow;
+          const divisions = stage.divisions;
+          for (let column = 0; column < columnCount; column += 1) {
+            const columnStage: ArtboardPlaneStage = {
+              x: stage.x + column * (cellWidth + gapPx),
+              y: stage.y,
+              width: cellWidth,
+              height: cellHeight,
+              ...(divisions !== undefined ? { divisions } : {}),
+            };
+            const shell = createArtboardStageShell(columnStage, orientation, shellChrome);
+            addArtboardStageShell(canvas, shell, columnStage);
+          }
+          const anchor = new IsometricGroup({
+            left: stageGround.left,
+            right: stageGround.right,
+            top: 0,
+          });
+          canvas.addChild(anchor);
+          return anchor;
+        })()
+      : (() => {
+          const shell = createArtboardStageShell(stage, orientation, shellChrome);
+          addArtboardStageShell(canvas, shell, stage);
+          return shell;
+        })();
   for (const spec of specs) {
     const stackLayer = stackLayers.get(spec.id);
     mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {

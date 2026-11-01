@@ -22,21 +22,47 @@
   --ic-canvas-chrome-fg-muted: color-mix(in oklch, var(--ic-canvas-chrome-fg) 68%, transparent);
   --ic-canvas-chrome-grain-opacity: 0.085;
   --ic-canvas-chrome-grain-size: 168px;
-  --ic-artboard-float-shadow: drop-shadow(0 56px 200px color-mix(in oklch, black 18%, transparent))
-    drop-shadow(0 28px 100px color-mix(in oklch, black 10%, transparent));
-  /* Lit rim on the artboard front slab — seals gaps and reads against dark chrome. */
-  --ic-artboard-front-edge-light: color-mix(
+
+  /* Artboard iso shell — schemes override --ic-artboard-{surface,front,side}-fill. */
+  --ic-artboard-slab-shadow: color-mix(in oklch, black 28%, transparent);
+  --ic-artboard-slab-shadow-soft: color-mix(in oklch, black 14%, transparent);
+  --ic-artboard-slab-filter: drop-shadow(0 7px 14px var(--ic-artboard-slab-shadow))
+    drop-shadow(0 3px 6px var(--ic-artboard-slab-shadow-soft));
+  --ic-artboard-surface-fill-fallback: color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc));
+  --ic-artboard-front-fill-fallback: color-mix(
     in oklch,
-    var(--ic-artboard-surface-fill, var(--zui-surface, #f8fafc)) 46%,
-    white
+    var(--ic-artboard-surface-fill, var(--ic-artboard-surface-fill-fallback)) 88%,
+    black
   );
-  --ic-artboard-front-edge-glow: color-mix(
+  --ic-artboard-side-fill-fallback: color-mix(
     in oklch,
-    var(--ic-artboard-front-edge-light) 62%,
-    transparent
+    var(--ic-artboard-surface-fill, var(--ic-artboard-surface-fill-fallback)) 94%,
+    black
   );
-  --ic-artboard-front-stroke-width: 1.5px;
-  --ic-artboard-front-stroke: var(--ic-artboard-front-edge-light);
+  --ic-artboard-top-fill: var(--ic-artboard-surface-fill, var(--ic-artboard-surface-fill-fallback));
+  --ic-artboard-front-face-fill: var(
+    --ic-artboard-front-fill,
+    var(--ic-artboard-front-fill-fallback)
+  );
+  --ic-artboard-side-face-fill: var(--ic-artboard-side-fill, var(--ic-artboard-side-fill-fallback));
+  --ic-artboard-face-seam-tint: black;
+  --ic-artboard-face-seam-fill-ratio: 94%;
+  --ic-artboard-top-seam-stroke: color-mix(
+    in oklch,
+    var(--ic-artboard-top-fill) var(--ic-artboard-face-seam-fill-ratio),
+    var(--ic-artboard-face-seam-tint)
+  );
+  --ic-artboard-front-seam-stroke: color-mix(
+    in oklch,
+    var(--ic-artboard-front-face-fill) var(--ic-artboard-face-seam-fill-ratio),
+    var(--ic-artboard-face-seam-tint)
+  );
+  --ic-artboard-side-seam-stroke: color-mix(
+    in oklch,
+    var(--ic-artboard-side-face-fill) var(--ic-artboard-face-seam-fill-ratio),
+    var(--ic-artboard-face-seam-tint)
+  );
+  --ic-artboard-face-seam-stroke-width: 0.75px;
   --ic-surface-muted: var(--zui-surface, #f8fafc);
   --ic-ink: var(--zui-ink, #1e293b);
   --ic-ink-muted: var(--zui-ink-muted, #64748b);

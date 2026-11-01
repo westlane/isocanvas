@@ -18,8 +18,30 @@ export type IsoCanvasArtboardEntry = {
   host: HTMLDivElement;
 };
 
+export type IsoCanvasStageLayout = "single" | "row" | "stack";
+
+export type IsoCanvasStageRowLayoutOptions = {
+  /** Gap between artboards in the row/stack (px). */
+  gapPx?: number;
+  /** Isometric pitch applied to the whole row (`rotateX`). */
+  pitchDeg?: number;
+  /** Map bearing applied to the row (`rotateZ`). */
+  bearingDeg?: number;
+  /** When true (default in row layout), one pan/zoom drives every visible artboard. */
+  syncCamera?: boolean;
+  /** Row: equalize logical artboard user height to the tallest scene (default true). */
+  alignUserHeights?: boolean;
+  /**
+   * Row: tight horizontal iso strip — small gap, equal column user width + height
+   * (three slabs read as one continuous ground row).
+   */
+  continuous?: boolean;
+};
+
 export type IsoCanvasStageAddArtboardOptions = CreateArtboardOptions & {
   id: IsoCanvasArtboardId;
+  /** Optional caption rendered above the artboard in row layout. */
+  label?: string;
 };
 
 export type CreateIsoCanvasStageOptions = {
@@ -27,6 +49,9 @@ export type CreateIsoCanvasStageOptions = {
   className?: string;
   /** Pan/zoom pointer capture; defaults to the stage container. */
   surface?: HTMLElement;
+  /** `single` — one visible artboard; `row` — side by side; `stack` — three+ artboards on one iso tilt, stacked in depth (+y plane). */
+  layout?: IsoCanvasStageLayout;
+  row?: IsoCanvasStageRowLayoutOptions;
   /** Seed artboards at creation time. */
   artboards?: readonly IsoCanvasStageAddArtboardOptions[];
   /** Initial active artboard (defaults to first seeded id). */
@@ -43,10 +68,14 @@ export type IsoCanvasStagePanZoomOptions = {
   resyncOnHostEvent?: string;
   spacePanClass?: string;
   panningClass?: string;
-  onViewBoxApplied?: (viewBox: ViewBox, context: { notify: boolean }) => void;
+  onViewBoxApplied?: (
+    viewBox: ViewBox,
+    context: { notify: boolean; artboardId?: IsoCanvasArtboardId },
+  ) => void;
 };
 
 export type IsoCanvasStage = {
+  readonly layout: IsoCanvasStageLayout;
   /** Mount this element in your app viewport (single map surface). */
   readonly container: HTMLDivElement;
   readonly activeArtboardId: IsoCanvasArtboardId | null;
@@ -56,7 +85,12 @@ export type IsoCanvasStage = {
   getArtboard: (id: IsoCanvasArtboardId) => IsoCanvasArtboardEntry | undefined;
   getArtboards: () => readonly IsoCanvasArtboardEntry[];
   artboardIds: () => readonly IsoCanvasArtboardId[];
+  /** Row layout: refresh CSS vars after add/remove (no-op in single layout). */
+  relayoutArtboards: () => void;
   setActiveArtboard: (id: IsoCanvasArtboardId) => boolean;
+  /** User visibility (row: hide column; single: must also be active to show). Default true for new artboards. */
+  setArtboardVisible: (id: IsoCanvasArtboardId, visible: boolean) => boolean;
+  isArtboardVisible: (id: IsoCanvasArtboardId) => boolean;
   getActiveArtboard: () => IsoCanvasArtboardEntry | undefined;
   /** Default framed camera for one artboard or the active artboard. */
   fitArtboard: (
@@ -66,5 +100,7 @@ export type IsoCanvasStage = {
   /** Frame the active artboard (alias for apps that think in “map bounds”). */
   fitView: (options?: IsoCanvasStageFitOptions) => boolean;
   attachPanZoom: (options?: IsoCanvasStagePanZoomOptions) => () => void;
+  /** Row + syncCamera: copy primary host world camera to every visible peer. */
+  syncRowWorldCamera: () => boolean;
   destroy: () => void;
 };

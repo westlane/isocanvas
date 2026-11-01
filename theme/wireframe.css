@@ -1,5 +1,7 @@
 /* Wireframe / stencil diagram mode — enable with data-ic-wireframe="on" on host or root. */
 
+@import "./wireframe-artboard-shell.css";
+
 [data-ic-wireframe="on"] {
   --ic-theme-iso-face-stroke-width: 1px;
   --ic-theme-iso-front-stroke-width: 1px;
@@ -28,26 +30,16 @@
   fill: var(--ic-wireframe-top-surface-fill, color-mix(in oklch, var(--ic-wireframe-iso-stroke) 14%, transparent)) !important;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
-  fill: var(
-    --ic-wireframe-top-surface-fill,
-    color-mix(in oklch, var(--ic-wireframe-iso-stroke) 14%, transparent)
-  ) !important;
-  stroke: none !important;
-}
-
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
   stroke: none !important;
   fill: none !important;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front,
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
   fill: var(--ic-wireframe-front-face-fill, color-mix(in oklch, var(--ic-wireframe-iso-stroke) 8%, transparent)) !important;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side,
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
   fill: var(--ic-wireframe-side-face-fill, color-mix(in oklch, var(--ic-wireframe-iso-stroke) 6%, transparent)) !important;
 }
 
@@ -62,21 +54,6 @@
 
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom {
   display: none;
-}
-
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
-  stroke: none !important;
-}
-
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
-  stroke: var(
-    --ic-artboard-front-stroke,
-    var(--ic-artboard-front-edge-light, var(--ic-artboard-front-fill))
-  ) !important;
-  stroke-width: var(--ic-artboard-front-stroke-width, 1.5px) !important;
-  vector-effect: non-scaling-stroke;
-  paint-order: stroke fill;
-  filter: drop-shadow(0 0 3px var(--ic-artboard-front-edge-glow, transparent));
 }
 
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] :is(path, polygon, rect):not(.ic-cube-canvas-bg):not(.ic-svg-dot-grid):not(.ic-artboard-dot-grid-fill):not(.ic-iso-cube-face):not(.ic-artboard-outline):not(.ic-artboard-outline-layer):not(.ic-artboard-face):not(.ic-artboard-guide):not(.ic-artboard-subguide):not(.ic-artboard-fineguide) {

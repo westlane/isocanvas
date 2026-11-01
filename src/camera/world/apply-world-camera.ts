@@ -6,7 +6,7 @@ import { resolveWorldCameraViewportLayers } from "../../viewport/world-camera-la
 import { clearDotGridWorldCamera, syncDotGridWithWorldCamera } from "../../grid/sync-camera.js";
 import { removeSvgDotGrid } from "../../grid/svg.js";
 import { IC_ARTBOARD_CLASS } from "../../layout/artboard.js";
-import { writeViewBoxToSvg, setViewportCenteredMeet } from "../view-box/attributes.js";
+import { writeViewBoxToSvg, setViewportCenteredMeet, viewBoxesNearlyEqual } from "../view-box/attributes.js";
 import { worldCameraViewportFromRects } from "./world-viewport.js";
 import type { WorldCameraLayerOptions } from "../../types/camera.js";
 
@@ -46,16 +46,33 @@ export function applyWorldCameraToHost(
     return false;
   }
   const { anchor, grid, contentLayer, svg } = layers;
+  const embeddedArtboard = host.closest(`.${IC_ARTBOARD_CLASS}`) != null;
+  const artboardRoot = host.closest(`.${IC_ARTBOARD_CLASS}`);
+  const frameOnlyArtboard =
+    artboardRoot instanceof HTMLElement && artboardRoot.dataset.icFrameOnly === "true";
+  if (grid === null) {
+    const current = readWorldCameraFromHost(host);
+    if (current && viewBoxesNearlyEqual(current, camera)) {
+      return true;
+    }
+  }
+  if (frameOnlyArtboard && grid === null) {
+    writeViewBoxToSvg(svg, camera);
+    svg.style.width = "100%";
+    svg.style.height = "100%";
+    svg.style.display = "block";
+    svg.style.maxWidth = embeddedArtboard ? "none" : "100%";
+    svg.style.maxHeight = embeddedArtboard ? "none" : "100%";
+    writeWorldCameraOnHost(host, camera);
+    return true;
+  }
+
   const anchorRect = anchor.getBoundingClientRect();
   const svgRect = svg.getBoundingClientRect();
   if (anchorRect.width <= 0 || anchorRect.height <= 0 || svgRect.width <= 0 || svgRect.height <= 0) {
     return false;
   }
 
-  const embeddedArtboard = host.closest(`.${IC_ARTBOARD_CLASS}`) != null;
-  const artboardRoot = host.closest(`.${IC_ARTBOARD_CLASS}`);
-  const frameOnlyArtboard =
-    artboardRoot instanceof HTMLElement && artboardRoot.dataset.icFrameOnly === "true";
   if (frameOnlyArtboard) {
     setViewportCenteredMeet(svg);
   }

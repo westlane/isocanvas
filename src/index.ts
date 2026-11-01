@@ -9,6 +9,7 @@ export * from "./camera/view-box/attributes.js";
 export * from "./camera/view-box/clamp.js";
 export * from "./camera/viewport-cameras.js";
 export * from "./camera/world-pan-zoom.js";
+export * from "./camera/world/linked-world-camera.js";
 export * from "./camera/world/apply-world-camera.js";
 export * from "./camera/world/world-transform.js";
 export * from "./camera/world/world-viewport.js";
