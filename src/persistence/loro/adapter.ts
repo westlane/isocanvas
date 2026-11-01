@@ -1,10 +1,11 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { LoroDoc } from "loro.js";
 import type {
   LoroFieldPersistenceAdapter,
   LoroFieldPersistenceOptions,
-} from "../../types/plugins.js";
+} from "../loro-types.js";
 
 /** Persist one field on a Loro map (in-memory or host-provided doc). */
 export function createLoroFieldPersistenceAdapter<TSnapshot>(

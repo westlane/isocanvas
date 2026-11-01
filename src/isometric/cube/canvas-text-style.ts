@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { IsometricOrientation } from "../../types/diagram.js";
 import { DEFAULT_CUBE_CANVAS_SCALE } from "./cube.js";

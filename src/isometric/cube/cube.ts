@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { ISO_GRID_AXIS_X } from "../../grid/projection.js";
 import type { IsoBoxSpec, IsoFaceId } from "../../types/diagram.js";

@@ -1,8 +1,8 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Showcase tool plugins and hash routing. */
 
 import { mountCardGrid, mountCardStack } from "./samples/index.js";
-import { applyDemoCanvasCameraToHost, notifyDemoCanvasCameraChanged } from "./session.js";
 import { demoThemeManager } from "./theme.js";
 
 export type DemoToolContext = {
@@ -31,11 +31,6 @@ export type DemoToolRoute = {
   groupId: string;
   itemId: string;
 };
-
-function refreshDemoCanvasCamera(host: HTMLElement): void {
-  applyDemoCanvasCameraToHost(host);
-  notifyDemoCanvasCameraChanged(host);
-}
 
 export const cardGridTool: DemoToolPlugin = {
   id: "card-grid",

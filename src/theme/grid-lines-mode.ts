@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** When `"on"`, artboard division guides and SVG layout guides are visible (solid or wireframe). */
 export const IC_GRID_LINES_DATA_ATTR = "data-ic-grid-lines";

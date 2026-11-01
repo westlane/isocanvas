@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { Box2d } from "../types/core.js";
 import { IC_ARTBOARD_OUTLINE_CLASS } from "./artboard-outline.js";

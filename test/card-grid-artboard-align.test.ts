@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, beforeEach } from "vitest";
 import {
@@ -26,45 +27,6 @@ import {
   DEMO_CARD_USER_WIDTH_PX,
 } from "./fixtures/card-grid.js";
 import { demoThemeManager, initDemoTheme } from "../demo/scripts/theme.js";
-
-function pathPoints(d: string): { x: number; y: number }[] {
-  const re = /[ML]\s*(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g;
-  const pts: { x: number; y: number }[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(d)) !== null) {
-    pts.push({ x: Number(m[1]), y: Number(m[2]) });
-  }
-  return pts;
-}
-
-function viewBoxBounds(el: Element): { minX: number; maxX: number; minY: number; maxY: number } {
-  const pts = pathPoints(el.getAttribute("d") ?? "");
-  let minX = Number.POSITIVE_INFINITY;
-  let maxX = Number.NEGATIVE_INFINITY;
-  let minY = Number.POSITIVE_INFINITY;
-  let maxY = Number.NEGATIVE_INFINITY;
-  for (const base of pts) {
-    let x = base.x;
-    let y = base.y;
-    let node: Element | null = el.parentElement;
-    while (node && node.tagName !== "svg") {
-      const transform = node.getAttribute("transform");
-      if (transform?.includes("translate")) {
-        const m = /translate\(([-\d.]+)[,\s]+([-,\d.]+)\)/.exec(transform);
-        if (m) {
-          x += Number(m[1]);
-          y += Number(m[2]);
-        }
-      }
-      node = node.parentElement;
-    }
-    minX = Math.min(minX, x);
-    maxX = Math.max(maxX, x);
-    minY = Math.min(minY, y);
-    maxY = Math.max(maxY, y);
-  }
-  return { minX, maxX, minY, maxY };
-}
 
 describe("card grid plane placement", () => {
   beforeEach(() => {

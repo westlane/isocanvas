@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Floating viewport debug HUD (viewBox, zoom, home reset). */
 
 import { applyDemoHomeView } from "../viewport.js";

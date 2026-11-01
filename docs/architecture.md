@@ -16,7 +16,7 @@ Layered stack for portable `DiagramScene` data plus canvas/viewport infrastructu
 | `diagram/` | **Shapes** (portable): `DiagramScene` types + `renderDiagramScene` |
 | `svg/` | SVG user-space bbox helpers |
 | `theme/` | Color tokens, theme manager, wireframe mode |
-| `persistence/` | Reusable snapshot adapters (memory, web storage, Loro field + doc bytes) |
+| `persistence/` | Reusable snapshot adapters (memory, web storage, Loro field + doc bytes); Loro-specific types live here |
 | `extensions/` | Optional `IsoCanvasExtension` host |
 | `types/` | Shared types: `core`, `artboard`, `camera`, `diagram`, `grid`, `theme`, `plugins` |
 

@@ -693,9 +693,14 @@ __metadata:
     typescript: "npm:^5.8.3"
     vite: "npm:^7.1.0"
     vitest: "npm:^3.2.0"
+  peerDependencies:
+    loro.js: ^0.4.0
   dependenciesMeta:
     "@westlane/pino-blanc@0.1.4":
       unplugged: true
+  peerDependenciesMeta:
+    loro.js:
+      optional: true
   languageName: unknown
   linkType: soft
 

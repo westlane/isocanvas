@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 export * from "./camera/view-box/baseline.js";
 export * from "./camera/fit/center-artboard-view.js";

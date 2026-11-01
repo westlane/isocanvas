@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, beforeEach } from "vitest";
 import { IsometricCanvas, PlaneView } from "@elchininet/isometric";
@@ -422,7 +423,9 @@ describe("isometric cube (library shape)", () => {
       viewBox: { x: 0, y: 0, w: 1000, h: 1000 },
       divisions: 4,
       nodes: DIAGRAM_SCENE_FIXTURE.nodes,
-      edges: DIAGRAM_SCENE_FIXTURE.edges,
+      ...(DIAGRAM_SCENE_FIXTURE.edges !== undefined
+        ? { edges: DIAGRAM_SCENE_FIXTURE.edges }
+        : {}),
     };
     expect(() => renderDiagramScene(host, scene, activeShowcaseColors())).not.toThrow();
     expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();

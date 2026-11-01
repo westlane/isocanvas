@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -49,6 +52,14 @@ export default defineConfig({
         replacement: path.join(rootDir, "theme/tokens.css"),
       },
       {
+        find: "@westlane/isocanvas/persistence",
+        replacement: path.join(rootDir, "src/persistence/index.ts"),
+      },
+      {
+        find: "@westlane/isocanvas",
+        replacement: path.join(rootDir, "src/index.ts"),
+      },
+      {
         find: "@westlane/pino-blanc/themes",
         replacement: path.join(rootDir, "../pino-blanc/themes/index.ts"),
       },
@@ -59,14 +70,6 @@ export default defineConfig({
       {
         find: "@westlane/pino-blanc",
         replacement: path.join(rootDir, "../pino-blanc/src/index.ts"),
-      },
-      {
-        find: "@westlane/isocanvas/persistence",
-        replacement: path.join(rootDir, "src/persistence/index.ts"),
-      },
-      {
-        find: "@westlane/isocanvas",
-        replacement: path.join(rootDir, "src/index.ts"),
       },
     ],
   },

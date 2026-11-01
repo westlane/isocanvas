@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** Logical artboard size in user units (+x right, +y up; origin bottom-left). */
 export type ArtboardUserSize = {

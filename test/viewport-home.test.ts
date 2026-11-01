@@ -1,5 +1,6 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
 // @vitest-environment happy-dom
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
 import {

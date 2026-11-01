@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBox } from "../types/core.js";
 import { clamp } from "./view-box/clamp.js";

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBoxBaseline } from "../types/camera.js";
 import type { Box2d } from "../types/core.js";

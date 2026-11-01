@@ -2,9 +2,12 @@
 
 Generic snapshot persistence lives in **`src/persistence/`** and is exported from **`@westlane/isocanvas/persistence`** (not the root entry — keeps browser/diagram imports free of `loro.js`).
 
+Install **`loro.js`** when you use Loro adapters (`peerDependencies`, optional at install). Memory and `localStorage` JSON adapters do not require it.
+
 ## Types
 
-- **`PersistenceAdapter<TSnapshot>`** — `load`, `save`, optional `clear`, plus a stable `id`.
+- **`PersistenceAdapter<TSnapshot>`** — `load`, `save`, optional `clear`, plus a stable `id` (exported from root and `./persistence`).
+- Loro-specific types (`LoroFieldPersistenceOptions`, …) — **`@westlane/isocanvas/persistence`** only.
 - **`PersistenceRegistry<TSnapshot>`** — `getAdapter`, `setAdapter`, optional `setAfterSave` / `runAfterSave`.
 
 Apps define their own snapshot shape (`TSnapshot`); the library does not embed demo session fields.

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { IC_DOT_GRID_CLASS, IC_DOT_GRID_SURFACE_CLASS } from "../grid/surface.js";
 import { IC_ARTBOARD_CLASS, IC_ARTBOARD_CONTENT_CLASS } from "../layout/artboard.js";

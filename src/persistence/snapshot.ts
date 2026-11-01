@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** Parse a stored value when snapshots use a numeric `v` field. */
 export function snapshotFromVersionedValue<TSnapshot extends { v: number }>(

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** Pixel box where SVG `viewBox` maps (meet); offsets are relative to the anchor rect. */
 export type WorldCameraViewport = {

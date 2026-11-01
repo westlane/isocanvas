@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
   "type": "module",
-  "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "packageManager": "yarn@4.9.2",
   "repository": {
     "type": "git",
@@ -35,28 +34,40 @@
     "./canvas-chrome.css": "./theme/canvas-chrome.css",
     "./theme/tokens.css": "./theme/tokens.css",
     "./theme/schemes.css": "./theme/schemes.css",
+    "./theme/schemes/*": "./theme/schemes/*",
     "./theme/diagram-surfaces.css": "./theme/diagram-surfaces.css",
     "./theme/wireframe.css": "./theme/wireframe.css"
   },
   "files": [
     "dist",
-    "src",
     "theme",
     "README.md",
+    "LICENSE",
     "docs/architecture.md",
     "docs/persistence.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepack": "yarn build",
+    "pretest": "yarn build",
     "demo": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.check.json",
     "test": "vitest run",
+    "check": "yarn typecheck && yarn build && yarn test && yarn check:neutral",
+    "check:neutral": "node scripts/check-neutral.mjs",
     "build:theme-schemes": "IC_GENERATE=1 vitest run"
   },
   "sideEffects": false,
   "dependencies": {
-    "@elchininet/isometric": "^4.0.0",
+    "@elchininet/isometric": "^4.0.0"
+  },
+  "peerDependencies": {
     "loro.js": "^0.4.0"
+  },
+  "peerDependenciesMeta": {
+    "loro.js": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=22"
@@ -67,6 +78,7 @@
     "@westlane/pino-blanc": "portal:../pino-blanc",
     "feather-icons": "^4.29.2",
     "happy-dom": "^20.0.10",
+    "loro.js": "^0.4.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.0",
     "vitest": "^3.2.0"

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { worldTransformFromViewBox } from "../camera/world/world-transform.js";
 import { DEFAULT_DOT_GRID_MARK_PX, DEFAULT_DOT_GRID_SIZE_PX } from "./surface.js";

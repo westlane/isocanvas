@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Theme / orientation chrome controls and keyboard shortcuts. */
 
 import { getDemoLogger, refreshDemoLoggers } from "../log.js";

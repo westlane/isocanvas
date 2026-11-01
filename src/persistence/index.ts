@@ -1,11 +1,12 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
+export type { PersistenceAdapter } from "../types/plugins.js";
 export type {
   LoroFieldMap,
   LoroFieldPersistenceAdapter,
   LoroFieldPersistenceOptions,
-  PersistenceAdapter,
-} from "../types/plugins.js";
+} from "./loro-types.js";
 export * from "./loro/adapter.js";
 export * from "./loro/doc-bytes-storage.js";
 export * from "./loro/install-local-doc-bytes.js";

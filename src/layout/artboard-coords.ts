@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ArtboardUserSize } from "../types/artboard.js";
 import type { Box2d, ViewBox } from "../types/core.js";

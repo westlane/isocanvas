@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -13,7 +14,6 @@ import {
   IC_WIREFRAME_ON,
   readGridLinesMode,
   readWireframeMode,
-  toggleGridLinesMode,
   toggleWireframeMode,
   wireframeBackFaceStrokeOnCanvas,
   wireframeTopFaceFillOnCanvas,

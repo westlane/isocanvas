@@ -141,13 +141,27 @@ Portable **`DiagramScene`** data (nodes + optional edges) lives in `src/types/di
 
 ```bash
 yarn install
-yarn typecheck
-yarn test
-yarn build
+yarn check          # typecheck, build, test, neutral-policy
 ```
 
-`@westlane/pino-blanc` is a **portal** dependency on [`../pino-blanc`](../pino-blanc) (Yarn 4). Clone both repos as siblings under `westlane/`, or after [pino-blanc](https://github.com/westlane/pino-blanc) **0.1.4+** is on GitHub, switch to `github:westlane/pino-blanc#v0.1.4` or `npm:@westlane/pino-blanc@^0.1.4` with [GitHub Packages auth](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry) in `.npmrc`.
+`yarn build` emits **`dist/`** (required for npm `exports`; `pretest` / `prepack` run it automatically). Published tarballs ship **`dist/` + `theme/`** only (no `src/`).
+
+Demo-only: **`@westlane/pino-blanc`** is a dev **portal** on [`../pino-blanc`](../pino-blanc) (sibling checkout). CI clones the same repo beside this one.
 
 ## Consumers
 
-Local apps and `yarn demo` resolve the package entry to **`src/index.ts`**. Run `yarn build` emits **`dist/`** for npm consumers (`import` → `dist/index.js`). Local **`yarn demo`** resolves **`src/`** via Vite aliases (not package exports). Public JS entrypoints: **`@westlane/isocanvas`** (canvas/diagram) and **`@westlane/isocanvas/persistence`** (Loro/session adapters). CSS uses the `./canvas-chrome.css` (etc.) export paths.
+| Need | Import | Also install |
+| --- | --- | --- |
+| Canvas, grid, snap, iso mount | `@westlane/isocanvas` | (includes `@elchininet/isometric`) |
+| Artboard lattice layout only | `@westlane/isocanvas/layout` | — |
+| Session / Loro adapters | `@westlane/isocanvas/persistence` | `loro.js` (peer; optional at install) |
+| Full demo chrome CSS | `@westlane/isocanvas/canvas-chrome.css` | — |
+| One palette | `@westlane/isocanvas/theme/schemes/dark/gruvbox.css` (etc.) | third-party palette CSS — not relicensed by isocanvas; prefer single imports over `theme/schemes.css` |
+
+After `yarn add @westlane/isocanvas`, run **`yarn build`** inside the package if you install from git without a prebuilt `dist/`. Registry installs run `prepack` at publish time.
+
+Local **`yarn demo`** resolves **`src/`** via Vite aliases (not package `exports`).
+
+## License
+
+MIT — see [LICENSE](LICENSE). Applies to isocanvas **TypeScript/JavaScript** sources (SPDX headers on `.ts`/`.mjs`). **CSS** in this repo carries no copyright comment headers; palette scheme sheets under `theme/schemes/` are generated from pino-blanc built-ins (third-party palette names).

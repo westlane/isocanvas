@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
 import {
@@ -27,7 +28,11 @@ describe("artboard row space-between", () => {
       rowCount: 1,
     });
     expect(rects).toHaveLength(3);
-    const boxes = rects.map((rect, i) =>
+    const [r0, r1, r2] = rects;
+    expect(r0).toBeDefined();
+    expect(r1).toBeDefined();
+    expect(r2).toBeDefined();
+    const boxes = [r0!, r1!, r2!].map((rect, i) =>
       enforcePlaneBoxOnArtboardLattice(
         {
           id: String(i),
@@ -41,8 +46,12 @@ describe("artboard row space-between", () => {
         renderStage,
       ),
     );
-    const gap01 = (boxes[1].x - (boxes[0].x + boxes[0].width)) / step;
-    const gap12 = (boxes[2].x - (boxes[1].x + boxes[1].width)) / step;
+    const [b0, b1, b2] = boxes;
+    expect(b0).toBeDefined();
+    expect(b1).toBeDefined();
+    expect(b2).toBeDefined();
+    const gap01 = (b1!.x - (b0!.x + b0!.width)) / step;
+    const gap12 = (b2!.x - (b1!.x + b1!.width)) / step;
     expect(gap01).toBeCloseTo(gap12, 4);
     expect(gap01).toBeCloseTo(4, 4);
   });
@@ -59,8 +68,8 @@ describe("artboard row space-between", () => {
     const step = artboardPlaneGridLineStep(stage).xPx;
     const rowMinX = DEFAULT_ARTBOARD_LAYOUT_DOT_INSET * step;
     const rowMaxInner = 3 * pitch - DEFAULT_ARTBOARD_LAYOUT_DOT_INSET * step;
-    expect(rects[0].x).toBeCloseTo(rowMinX, 4);
-    expect(rects[2].x + rects[2].w).toBeCloseTo(rowMaxInner, 4);
+    expect(rects[0]!.x).toBeCloseTo(rowMinX, 4);
+    expect(rects[2]!.x + rects[2]!.w).toBeCloseTo(rowMaxInner, 4);
   });
 
   it("uses equal vertical gaps between rows in the layout band", () => {
@@ -122,7 +131,6 @@ describe("artboard row space-between", () => {
     const stage = { ...defaultLatticeStage(), divisions: 4 };
     const rowCount = 4;
     const dotInset = DEFAULT_ARTBOARD_LAYOUT_DOT_INSET;
-    const dotInsetTrailing = DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING;
     const step = artboardPlaneGridLineStep(stage).xPx;
     const row = planeRectsSpaceBetweenInRow(0, 4, NODE, {
       stage,
