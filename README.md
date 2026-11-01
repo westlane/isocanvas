@@ -117,7 +117,7 @@ yarn test
 yarn build
 ```
 
-`@westlane/pino-blanc` is published to [GitHub Packages](https://github.com/westlane/pino-blanc). For local install, authenticate npm to `https://npm.pkg.github.com` (read packages), or clone [`pino-blanc`](https://github.com/westlane/pino-blanc) beside this repo and temporarily set `"@westlane/pino-blanc": "portal:../pino-blanc"` in `package.json` before `yarn install`.
+`@westlane/pino-blanc` is a **portal** dependency on [`../pino-blanc`](../pino-blanc) (Yarn 4). Clone both repos as siblings under `westlane/`, or after [pino-blanc](https://github.com/westlane/pino-blanc) **0.1.4+** is on GitHub, switch to `github:westlane/pino-blanc#v0.1.4` or `npm:@westlane/pino-blanc@^0.1.4` with [GitHub Packages auth](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry) in `.npmrc`.
 
 ## Consumers
 

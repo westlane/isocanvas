@@ -31,7 +31,7 @@ const RAW_RUNTIME_STATE =
           ["@types/feather-icons", "npm:4.29.4"],\
           ["@types/node", "npm:22.20.5"],\
           ["@westlane/isocanvas", "workspace:."],\
-          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A."],\
+          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."],\
           ["feather-icons", "npm:4.29.2"],\
           ["happy-dom", "npm:20.14.6"],\
           ["ic-canvas", [\
@@ -947,7 +947,7 @@ const RAW_RUNTIME_STATE =
           ["@types/feather-icons", "npm:4.29.4"],\
           ["@types/node", "npm:22.20.5"],\
           ["@westlane/isocanvas", "workspace:."],\
-          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A."],\
+          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."],\
           ["feather-icons", "npm:4.29.2"],\
           ["happy-dom", "npm:20.14.6"],\
           ["ic-canvas", [\
@@ -963,20 +963,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@westlane/pino-blanc", [\
-      ["file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A.", {\
-        "packageLocation": "./.yarn/unplugged/@westlane-pino-blanc-virtual-61da91ec73/node_modules/@westlane/pino-blanc/",\
+      ["portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A.", {\
+        "packageLocation": "../pino-blanc/",\
         "packageDependencies": [\
-          ["@westlane/pino-blanc", "file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A."]\
+          ["@westlane/pino-blanc", "portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A.", {\
-        "packageLocation": "./.yarn/unplugged/@westlane-pino-blanc-virtual-61da91ec73/node_modules/@westlane/pino-blanc/",\
+      ["virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A.", {\
+        "packageLocation": "./.yarn/__virtual__/@westlane-pino-blanc-virtual-e0ad3500e0/2/pino-blanc/",\
         "packageDependencies": [\
           ["@types/react", null],\
           ["@types/svelte", null],\
           ["@types/vue", null],\
-          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#file:../pino-blanc#../pino-blanc::hash=1035ec&locator=%40westlane%2Fisocanvas%40workspace%3A."],\
+          ["@westlane/pino-blanc", "virtual:8f811c93d35a738d30c2aa36b54d8d2481a50e9866df9625c6b4032afa8b7b974b0c6dd1f24dc51828c4b05f67f0e5612d9ed2541199d4503d4e73c37e80314d#portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."],\
           ["js-yaml", "npm:5.5.0"],\
           ["pino", "npm:9.14.0"],\
           ["react", null],\
@@ -991,7 +991,7 @@ const RAW_RUNTIME_STATE =
           "svelte",\
           "vue"\
         ],\
-        "linkType": "HARD"\
+        "linkType": "SOFT"\
       }]\
     ]],\
     ["abbrev", [\

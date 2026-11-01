@@ -85,7 +85,9 @@ function planeBoxesForColumn(column: DemoStackColumn): PlaneBoxSpec[] {
     const isTop = layerIndex === 0;
     return {
       id: `stack-${column.idPrefix}-${layer}`,
-      label: isTop ? DEMO_STACK_TOP_LABEL[column.idPrefix] : String(layer),
+      label: isTop
+        ? (DEMO_STACK_TOP_LABEL[column.idPrefix] ?? column.idPrefix)
+        : String(layer),
       x: origin.x,
       y: origin.y,
       footprintAnchor: "back-left",

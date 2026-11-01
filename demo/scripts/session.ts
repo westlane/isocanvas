@@ -12,7 +12,6 @@ import {
   createWebStoragePersistenceAdapter,
   DEFAULT_ISOMETRIC_ORIENTATION,
   paintIsometricOrientation,
-  readViewBoxFromSvg,
   readViewBoxBaselineFromSvg,
   readWorldCameraFromHost,
   snapshotFromVersionedValue,
