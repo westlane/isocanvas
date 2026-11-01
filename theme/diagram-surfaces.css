@@ -11,6 +11,18 @@ svg[data-diagram-renderer="ic-cube-canvas"] {
     var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-left-tint-percent, 14%),
     white
   );
+  --ic-iso-cube-selected-front-pressed-fill: color-mix(
+    in oklch,
+    var(--zui-iso-front-fill, #ddd6fe)
+      calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
+    in oklch,
+    var(--zui-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
+    white
+  );
   --ic-iso-cube-selected-side-pressed-fill: color-mix(
     in oklch,
     var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-side-tint-percent, 40%),
@@ -226,7 +238,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--front {
-  fill: var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd)) !important;
+  fill: var(--ic-iso-cube-selected-front-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--side {
@@ -234,7 +246,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
-  fill: var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6)) !important;
+  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--left {
@@ -251,7 +263,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-i
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face--front {
-  fill: var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd)) !important;
+  fill: var(--ic-iso-cube-selected-front-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face--side {
@@ -259,7 +271,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-i
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
-  fill: var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6)) !important;
+  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face--left,
@@ -268,7 +280,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-i
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:is(:active, .ic-node--selected) path.ic-iso-cube-press-bottom {
-  fill: var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6)) !important;
+  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,
@@ -289,7 +301,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--front {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd))
+    var(--ic-iso-cube-selected-front-pressed-fill)
       calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
     white
   ) !important;
@@ -307,7 +319,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6))
+    var(--ic-iso-cube-selected-bottom-pressed-fill)
       calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
     white
   ) !important;

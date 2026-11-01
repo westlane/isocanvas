@@ -48,6 +48,8 @@
   --ic-iso-cube-selected-active-fill-mix: 10%;
   /* Selected pressed faces — tints defined on svg[data-diagram-renderer] in diagram-surfaces.css */
   --ic-iso-cube-selected-left-tint-percent: 14%;
+  --ic-iso-cube-selected-front-pressed-fill-mix: 9%;
+  --ic-iso-cube-selected-bottom-pressed-fill-mix: 9%;
   --ic-iso-cube-selected-side-tint-percent: 40%;
   --ic-iso-cube-press-bottom-opacity: 0.08;
   --ic-iso-cube-press-bottom-scale-rest: 1;
