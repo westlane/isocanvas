@@ -12,6 +12,12 @@ export type DiagramSceneNode = {
   y: number;
   w: number;
   h: number;
+  /** Optional thin companion slab rendered under the main cube (same footprint). */
+  foundationSlab?: {
+    label: string;
+    fill: string;
+    stroke: string;
+  };
 };
 
 export type DiagramSceneEdge = {
@@ -40,6 +46,11 @@ export type IsoBoxSpec = {
   height: number;
   /** Vertical offset from ground anchor in iso units. */
   elevation?: number;
+  /** Uniform face fill (e.g. companion slab). */
+  monoFaceFill?: string;
+  compactLabel?: boolean;
+  planeBoxRole?: "domain" | "foundationSlab";
+  omitCubeLabel?: boolean;
 };
 
 export type IsoFaceId = "bottom" | "back" | "left" | "side" | "front" | "top";

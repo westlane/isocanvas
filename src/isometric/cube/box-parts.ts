@@ -32,6 +32,7 @@ import {
 } from "./canvas-text-style.js";
 import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
 import type { StackLayerPresentation } from "../../types/diagram.js";
+import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../../types/diagram-interaction.js";
 
 function faceRect(
   face: IsoFaceId,
@@ -96,6 +97,9 @@ export function mountIsoBoxOnStageShell(
     top: 0,
   });
   cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
+  if (spec.planeBoxRole === "foundationSlab") {
+    cubeShell.getElement().setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
+  }
   const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
   const fills = themedCubeFaceColors(colors);
   if (options?.stackLayer) {
@@ -133,10 +137,15 @@ export function mountIsoBoxOnStageShell(
   const nodeEl = node.getElement();
   nodeEl.classList.add("node");
   nodeEl.setAttribute("data-object-id", spec.id);
+  if (spec.planeBoxRole === "foundationSlab") {
+    nodeEl.setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
+  }
   if (options?.stackLayer) {
     paintStackLayerDataset(nodeEl, options.stackLayer);
   }
-  node.addChild(label);
+  if (!spec.omitCubeLabel && spec.label.trim()) {
+    node.addChild(label);
+  }
   volumeGroup.addChild(node);
   cubeShell.addChild(volumeGroup);
   boxShell.addChild(cubeShell);
@@ -178,17 +187,19 @@ export function createLocalIsoBoxParts(
 ): { faces: Record<IsoFaceId, IsometricRectangle>; label: IsometricText } {
   const { width: w, depth: d, height: h } = spec;
   const fills = themedCubeFaceColors(colors);
+  const mono = spec.monoFaceFill;
   const faces = {} as Record<IsoFaceId, IsometricRectangle>;
 
   for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
     faces[id] = faceRect(
       id,
-      fills[id],
+      mono ?? fills[id],
       isoCubeFaceRectLayoutForPlaneTopLeft(id, w, d, h, orientation),
     );
   }
 
-  return { faces, label: createIsoBoxLabel(spec, colors, orientation, labelFontSizePx) };
+  const labelSize = spec.compactLabel ? labelFontSizePx * 0.72 : labelFontSizePx;
+  return { faces, label: createIsoBoxLabel(spec, colors, orientation, labelSize) };
 }
 
 export function mountAnchoredFace(

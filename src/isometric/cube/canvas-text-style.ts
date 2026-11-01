@@ -21,6 +21,11 @@ export const ISO_CUBE_FACE_NO_STROKE = CANVAS_TEXT_NO_STROKE;
 
 export const IC_ISO_CUBE_LABEL_CLASS = "ic-iso-cube-label";
 
+/** Type token under the domain cube (foundation slab caption). */
+export const IC_FOUNDATION_SLAB_CAPTION_CLASS = "ic-foundation-slab-caption";
+
+export const FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX = 15;
+
 /** TOP face labels on mounted iso boxes (default and rotated orientation). */
 export const ISO_CUBE_LABEL_FONT_SIZE_PX = 28;
 
@@ -146,6 +151,9 @@ export function uniformIsoCubeTopLabelFontSizePx(
   }
   let uniform = baseFontSizePx;
   for (const spec of specs) {
+    if (!spec.label.trim() || spec.omitCubeLabel) {
+      continue;
+    }
     const fit = fitIsoCubeTopLabelFontSizePx({
       label: spec.label,
       widthIso: spec.width,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import { IsometricText, PlaneView } from "@elchininet/isometric";
+import { IsometricText, PlaneView, type IsometricCanvas } from "@elchininet/isometric";
 import type { DiagramScene, DiagramSceneNode } from "../types/diagram.js";
 import {
   CANVAS_TEXT_NO_STROKE,
@@ -10,9 +10,12 @@ import {
   ISO_CANVAS_LABEL_FONT_FAMILY,
   ISO_CANVAS_LABEL_FONT_WEIGHT,
   ISO_EDGE_LABEL_FONT_SIZE_PX,
+  IC_FOUNDATION_SLAB_CAPTION_CLASS,
+  FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
 } from "../isometric/cube/canvas-text-style.js";
 import { artboardPlaneToIsoGround, isoSizeFromDiagramUser } from "../isometric/diagram-user.js";
-import { extrusionHeightForFootprint } from "../isometric/cube/cube.js";
+import { extrusionHeightForFootprint, userPxToIsoUnits } from "../isometric/cube/cube.js";
+import { ISO_STACK_ARTBOARD_CLEARANCE_ISO } from "../isometric/cube/stack-opacity.js";
 import {
   addIsoEdgeSegment,
   decorateCubeCanvas,
@@ -33,12 +36,17 @@ import { frameDiagramSceneCamera } from "./diagram-document.js";
 
 const MIN_EXTRUSION = 0.35;
 const MAX_EXTRUSION = 1.1;
+/** Pedestal extrusion under the domain cube (iso units). */
+const FOUNDATION_SLAB_HEIGHT_ISO = userPxToIsoUnits(20);
+/** Extra footprint depth (+y on artboard) so tier color reads below the cube. */
+const FOUNDATION_SLAB_DEPTH_EXTENSION_PX = 40;
+const FOUNDATION_SLAB_VIEWBOX_PAD_PX = FOUNDATION_SLAB_DEPTH_EXTENSION_PX + 8;
 
 function nodeCenter(node: DiagramSceneNode): { x: number; y: number } {
   return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
 }
 
-function planeBoxFromNode(node: DiagramSceneNode): PlaneBoxSpec {
+function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSpec>): PlaneBoxSpec {
   const { width, depth } = isoSizeFromDiagramUser(node.w, node.h);
   const height = Math.min(
     MAX_EXTRUSION,
@@ -52,6 +60,79 @@ function planeBoxFromNode(node: DiagramSceneNode): PlaneBoxSpec {
     width: node.w,
     depth: node.h,
     height,
+    planeBoxRole: "domain",
+    ...overrides,
+  };
+}
+
+function planeBoxesForSceneNode(node: DiagramSceneNode): PlaneBoxSpec[] {
+  const slab = node.foundationSlab;
+  if (!slab) {
+    return [planeBoxFromNode(node)];
+  }
+  const slabHeight = FOUNDATION_SLAB_HEIGHT_ISO;
+  const slabElevation = ISO_STACK_ARTBOARD_CLEARANCE_ISO;
+  const domainElevation = slabElevation + slabHeight;
+  return [
+    planeBoxFromNode(node, {
+      id: `${node.id}__foundationSlab`,
+      label: "",
+      depth: node.h + FOUNDATION_SLAB_DEPTH_EXTENSION_PX,
+      height: slabHeight,
+      elevation: slabElevation,
+      planeBoxRole: "foundationSlab",
+      monoFaceFill: slab.fill,
+      omitCubeLabel: true,
+    }),
+    planeBoxFromNode(node, {
+      elevation: domainElevation,
+    }),
+  ];
+}
+
+function mountFoundationSlabCaptions(
+  canvas: IsometricCanvas,
+  scene: DiagramScene,
+  stage: ArtboardPlaneStage,
+): void {
+  for (const node of scene.nodes) {
+    const slab = node.foundationSlab;
+    if (!slab?.label.trim()) {
+      continue;
+    }
+    const captionPlaneY =
+      node.y + node.h + FOUNDATION_SLAB_DEPTH_EXTENSION_PX / 2;
+    const captionPlaneX = node.x + node.w / 2;
+    const ground = artboardPlaneToIsoGround(captionPlaneX, captionPlaneY, undefined, stage);
+    canvas.addChild(
+      new IsometricText({
+        planeView: PlaneView.TOP,
+        text: formatIsoCanvasLabelText(slab.label),
+        left: ground.left,
+        right: ground.right,
+        top: 0.06,
+        fontSize: FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
+        fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
+        fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
+        fontStyle: "normal",
+        fillColor: slab.stroke,
+        ...CANVAS_TEXT_NO_STROKE,
+        className: `${IC_FOUNDATION_SLAB_CAPTION_CLASS} ${IC_ISO_CUBE_LABEL_CLASS}`,
+        origin: ["center", "center"],
+        selectable: false,
+      }),
+    );
+  }
+}
+
+function artboardStageWithFoundationSlabPad(scene: DiagramScene, stage: ArtboardPlaneStage): ArtboardPlaneStage {
+  const needsPad = scene.nodes.some((node) => node.foundationSlab);
+  if (!needsPad) {
+    return stage;
+  }
+  return {
+    ...stage,
+    height: stage.height + FOUNDATION_SLAB_VIEWBOX_PAD_PX,
   };
 }
 
@@ -64,16 +145,19 @@ export type RenderDiagramSceneOptions = {
 
 function artboardStageFromScene(scene: DiagramScene): ArtboardPlaneStage {
   const viewBox = scene.viewBox;
+  let stage: ArtboardPlaneStage;
   if (viewBox && viewBox.w > 0 && viewBox.h > 0) {
-    return {
+    stage = {
       x: viewBox.x,
       y: viewBox.y,
       width: viewBox.w,
       height: viewBox.h,
       divisions: scene.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
     };
+  } else {
+    stage = defaultIsoArtboardStage();
   }
-  return defaultIsoArtboardStage();
+  return artboardStageWithFoundationSlabPad(scene, stage);
 }
 
 /** Mount a portable {@link DiagramScene} on an iso artboard stage (scene viewBox when present). */
@@ -126,8 +210,10 @@ export function renderDiagramScene(
 
   mountPlaneBoxesOnCanvas(
     canvas,
-    scene.nodes.map((node) =>
-      enforcePlaneBoxOnArtboardLattice(planeBoxFromNode(node), stage),
+    scene.nodes.flatMap((node) =>
+      planeBoxesForSceneNode(node).map((box) =>
+        enforcePlaneBoxOnArtboardLattice(box, stage),
+      ),
     ),
     colors,
     {
@@ -139,6 +225,8 @@ export function renderDiagramScene(
             options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
         }),
   });
+
+  mountFoundationSlabCaptions(canvas, scene, stage);
 
   const svg = decorateCubeCanvas(canvas);
   frameDiagramSceneCamera(host);

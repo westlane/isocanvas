@@ -2,6 +2,7 @@
 // Copyright (c) 2026 West Lane
 
 import { IC_ISO_CUBE_SHELL_CLASS } from "../isometric/cube/cube-faces.js";
+import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../types/diagram-interaction.js";
 
 /** Applied to {@link IC_ISO_CUBE_SHELL_CLASS} when its object is toggled on (pressed latched). */
 export const IC_NODE_SELECTED_CLASS = "ic-node--selected";
@@ -19,23 +20,39 @@ export type AttachDiagramNodeSelectionOptions = {
   onSelectionChange?: (selectedIds: readonly string[]) => void;
 };
 
+/** When `"false"`, cube is decorative (e.g. companion foundation slab) — no tap selection or button chrome. */
+export { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../types/diagram-interaction.js";
+
+function diagramObjectSelectable(node: Element | null): boolean {
+  return node?.getAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR) !== "false";
+}
+
+function selectableNodeFromShell(shell: Element): Element | null {
+  const nested = shell.querySelector("g.node[data-object-id]");
+  if (!nested || !diagramObjectSelectable(nested)) {
+    return null;
+  }
+  return nested;
+}
+
 function objectIdFromTarget(target: EventTarget | null): string | null {
   if (!(target instanceof Element)) {
     return null;
   }
   const onNode = target.closest("g.node[data-object-id]");
-  const fromNode = onNode?.getAttribute("data-object-id")?.trim();
-  if (fromNode) {
-    return fromNode;
+  if (onNode && diagramObjectSelectable(onNode)) {
+    return onNode.getAttribute("data-object-id")?.trim() || null;
   }
   const shell = target.closest(`g.${IC_ISO_CUBE_SHELL_CLASS}`);
-  const nested = shell?.querySelector("g.node[data-object-id]");
-  const fromShell = nested?.getAttribute("data-object-id")?.trim();
-  return fromShell || null;
+  if (!shell) {
+    return null;
+  }
+  const nested = selectableNodeFromShell(shell);
+  return nested?.getAttribute("data-object-id")?.trim() ?? null;
 }
 
 function objectIdFromShell(shell: Element): string | null {
-  const nested = shell.querySelector("g.node[data-object-id]");
+  const nested = selectableNodeFromShell(shell);
   return nested?.getAttribute("data-object-id")?.trim() ?? null;
 }
 
@@ -78,13 +95,18 @@ function syncCubeShellTogglePresentation(
 ): void {
   for (const shell of Array.from(host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`))) {
     const id = objectIdFromShell(shell);
-    const pressed = Boolean(id && selectedIds.has(id));
+    if (!id) {
+      shell.classList.remove(IC_NODE_SELECTED_CLASS);
+      shell.removeAttribute("role");
+      shell.removeAttribute("aria-pressed");
+      shell.removeAttribute("aria-label");
+      continue;
+    }
+    const pressed = selectedIds.has(id);
     shell.classList.toggle(IC_NODE_SELECTED_CLASS, pressed);
     shell.setAttribute("role", "button");
     shell.setAttribute("aria-pressed", pressed ? "true" : "false");
-    if (id) {
-      shell.setAttribute("aria-label", id);
-    }
+    shell.setAttribute("aria-label", id);
   }
 }
 

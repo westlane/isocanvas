@@ -132,4 +132,36 @@ describe("diagram node selection", () => {
     expect(selected).toEqual(["map", "story"]);
     expect(host.querySelectorAll(`g.${IC_NODE_SELECTED_CLASS}`).length).toBe(2);
   });
+
+  it("ignores taps on non-selectable companion slabs", () => {
+    const host = document.createElement("div");
+    const surface = document.createElement("div");
+    host.innerHTML = `
+      <svg>
+        <g class="${IC_ISO_CUBE_SHELL_CLASS}">
+          <g class="node" data-object-id="venue__foundationSlab" data-diagram-selectable="false">
+            <text>Place</text>
+          </g>
+        </g>
+        <g class="${IC_ISO_CUBE_SHELL_CLASS}">
+          <g class="node" data-object-id="venue"><text>Venue</text></g>
+        </g>
+      </svg>
+    `;
+    surface.append(host);
+    let selected: readonly string[] = [];
+    attachDiagramNodeSelection({ surface, host, onSelectionChange: (ids) => { selected = ids; } });
+    const slab = host.querySelector('[data-object-id="venue__foundationSlab"]');
+    const base = {
+      bubbles: true,
+      clientX: 15,
+      clientY: 15,
+      button: 0,
+      pointerId: 1,
+      pointerType: "mouse",
+    };
+    slab!.dispatchEvent(new PointerEvent("pointerdown", base));
+    slab!.dispatchEvent(new PointerEvent("pointerup", base));
+    expect(selected).toEqual([]);
+  });
 });

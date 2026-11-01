@@ -20,6 +20,9 @@ export function stackLayerPresentationByBoxId(
 ): Map<string, StackLayerPresentation> {
   const groups = new Map<string, PlaneBoxSpec[]>();
   for (const box of boxes) {
+    if (box.planeBoxRole === "foundationSlab") {
+      continue;
+    }
     const key = planeBoxStackFootprintKey(box);
     const list = groups.get(key) ?? [];
     list.push(box);

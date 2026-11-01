@@ -44,5 +44,13 @@ export type PlaneBoxSpec = {
   height?: number;
   /** Lift above the footprint ground in iso units (same-plane stacks). */
   elevation?: number;
+  /** Skip card-stack fade when paired with a companion foundation slab. */
+  planeBoxRole?: "domain" | "foundationSlab";
+  /** Uniform lit fill for all faces (companion slabs). */
+  monoFaceFill?: string;
+  /** Smaller top label on companion slabs. */
+  compactLabel?: boolean;
+  /** When true, mount faces only (caption may be placed elsewhere). */
+  omitCubeLabel?: boolean;
 };
 
