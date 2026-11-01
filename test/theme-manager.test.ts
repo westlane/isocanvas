@@ -15,9 +15,6 @@ describe("theme manager", () => {
     expect(props[ZUI_THEME_CSS_VARS.accent]).toBe("#9333ea");
     expect(props[ZUI_THEME_CSS_VARS.clusterRx]).toBe("0px");
     expect(props[ZUI_THEME_CSS_VARS.isoShadowOpacity]).toBe("0.42");
-    expect(props[ZUI_THEME_CSS_VARS.dotGridDot]).toBe(
-      "color-mix(in oklch, #e2e8f0 30%, transparent)",
-    );
     expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeWidth]).toBe("1px");
     expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeTop]).toMatch(/^color-mix\(in oklch,/);
     expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeRecess]).toMatch(/^color-mix\(in oklch,/);

@@ -29,7 +29,6 @@
   --zui-selected-border: #ffffff;
   --zui-on-accent: #8f93a3;
   --ic-dot-grid-border: #bdbec1;
-  --ic-dot-grid-dot: color-mix(in oklch, #bdbec1 30%, transparent);
   --ic-theme-cluster-rx: 0px;
   --ic-theme-iso-face-stroke-width: 1px;
   --ic-theme-iso-front-stroke-width: 0px;
@@ -43,9 +42,7 @@
   --ic-wireframe-front-face-fill: rgba(52, 59, 88, 0.08);
   --ic-wireframe-side-face-fill: rgba(52, 59, 88, 0.06);
   --ic-wireframe-back-face-stroke: rgba(52, 59, 88, 0.28);
-  --ic-wireframe-dot-grid-fill: rgba(175, 175, 177, 0.3);
   --ic-wireframe-label-fill: #343b58;
-  --ic-wireframe-artboard-guide-line: color-mix(in oklch, #bbbbbe 24%, transparent);
   --ic-artboard-surface-fill: #d5d5d8;
   --ic-artboard-front-fill: #b7b7ba;
   --ic-artboard-side-fill: #747476;

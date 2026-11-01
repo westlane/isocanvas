@@ -12,6 +12,7 @@ import type { IsoCanvasColors } from "../../types/theme.js";
 import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";
 import {
   ISO_CUBE_MOUNT_FACE_ORDER,
+  IC_ISO_CUBE_SHELL_CLASS,
   isoCubeFaceClassName,
   isoCubeFaceRectLayoutForPlaneTopLeft,
 } from "./cube-faces.js";
@@ -86,6 +87,12 @@ export function mountIsoBoxOnStageShell(
     right: spec.right - stageGround.right,
     top: spec.elevation ?? 0,
   });
+  const cubeShell = new IsometricGroup({
+    left: 0,
+    right: 0,
+    top: 0,
+  });
+  cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
   const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
   if (options?.stackLayer) {
     applyStackLayerPresentation({ faces, label }, options.stackLayer);
@@ -95,7 +102,7 @@ export function mountIsoBoxOnStageShell(
     if (options?.omitBottomFace && id === "bottom") {
       continue;
     }
-    boxShell.addChild(faces[id]);
+    cubeShell.addChild(faces[id]);
   }
   const node = new IsometricGroup({
     id: spec.id,
@@ -110,7 +117,8 @@ export function mountIsoBoxOnStageShell(
     paintStackLayerDataset(nodeEl, options.stackLayer);
   }
   node.addChild(label);
-  boxShell.addChild(node);
+  cubeShell.addChild(node);
+  boxShell.addChild(cubeShell);
   shell.addChild(boxShell);
 }
 

@@ -7,6 +7,9 @@ import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";
 /** Face paths for CSS (solid fills; wireframe supplies strokes). */
 export const IC_ISO_CUBE_FACE_CLASS = "ic-iso-cube-face";
 
+/** Groups cube faces + label node for hit-testing and hover paint. */
+export const IC_ISO_CUBE_SHELL_CLASS = "ic-iso-cube-shell";
+
 export function isoCubeFaceClassName(face: IsoFaceId): string {
   return `${IC_ISO_CUBE_FACE_CLASS} ic-iso-cube-face--${face}`;
 }

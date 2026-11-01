@@ -3,7 +3,6 @@
 import type { IsoCanvasTheme } from "../types/theme.js";
 import {
   artboardSurfaceFillOnCanvas,
-  dotGridDotCssFromBorder,
   isoSolidFaceStrokeCssFromFill,
   isoSlabVisibleFacesFromTop,
   isLightHex,
@@ -11,9 +10,7 @@ import {
   wireframeFrontSurfaceOnCanvas,
   wireframeBackFaceStrokeOnCanvas,
   wireframeSideFaceFillOnCanvas,
-  wireframeDotGridFillOnCanvas,
   wireframeLabelFillOnCanvas,
-  wireframeArtboardGuideLineCss,
   wireframeTopFaceFillOnCanvas,
   wireframeIsoNodeStroke,
   wireframeGridStrokeOnCanvas,
@@ -50,7 +47,6 @@ export const ZUI_THEME_CSS_VARS = {
   selectedBorder: "--zui-selected-border",
   onAccent: "--zui-on-accent",
   dotGridBorder: "--ic-dot-grid-border",
-  dotGridDot: "--ic-dot-grid-dot",
   clusterRx: "--ic-theme-cluster-rx",
   isoFaceStrokeWidth: "--ic-theme-iso-face-stroke-width",
   isoFrontStrokeWidth: "--ic-theme-iso-front-stroke-width",
@@ -64,9 +60,7 @@ export const ZUI_THEME_CSS_VARS = {
   wireframeFrontFaceFill: "--ic-wireframe-front-face-fill",
   wireframeSideFaceFill: "--ic-wireframe-side-face-fill",
   wireframeBackFaceStroke: "--ic-wireframe-back-face-stroke",
-  wireframeDotGridFill: "--ic-wireframe-dot-grid-fill",
   wireframeLabelFill: "--ic-wireframe-label-fill",
-  wireframeArtboardGuideLine: "--ic-wireframe-artboard-guide-line",
   artboardSurfaceFill: "--ic-artboard-surface-fill",
   artboardFrontFill: "--ic-artboard-front-fill",
   artboardSideFill: "--ic-artboard-side-fill",
@@ -77,6 +71,7 @@ export function themeToCssCustomProperties(theme: IsoCanvasTheme): Record<string
   const appearance = isLightHex(colors.surface) ? "light" : "dark";
   const artboardTop = artboardSurfaceFillOnCanvas(colors.surface, appearance);
   const artboardSlab = isoSlabVisibleFacesFromTop(artboardTop, appearance);
+  const gridLineInk = wireframeGridStrokeOnCanvas(colors.surface);
   return {
     [ZUI_THEME_CSS_VARS.accent]: colors.accent,
     [ZUI_THEME_CSS_VARS.accentDeep]: colors.accentDeep,
@@ -106,7 +101,6 @@ export function themeToCssCustomProperties(theme: IsoCanvasTheme): Record<string
     [ZUI_THEME_CSS_VARS.selectedBorder]: colors.selectedBorder,
     [ZUI_THEME_CSS_VARS.onAccent]: colors.onAccent,
     [ZUI_THEME_CSS_VARS.dotGridBorder]: colors.dotGridBorder,
-    [ZUI_THEME_CSS_VARS.dotGridDot]: dotGridDotCssFromBorder(colors.dotGridBorder),
     [ZUI_THEME_CSS_VARS.clusterRx]: `${radius.clusterRx}px`,
     [ZUI_THEME_CSS_VARS.isoFaceStrokeWidth]: `${radius.isoFaceStrokeWidth}px`,
     [ZUI_THEME_CSS_VARS.isoFrontStrokeWidth]: `${radius.isoFrontStrokeWidth}px`,
@@ -116,7 +110,7 @@ export function themeToCssCustomProperties(theme: IsoCanvasTheme): Record<string
       colors.surface,
       colors.isoEdgeStroke,
     ),
-    [ZUI_THEME_CSS_VARS.wireframeGridStroke]: wireframeGridStrokeOnCanvas(colors.surface),
+    [ZUI_THEME_CSS_VARS.wireframeGridStroke]: gridLineInk,
     [ZUI_THEME_CSS_VARS.wireframeIsoStroke]: wireframeIsoNodeStroke(
       colors.surface,
       colors.ink,
@@ -146,18 +140,10 @@ export function themeToCssCustomProperties(theme: IsoCanvasTheme): Record<string
       colors.ink,
       colors.isoLeftFill,
     ),
-    [ZUI_THEME_CSS_VARS.wireframeDotGridFill]: wireframeDotGridFillOnCanvas(
-      colors.surface,
-      colors.ink,
-    ),
     [ZUI_THEME_CSS_VARS.wireframeLabelFill]: wireframeLabelFillOnCanvas(
       colors.surface,
       colors.ink,
       colors.isoTopFill,
-    ),
-    [ZUI_THEME_CSS_VARS.wireframeArtboardGuideLine]: wireframeArtboardGuideLineCss(
-      colors.surface,
-      appearance,
     ),
     [ZUI_THEME_CSS_VARS.artboardSurfaceFill]: artboardTop,
     [ZUI_THEME_CSS_VARS.artboardFrontFill]: artboardSlab.front,

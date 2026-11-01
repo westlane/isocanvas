@@ -381,13 +381,13 @@ describe("isometric cube (library shape)", () => {
     host.remove();
   });
 
-  it("renders diagram scene with default artboard shell (slab, dots, no guides)", () => {
+  it("renders diagram scene with default artboard shell (slab, dots, guide overlay)", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors());
     expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();
     expect(host.querySelectorAll("path.ic-artboard-face--front[d]")).toHaveLength(1);
-    expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(0);
+    expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(4);
     host.remove();
   });
 

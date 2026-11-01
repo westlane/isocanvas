@@ -81,10 +81,40 @@ svg[data-diagram-renderer="ic-cube-canvas"] > rect.ic-cube-canvas-bg {
   pointer-events: none;
 }
 
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 0.1s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell path.ic-iso-cube-face {
+  pointer-events: all;
+  transition: filter 0.12s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:hover:not(:active) path.ic-iso-cube-face {
+  filter: brightness(var(--ic-iso-cube-hover-brightness, 1.06));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active {
+  transform: scale(var(--ic-iso-cube-active-scale, 0.985));
+  transition-duration: 0.05s;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face {
+  filter: brightness(var(--ic-iso-cube-active-brightness, 0.94));
+}
+
 g.node[data-object-id],
 g.node[data-object-id] :is(rect, line, path, polygon, polyline, text, tspan) {
   cursor: pointer;
   pointer-events: all;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell g.node[data-object-id] .ic-iso-cube-label,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell g.node[data-object-id] .ic-iso-cube-label tspan {
+  pointer-events: none;
 }
 
 rect.align-bounds-guide {

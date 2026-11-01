@@ -1,6 +1,7 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
 import {
+  applyGridLinesMode,
   applyWireframeMode,
   blendHexWithWhite,
   createThemeManager,
@@ -51,6 +52,7 @@ let active: ThemeManager | null = null;
 let familyIndex = 0;
 let appearance: DemoAppearance = "dark";
 let wireframe = false;
+let gridLines = true;
 
 const DEMO_CHROME_BG = "--demo-chrome-bg";
 const DEMO_CHROME_FG = "--demo-chrome-fg";
@@ -66,6 +68,11 @@ function syncPageChrome(manager: ThemeManager): void {
   document.documentElement.dataset.demoAppearance = appearance;
   document.documentElement.dataset.icTheme = themeIdForPair(familyIndex, appearance);
   applyWireframeMode(document.documentElement, wireframe);
+  applyGridLinesMode(document.documentElement, gridLines);
+  const artboard = manager.target.querySelector(".ic-artboard");
+  if (artboard instanceof HTMLElement) {
+    applyGridLinesMode(artboard, gridLines);
+  }
   document.documentElement.style.colorScheme = appearance;
 
   const chromeBg = colors.surface;
@@ -112,11 +119,6 @@ function syncPageChrome(manager: ThemeManager): void {
 
   root.style.setProperty("--ic-dot-grid-surface", "transparent");
   root.style.setProperty("--ic-dot-grid-surface-fallback", chromeBg);
-  root.style.setProperty("--ic-dot-grid-border", chromeFgMuted);
-  root.style.setProperty(
-    "--ic-dot-grid-dot",
-    "color-mix(in oklch, var(--demo-chrome-fg-muted) 30%, transparent)",
-  );
   persistDemoChromePrefs(chromeBg, chromeFg);
 }
 
@@ -126,6 +128,7 @@ type StoredDemoChrome = {
   familyIndex?: unknown;
   appearance?: unknown;
   wireframe?: unknown;
+  gridLines?: unknown;
   themeId?: unknown;
   surface?: unknown;
   fg?: unknown;
@@ -179,6 +182,11 @@ function applyStoredDemoChrome(stored: StoredDemoChrome | null): void {
   }
 
   wireframe = stored.wireframe === true;
+  if (stored.gridLines === false) {
+    gridLines = false;
+  } else if (stored.gridLines === true) {
+    gridLines = true;
+  }
 
   if (typeof document === "undefined") {
     return;
@@ -195,6 +203,11 @@ function applyStoredDemoChrome(stored: StoredDemoChrome | null): void {
     root.dataset.icWireframe = "on";
   } else {
     delete root.dataset.icWireframe;
+  }
+  if (gridLines) {
+    root.dataset.icGridLines = "on";
+  } else {
+    delete root.dataset.icGridLines;
   }
   root.style.colorScheme = appearance;
 
@@ -225,6 +238,7 @@ function persistDemoChromePrefs(surface: string, fg: string): void {
         familyIndex,
         appearance,
         wireframe,
+        gridLines,
         themeId: themeIdForPair(familyIndex, appearance),
         surface,
         fg,
@@ -330,4 +344,16 @@ export function toggleDemoWireframe(): boolean {
     syncPageChrome(active);
   }
   return wireframe;
+}
+
+export function currentDemoGridLines(): boolean {
+  return gridLines;
+}
+
+export function toggleDemoGridLines(): boolean {
+  gridLines = !gridLines;
+  if (active) {
+    syncPageChrome(active);
+  }
+  return gridLines;
 }

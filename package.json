@@ -24,6 +24,11 @@
       "import": "./dist/persistence/index.js",
       "default": "./dist/persistence/index.js"
     },
+    "./layout": {
+      "types": "./dist/layout-entry.d.ts",
+      "import": "./dist/layout-entry.js",
+      "default": "./dist/layout-entry.js"
+    },
     "./dot-grid.css": "./theme/layout/dot-grid.css",
     "./layout.css": "./theme/layout/layout.css",
     "./camera.css": "./theme/camera/camera.css",

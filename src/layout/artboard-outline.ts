@@ -18,6 +18,9 @@ export const IC_ARTBOARD_GUIDE_CLASS = "ic-artboard-guide";
 /** Fainter lines subdividing each macro cell. */
 export const IC_ARTBOARD_SUBGUIDE_CLASS = "ic-artboard-subguide";
 
+/** Finest lattice lines (one step on the dot grid between sub-guides). */
+export const IC_ARTBOARD_FINEGUIDE_CLASS = "ic-artboard-fineguide";
+
 /** Visible vertical faces on the iso artboard slab. */
 export const IC_ARTBOARD_FACE_CLASS = "ic-artboard-face";
 

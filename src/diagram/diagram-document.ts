@@ -15,6 +15,7 @@ import {
   type CreateArtboardOptions,
 } from "../layout/artboard.js";
 import { createDefaultThemeManager, type ThemeManager } from "../theme/manager.js";
+import { applyGridLinesMode } from "../theme/grid-lines-mode.js";
 import type { DiagramScene } from "../types/diagram.js";
 import type { ArtboardUserSize } from "../types/artboard.js";
 
@@ -30,6 +31,11 @@ export function createDiagramArtboard(
   });
 }
 
+/** Turn on layout guides for a diagram artboard (matches {@link applyDefaultDiagramTheme}). */
+export function enableDiagramArtboardGridLines(artboardRoot: HTMLElement): void {
+  applyGridLinesMode(artboardRoot, true);
+}
+
 /** Apply {@link DEFAULT_ISO_CANVAS_THEME} tokens on `target` (required for visible ground dots). */
 export function applyDefaultDiagramTheme(
   target: HTMLElement = document.documentElement,
@@ -37,6 +43,7 @@ export function applyDefaultDiagramTheme(
   const manager = createDefaultThemeManager(target);
   manager.apply();
   target.dataset.icTheme = manager.getTheme().id;
+  applyGridLinesMode(target, true);
   return manager;
 }
 

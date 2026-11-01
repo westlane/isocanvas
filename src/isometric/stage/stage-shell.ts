@@ -12,6 +12,7 @@ import {
   artboardFaceClassName,
   ARTBOARD_SLAB_HEIGHT_USER_PX,
   artboardGroundElevationIso,
+  IC_ARTBOARD_FINEGUIDE_CLASS,
   IC_ARTBOARD_GUIDE_CLASS,
   IC_ARTBOARD_OUTLINE_CLASS,
   IC_ARTBOARD_OUTLINE_LAYER_CLASS,
@@ -21,9 +22,12 @@ import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";
 import {
   DEFAULT_ARTBOARD_GRID_DIVISIONS,
   DEFAULT_ARTBOARD_GRID_SUBDIVISIONS,
+  DEFAULT_ARTBOARD_DOT_LATTICE_PHASE,
 } from "../../layout/artboard.js";
+import { artboardIsoGroundGuideFraction } from "../../layout/lattice-plane.js";
 import { mountIsoGroundDotGrid } from "../../grid/svg.js";
 import { artboardPlaneToIsoGround, isoSizeFromDiagramUser } from "../diagram-user.js";
+import { isometricCanvasMountHost } from "../orientation.js";
 import { isoCubeFaceRectLayoutForPlaneTopLeft } from "../cube/cube-faces.js";
 import { userPxToIsoUnits } from "../cube/cube.js";
 import { isoStageGroundLayout } from "./ground-local.js";
@@ -58,9 +62,27 @@ function mountArtboardSlabFace(
 }
 
 /**
- * Macro splits on the iso ground face (same local axes as the stage outline), with fainter
- * sub-guides inside each cell. Sub-guides mount first so macro guides paint over them.
+ * Macro / sub / fine splits on the iso ground (3×3 macro, 3×3 sub, 3×3 fine per cell).
+ * Finest guides mount first; macro paints on top.
  */
+function artboardIsoGroundGuideClass(
+  lineIndex: number,
+  grid: { divisions: number; subdivisions: number },
+): string {
+  const macroStride = grid.subdivisions;
+  const subStride = grid.subdivisions / grid.divisions;
+  if (!Number.isInteger(subStride) || subStride < 1) {
+    throw new Error("Artboard subdivisions must be a multiple of divisions");
+  }
+  if (lineIndex % macroStride === 0) {
+    return IC_ARTBOARD_GUIDE_CLASS;
+  }
+  if (lineIndex % subStride === 0) {
+    return IC_ARTBOARD_SUBGUIDE_CLASS;
+  }
+  return IC_ARTBOARD_FINEGUIDE_CLASS;
+}
+
 function mountArtboardIsoGroundDivisions(
   shell: IsometricGroup,
   footprintWidthIso: number,
@@ -70,32 +92,28 @@ function mountArtboardIsoGroundDivisions(
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
 ): void {
   const lines = grid.divisions * grid.subdivisions;
-  const macro: number[] = [];
+  const tiers: Array<{ className: string; indices: number[] }> = [
+    { className: IC_ARTBOARD_FINEGUIDE_CLASS, indices: [] },
+    { className: IC_ARTBOARD_SUBGUIDE_CLASS, indices: [] },
+    { className: IC_ARTBOARD_GUIDE_CLASS, indices: [] },
+  ];
   for (let i = 1; i < lines; i += 1) {
-    if (i % grid.subdivisions === 0) {
-      macro.push(i);
-    } else {
+    const className = artboardIsoGroundGuideClass(i, grid);
+    const tier = tiers.find((entry) => entry.className === className);
+    tier?.indices.push(i);
+  }
+  for (const { className, indices } of tiers) {
+    for (const i of indices) {
       mountIsoGroundGuidePair(
         shell,
         footprintWidthIso,
         footprintDepthIso,
-        i / lines,
-        IC_ARTBOARD_SUBGUIDE_CLASS,
+        artboardIsoGroundGuideFraction(i, lines, DEFAULT_ARTBOARD_DOT_LATTICE_PHASE),
+        className,
         slabTop,
         orientation,
       );
     }
-  }
-  for (const i of macro) {
-    mountIsoGroundGuidePair(
-      shell,
-      footprintWidthIso,
-      footprintDepthIso,
-      i / lines,
-      IC_ARTBOARD_GUIDE_CLASS,
-      slabTop,
-      orientation,
-    );
   }
 }
 
@@ -200,6 +218,17 @@ export function createArtboardStageShell(
     mountArtboardSlabFace(shell, "front", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
     mountArtboardSlabFace(shell, "side", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
     shell.addChild(ground);
+    mountArtboardIsoGroundDivisions(
+      shell,
+      footprintWidthIso,
+      footprintDepthIso,
+      {
+        divisions: stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
+        subdivisions: stage.subdivisions ?? DEFAULT_ARTBOARD_GRID_SUBDIVISIONS,
+      },
+      slabTop,
+      orientation,
+    );
     return shell;
   }
   mountArtboardSlabFace(shell, "front", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
@@ -230,7 +259,7 @@ export function createArtboardStageShell(
   return shell;
 }
 
-/** Attach the stage shell, then lay the dot grid on its ground (outline path data exists once attached). */
+/** Attach the stage shell, then lay dots under division guides (outline layer → dots → guides). */
 export function addArtboardStageShell(
   canvas: IsometricCanvas,
   shell: IsometricGroup,
@@ -241,9 +270,14 @@ export function addArtboardStageShell(
   if (!(outline instanceof SVGPathElement)) {
     throw new Error("Artboard stage shell is missing its ground outline");
   }
-  mountIsoGroundDotGrid(outline, {
-    width: stage.width,
-    height: stage.height,
-    divisions: stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
-  });
+  const themeHost = isometricCanvasMountHost(canvas);
+  mountIsoGroundDotGrid(
+    outline,
+    {
+      width: stage.width,
+      height: stage.height,
+      divisions: stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
+    },
+    themeHost ? { themeHost } : {},
+  );
 }

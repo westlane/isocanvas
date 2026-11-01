@@ -26,6 +26,7 @@ import { DEFAULT_ISO_CANVAS_COLORS } from "../theme/defaults.js";
 import type { PlaneBoxSpec } from "../types/artboard.js";
 import type { ArtboardPlaneStage } from "../types/artboard.js";
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../layout/artboard.js";
+import { enforcePlaneBoxOnArtboardLattice } from "../layout/lattice.js";
 import { defaultIsoArtboardStage, mountIsometricCanvasOnHost } from "../isometric/stage/stage.js";
 import { frameDiagramSceneCamera } from "./diagram-document.js";
 
@@ -122,7 +123,13 @@ export function renderDiagramScene(
     }
   }
 
-  mountPlaneBoxesOnCanvas(canvas, scene.nodes.map(planeBoxFromNode), colors, {
+  mountPlaneBoxesOnCanvas(
+    canvas,
+    scene.nodes.map((node) =>
+      enforcePlaneBoxOnArtboardLattice(planeBoxFromNode(node), stage),
+    ),
+    colors,
+    {
     stage,
     ...(options.omitArtboardShell
       ? { omitArtboardShell: true }

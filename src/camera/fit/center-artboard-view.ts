@@ -48,7 +48,7 @@ export {
 } from "../view-box/baseline.js";
 
 function fitOptionsForArtboard(
-  content: Box2d,
+  _content: Box2d,
   options: ViewBoxCenterArtboardOptions,
   isoMounted: boolean,
 ): ViewBoxFitContentOptions {

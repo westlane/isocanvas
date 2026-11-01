@@ -9,6 +9,9 @@ import {
   artboardPlaneCellFootprintAtTopLeftDot,
   artboardPlaneCellOrigin,
   artboardSnapFootprintToDots,
+  enforcePlaneBoxOnArtboardLattice,
+  artboardPlaneGridLineStep,
+  defaultLatticeStage,
   DEFAULT_ARTBOARD_DOTS_PER_CELL,
   artboardUserSizeForLattice,
   artboardUserToPlane,
@@ -57,6 +60,13 @@ describe("artboard lattice layout", () => {
     const dot = artboardPlaneCellFirstDot(1, 2, macroPitch);
     expect(dot.x).toBeCloseTo(corner.x + step / 2, 9);
     expect(dot.y).toBeCloseTo(corner.y + step / 2, 9);
+  });
+
+  it("intersection phase pins studs on cell corners", () => {
+    const corner = artboardPlaneCellOrigin(1, 2, macroPitch);
+    const dot = artboardPlaneCellFirstDot(1, 2, macroPitch, DEFAULT_ARTBOARD_DOTS_PER_CELL, "intersection");
+    expect(dot.x).toBeCloseTo(corner.x, 9);
+    expect(dot.y).toBeCloseTo(corner.y, 9);
   });
 
   it("shifts top-left dot pin by whole dot steps", () => {
@@ -140,5 +150,27 @@ describe("artboard lattice layout", () => {
       { col: 2, row: 0 },
       { col: 1, row: 1 },
     ]);
+  });
+
+  it("enforcePlaneBoxOnArtboardLattice is idempotent on the default stage", () => {
+    const stage = defaultLatticeStage();
+    const lineStep = artboardPlaneGridLineStep(stage).xPx;
+    const box = {
+      id: "n",
+      label: "n",
+      x: 41.2,
+      y: 88.7,
+      width: 170,
+      depth: 58,
+      height: 0.5,
+      footprintAnchor: "back-left" as const,
+    };
+    const once = enforcePlaneBoxOnArtboardLattice(box, stage);
+    const twice = enforcePlaneBoxOnArtboardLattice(once, stage);
+    expect(twice).toEqual(once);
+    expect(once.x % lineStep).toBeCloseTo(0, 9);
+    expect(once.y % lineStep).toBeCloseTo(0, 9);
+    expect(once.width % lineStep).toBeCloseTo(0, 9);
+    expect(once.depth % lineStep).toBeCloseTo(0, 9);
   });
 });

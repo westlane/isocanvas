@@ -71,7 +71,7 @@ describe("artboard iso ground grid", () => {
     host.remove();
   });
 
-  it("lays a dot grid on the ground between the surface fill and the guides", () => {
+  it("lays dots under division guides (grid lines paint above studs)", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     const size = 900;
@@ -89,16 +89,25 @@ describe("artboard iso ground grid", () => {
     const layer = host.querySelector(`path.${IC_ARTBOARD_OUTLINE_LAYER_CLASS}`)!;
     const dots = host.querySelector(`g.${IC_ARTBOARD_DOT_GRID_CLASS}`)!;
     expect(dots).toBeTruthy();
+    const dotMark = dots.querySelector("pattern circle.ic-artboard-dot");
+    expect(dotMark?.getAttribute("fill")).toBeTruthy();
     expect(layer).toBeTruthy();
     expect(outline.nextElementSibling).toBe(layer);
     expect(layer.nextElementSibling).toBe(dots);
-    expect(dots.nextElementSibling?.classList.contains("ic-artboard-subguide")).toBe(true);
+    expect(dots.nextElementSibling?.classList.contains("ic-artboard-fineguide")).toBe(true);
+    const fineguides = host.querySelectorAll("path.ic-artboard-fineguide[d]");
     const subguides = host.querySelectorAll("path.ic-artboard-subguide[d]");
     const guides = host.querySelectorAll("path.ic-artboard-guide[d]");
+    expect(fineguides).toHaveLength(36);
     expect(subguides).toHaveLength(12);
     expect(guides).toHaveLength(4);
-    const lines = [...host.querySelectorAll("path.ic-artboard-subguide, path.ic-artboard-guide")];
+    const lines = [
+      ...host.querySelectorAll(
+        "path.ic-artboard-fineguide, path.ic-artboard-subguide, path.ic-artboard-guide",
+      ),
+    ];
     expect(lines.indexOf(guides[0]!)).toBeGreaterThan(lines.indexOf(subguides[11]!));
+    expect(lines.indexOf(subguides[0]!)).toBeGreaterThan(lines.indexOf(fineguides[35]!));
 
     const [a, b, c, d, e, f] = /matrix\(([^)]+)\)/
       .exec(dots.getAttribute("transform") ?? "")![1]!
@@ -115,7 +124,7 @@ describe("artboard iso ground grid", () => {
     host.remove();
   });
 
-  it("places 9×9 centered dots in each macro cell (none on guide lines)", () => {
+  it("centers dots in each lattice cell (guides on cell boundaries)", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     const size = 900;

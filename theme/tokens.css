@@ -12,7 +12,12 @@
   --ic-gap: var(--ic-dot-grid-size, 18px);
   --ic-pad: 12px;
 
-  /* Dot grid geometry (colors come from scheme tokens) */
+  /* Iso cube interaction — >1 brightens on hover */
+  --ic-iso-cube-hover-brightness: 1.06;
+  --ic-iso-cube-active-scale: 0.985;
+  --ic-iso-cube-active-brightness: 0.94;
+
+  /* Dot grid geometry (dot color: theme/layout/artboard-grid.css) */
   --ic-dot-grid-size: 18px;
   --ic-dot-grid-phase: calc(var(--ic-dot-grid-size) / 2);
   --ic-dot-grid-mark: 2px;
@@ -22,7 +27,6 @@
   --ic-dot-grid-inset: -250%;
   --ic-dot-grid-macro-align: plane;
   --ic-dot-grid-projection: orthogonal;
-  --ic-dot-grid-dot: color-mix(in oklch, var(--ic-dot-grid-border, #cbd5e1) 30%, transparent);
   --ic-dot-grid-surface: transparent;
   --ic-dot-grid-surface-fallback: color-mix(in oklch, var(--zui-surface, #f8fafc) 92%, #ffffff);
 

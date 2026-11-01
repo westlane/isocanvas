@@ -4,7 +4,8 @@ import type { ViewBox } from "../types/core.js";
 import type { DotGridProjection } from "../types/grid.js";
 import { defaultDotGridPhase, DEFAULT_DOT_GRID_SIZE_PX } from "./surface.js";
 import { isometricDotGridPlaneMatrix } from "./projection.js";
-import { DEFAULT_ARTBOARD_DOTS_PER_CELL } from "../layout/artboard.js";
+import { DEFAULT_ARTBOARD_DOTS_PER_CELL, DEFAULT_ARTBOARD_DOT_LATTICE_PHASE } from "../layout/artboard.js";
+import { artboardDotLatticeOriginInCell } from "../layout/lattice-plane.js";
 import {
   parseSvgPathMoveLinePoints,
 } from "../layout/artboard-ground-path.js";
@@ -170,11 +171,18 @@ function planeToGroundMatrix(
 export function mountIsoGroundDotGrid(
   outline: SVGPathElement,
   plane: { width: number; height: number; divisions: number },
-  options: { dotsPerCell?: number; dotRadius?: number } = {},
+  options: {
+    dotsPerCell?: number;
+    dotRadius?: number;
+    themeHost?: HTMLElement;
+    dotFill?: string;
+  } = {},
 ): SVGGElement {
   const dotsPerSide = plane.divisions * (options.dotsPerCell ?? DEFAULT_ARTBOARD_DOTS_PER_CELL);
   const stepX = plane.width / dotsPerSide;
   const stepY = plane.height / dotsPerSide;
+  const step = { xPx: stepX, yPx: stepY };
+  const studOrigin = artboardDotLatticeOriginInCell(step, DEFAULT_ARTBOARD_DOT_LATTICE_PHASE);
   isoGroundDotGridCount += 1;
   const patternId = `ic-artboard-dot-grid-${isoGroundDotGridCount}`;
 
@@ -185,9 +193,15 @@ export function mountIsoGroundDotGrid(
   pattern.setAttribute("height", String(stepY));
   const mark = document.createElementNS(SVG_NS, "circle");
   mark.classList.add(IC_ARTBOARD_DOT_CLASS);
-  mark.setAttribute("cx", String(stepX / 2));
-  mark.setAttribute("cy", String(stepY / 2));
+  mark.setAttribute("cx", String(studOrigin.xPx));
+  mark.setAttribute("cy", String(studOrigin.yPx));
   mark.setAttribute("r", String(options.dotRadius ?? 2));
+  const resolvedFill =
+    options.dotFill ??
+    (options.themeHost ? resolveSvgFillFromThemeVar(options.themeHost) : undefined);
+  if (resolvedFill) {
+    mark.setAttribute("fill", resolvedFill);
+  }
   pattern.appendChild(mark);
 
   const rect = document.createElementNS(SVG_NS, "rect");
@@ -212,4 +226,27 @@ export function mountIsoGroundDotGrid(
 export function readDotGridFillFromElement(element: HTMLElement): string {
   const raw = getComputedStyle(element).getPropertyValue("--ic-dot-grid-dot").trim();
   return raw || "rgba(148, 163, 184, 0.3)";
+}
+
+/** SVG `<pattern>` fills do not reliably inherit `color-mix()` from CSS; resolve on the host. */
+export function resolveSvgFillFromThemeVar(
+  host: HTMLElement,
+  cssVar = "--ic-dot-grid-dot",
+): string {
+  if (typeof document === "undefined") {
+    return readDotGridFillFromElement(host);
+  }
+  const anchor = host.closest(".ic-artboard") ?? host;
+  const probe = document.createElement("span");
+  probe.style.setProperty("color", `var(${cssVar})`);
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.pointerEvents = "none";
+  anchor.appendChild(probe);
+  const resolved = getComputedStyle(probe).color;
+  probe.remove();
+  if (resolved && resolved !== "rgba(0, 0, 0, 0)") {
+    return resolved;
+  }
+  return readDotGridFillFromElement(host);
 }

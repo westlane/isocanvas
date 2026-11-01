@@ -15,6 +15,7 @@ import {
   wireframeIsoNodeStroke,
   wireframeGridStrokeOnCanvas,
   wireframeStrokeOnSurface,
+  themeToCssCustomProperties,
 } from "@westlane/isocanvas";
 import { BUILT_IN_THEMES } from "@westlane/pino-blanc/themes";
 
@@ -136,6 +137,13 @@ describe("artboardSurfaceFillOnCanvas", () => {
 });
 
 describe("isoSolidFaceStrokeCssFromFill", () => {
+  it("light themes derive dot fill in CSS from grid-line ink (see theme/layout/artboard-grid.css)", () => {
+    const iso = isoCanvasThemeFromLogTheme(BUILT_IN_THEMES["gruvbox-light"]!);
+    const props = themeToCssCustomProperties(iso);
+    expect(props["--ic-wireframe-grid-stroke"]).toBeTruthy();
+    expect(props["--ic-dot-grid-dot"]).toBeUndefined();
+  });
+
   it("is a slightly darkened face fill at 50% opacity", () => {
     const iso = isoCanvasThemeFromLogTheme(BUILT_IN_THEMES["solarized-dark"]!);
     const fill = iso.colors.isoRightFill;

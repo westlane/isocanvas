@@ -5,24 +5,13 @@
   --ic-theme-iso-front-stroke-width: 1px;
   --ic-theme-selected-stroke-width: 1px;
   --ic-artboard-outline: var(--ic-wireframe-grid-stroke, var(--ic-dot-grid-border, #94a3b8));
-  --ic-dot-grid-dot: var(
-    --ic-wireframe-dot-grid-fill,
-    color-mix(in oklch, var(--ic-wireframe-grid-stroke, var(--ic-dot-grid-border, #cbd5e1)) 30%, transparent)
-  );
-}
-
-[data-ic-wireframe="on"] .ic-artboard .ic-dot-grid-surface {
-  --ic-artboard-guide-line: var(
-    --ic-wireframe-artboard-guide-line,
-    color-mix(in oklch, var(--ic-wireframe-grid-stroke, #94a3b8) 24%, transparent)
-  );
 }
 
 [data-ic-wireframe="on"]
   svg[data-diagram-renderer="ic-cube-canvas"]
-  :is(path.ic-artboard-guide, path.ic-artboard-subguide) {
+  :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
   display: block;
-  stroke: var(--ic-wireframe-grid-stroke, var(--ic-artboard-outline, #94a3b8)) !important;
+  stroke: var(--ic-grid-lines-stroke) !important;
   fill: none !important;
   vector-effect: non-scaling-stroke;
 }
@@ -71,7 +60,6 @@
   fill: none !important;
 }
 
-/* Ground face omitted at mount; hide if present so it does not double-draw the footprint. */
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom {
   display: none;
 }
@@ -80,7 +68,7 @@
   stroke: none !important;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] :is(path, polygon, rect):not(.ic-cube-canvas-bg):not(.ic-svg-dot-grid):not(.ic-artboard-dot-grid-fill):not(.ic-iso-cube-face):not(.ic-artboard-outline):not(.ic-artboard-outline-layer):not(.ic-artboard-face):not(.ic-artboard-guide):not(.ic-artboard-subguide) {
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] :is(path, polygon, rect):not(.ic-cube-canvas-bg):not(.ic-svg-dot-grid):not(.ic-artboard-dot-grid-fill):not(.ic-iso-cube-face):not(.ic-artboard-outline):not(.ic-artboard-outline-layer):not(.ic-artboard-face):not(.ic-artboard-guide):not(.ic-artboard-subguide):not(.ic-artboard-fineguide) {
   stroke: var(--ic-wireframe-iso-stroke, #f8fafc) !important;
   stroke-width: 1px !important;
   fill: none !important;
@@ -88,10 +76,7 @@
 }
 
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-dot {
-  fill: var(
-    --ic-wireframe-dot-grid-fill,
-    color-mix(in oklch, var(--ic-wireframe-grid-stroke, #94a3b8) 30%, transparent)
-  );
+  fill: var(--ic-dot-grid-dot);
 }
 
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] > rect.ic-cube-canvas-bg {

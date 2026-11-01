@@ -383,6 +383,16 @@ export function dotGridDotCssFromBorder(borderHex: string): string {
   return `color-mix(in oklch, ${normalizeHex(borderHex)} ${pct}%, transparent)`;
 }
 
+/** Light canvases: dots share grid-line hue, slightly lifted toward white. */
+export const LIGHT_DOT_GRID_LINE_WHITEN = 0.04;
+export const LIGHT_DOT_GRID_DOT_OPACITY = 0.58;
+
+export function dotGridDotCssFromGridLineInk(gridLineInkHex: string): string {
+  const lighter = blendHexWithWhite(normalizeHex(gridLineInkHex), LIGHT_DOT_GRID_LINE_WHITEN);
+  const pct = Math.round(LIGHT_DOT_GRID_DOT_OPACITY * 100);
+  return `color-mix(in oklch, ${lighter} ${pct}%, transparent)`;
+}
+
 /** Solid iso card edge — slightly darker than that face fill, at 50% opacity. */
 export const ISO_SOLID_FACE_STROKE_DARKEN = 0.08;
 export const ISO_SOLID_FACE_STROKE_OPACITY = 0.5;
@@ -416,8 +426,8 @@ export function wireframeLabelFillOnCanvas(
   return wireframeIsoNodeStroke(surfaceHex, preferredInkHex);
 }
 
-/** Layout guides on the frosted artboard in wireframe mode. */
-export const WIREFRAME_ARTBOARD_GUIDE_LINE_OPACITY = 0.24;
+/** Layout guides on the frosted artboard in wireframe mode (scheme fallback; CSS owns live values). */
+export const WIREFRAME_ARTBOARD_GUIDE_LINE_OPACITY = 0.16;
 
 export function wireframeArtboardGuideLineCss(
   canvasSurfaceHex: string,

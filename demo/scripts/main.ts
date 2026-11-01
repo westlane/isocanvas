@@ -27,10 +27,12 @@ import {
 } from "./session.js";
 import {
   bootstrapDemoChromeFromStorage,
-  cycleDemoThemeFamily,
+  currentDemoGridLines,
   initDemoTheme,
   toggleDemoAppearance,
+  toggleDemoGridLines,
   toggleDemoWireframe,
+  cycleDemoThemeFamily,
 } from "./theme.js";
 import {
   ALL_DEMO_TOOLS,
@@ -50,7 +52,11 @@ import {
   parseViewportUrlFrame,
   syncRouteHashForTool,
 } from "./viewport.js";
-import { createIsoCanvasStage, DEFAULT_ARTBOARD_USER_SIZE } from "@westlane/isocanvas";
+import {
+  applyGridLinesMode,
+  createIsoCanvasStage,
+  DEFAULT_ARTBOARD_USER_SIZE,
+} from "@westlane/isocanvas";
 
 bootstrapDemoChromeFromStorage();
 
@@ -84,6 +90,8 @@ hostEl.classList.add("diagram-host");
 const log = getDemoLogger("demo");
 
 initDemoTheme(document.documentElement);
+applyGridLinesMode(hostEl, currentDemoGridLines());
+applyGridLinesMode(hostEl.closest(".ic-artboard") ?? hostEl, currentDemoGridLines());
 installDemoSessionPersistence();
 hydrateDemoSession();
 applyDemoIsometricOrientationToHost(hostEl);
@@ -118,6 +126,11 @@ bindDemoKeyboardShortcuts({
     toggleDemoWireframe();
     chrome.syncThemeControls();
     shell.themeWireframe.focus();
+  },
+  toggleGridLines: () => {
+    toggleDemoGridLines();
+    chrome.syncThemeControls();
+    shell.themeGridLines.focus();
   },
   toggleIsoOrientation: () => {
     toggleDemoIsometricOrientation(hostEl);

@@ -72,8 +72,50 @@
   --ic-artboard-guide-line: transparent;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide) {
+svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
   display: none;
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
+  display: block;
+  stroke: var(--ic-grid-lines-stroke) !important;
+  stroke-width: 1.25px !important;
+  fill: none !important;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-guide {
+  opacity: var(--ic-grid-lines-macro-opacity);
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-subguide {
+  opacity: var(--ic-grid-lines-sub-opacity);
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-fineguide {
+  opacity: var(--ic-grid-lines-fine-opacity);
+}
+
+[data-ic-grid-lines="on"] .ic-artboard .ic-dot-grid-surface,
+[data-ic-wireframe="on"] .ic-artboard .ic-dot-grid-surface {
+  --ic-artboard-guide-line: unset;
+}
+
+/* Frame-only diagrams: division guides live in the cube SVG (iso ground), not CSS plane overlays. */
+
+.ic-artboard[data-ic-grid-lines="on"][data-ic-frame-only] > .ic-artboard-content > :is(svg, .diagram-host),
+[data-ic-grid-lines="on"] .ic-artboard[data-ic-frame-only] > .ic-artboard-content > :is(svg, .diagram-host) {
+  position: relative;
+  z-index: 1;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
@@ -161,21 +203,14 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
 }
 
 /*
- * Iso artboard ground (cube SVG). Mount code sets geometry + class only; the library's default
- * presentation attributes lose to these class rules, so no !important is needed here.
+ * Iso artboard ground (cube SVG). Geometry from mount; stroke from theme/layout/artboard-grid.css.
  */
-.ic-artboard-guide,
-.ic-artboard-subguide {
-  stroke: var(--ic-artboard-outline, var(--ic-dot-grid-border, #94a3b8));
-  stroke-width: 1;
+svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
+  stroke: var(--ic-grid-lines-stroke);
+  stroke-width: 1.25px;
   vector-effect: non-scaling-stroke;
   fill: none;
-  opacity: 0.85;
   pointer-events: none;
-}
-
-.ic-artboard-subguide {
-  opacity: 0.3;
 }
 
 .ic-artboard-dot-grid {
@@ -183,5 +218,5 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
 }
 
 .ic-artboard-dot {
-  fill: var(--ic-dot-grid-dot, color-mix(in oklch, var(--ic-dot-grid-border, #94a3b8) 30%, transparent));
+  fill: var(--ic-dot-grid-dot);
 }
