@@ -5,6 +5,8 @@ import {
   type ViewBoxCenterArtboardOptions,
   DEFAULT_VIEWBOX_CENTER_ARTBOARD_OPTIONS,
 } from "../camera/fit/center-artboard-view.js";
+import type { DiagramNodeSelectionDetach } from "../camera/node-selection.js";
+import { attachDiagramNodeSelection } from "../camera/node-selection.js";
 import type { WorldCameraPanZoomDetach } from "../camera/world-pan-zoom.js";
 import { attachWorldCameraPanZoom } from "../camera/world-pan-zoom.js";
 import {
@@ -75,3 +77,17 @@ export function attachDiagramViewportPanZoom(options: {
 }): WorldCameraPanZoomDetach {
   return attachWorldCameraPanZoom(options);
 }
+
+export function attachDiagramViewportNodeSelection(options: {
+  surface: HTMLElement;
+  host: HTMLElement;
+  onSelectionChange?: (objectId: string | null) => void;
+}): DiagramNodeSelectionDetach {
+  return attachDiagramNodeSelection(options);
+}
+
+export {
+  applyDiagramNodeSelection,
+  clearDiagramNodeSelection,
+  IC_NODE_SELECTED_CLASS,
+} from "../camera/node-selection.js";

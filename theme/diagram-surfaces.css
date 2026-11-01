@@ -103,7 +103,68 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active {
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face {
-  filter: brightness(var(--ic-iso-cube-active-brightness, 0.94));
+  filter: brightness(var(--ic-iso-cube-active-brightness, 1.06));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face {
+  filter: none;
+  stroke: var(--zui-selected-border, #ffffff) !important;
+  stroke-width: max(var(--ic-theme-selected-stroke-width, 1px), 1.5px) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--top {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-top-fill, #e9d5ff) 42%,
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-front-fill, #ddd6fe) 38%,
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-right-fill, #c4b5fd) 36%,
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--bottom {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-bottom-fill, #a78bfa) 32%,
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-left-fill, #8b5cf6) 30%,
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label tspan {
+  --ic-label-fill: var(--zui-iso-label-fill, #212121);
+  fill: var(--ic-label-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face {
+  filter: brightness(var(--ic-iso-cube-selected-active-brightness, 1.03));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face {
+  filter: brightness(var(--ic-iso-cube-selected-hover-brightness, 1.02));
 }
 
 g.node[data-object-id],
