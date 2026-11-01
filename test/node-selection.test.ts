@@ -53,12 +53,12 @@ describe("diagram node selection", () => {
       </svg>
     `;
     surface.append(host);
-    let selected: string | null = "unset";
+    let selected: readonly string[] = [];
     attachDiagramNodeSelection({
       surface,
       host,
-      onSelectionChange: (objectId) => {
-        selected = objectId;
+      onSelectionChange: (objectIds) => {
+        selected = objectIds;
       },
     });
     const face = host.querySelector("path");
@@ -83,16 +83,52 @@ describe("diagram node selection", () => {
     };
     face!.dispatchEvent(new PointerEvent("pointerdown", base));
     face!.dispatchEvent(new PointerEvent("pointerup", base));
-    expect(selected).toBe("story");
+    expect(selected).toEqual(["story"]);
     expect(
       host.querySelector(`g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`),
     ).toBeTruthy();
 
     face!.dispatchEvent(new PointerEvent("pointerdown", base));
     face!.dispatchEvent(new PointerEvent("pointerup", base));
-    expect(selected).toBe(null);
+    expect(selected).toEqual([]);
     expect(
       host.querySelector(`g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`),
     ).toBeFalsy();
+  });
+
+  it("keeps other cubes pressed when toggling a second cube on", () => {
+    const host = document.createElement("div");
+    const surface = document.createElement("div");
+    host.innerHTML = `
+      <svg>
+        <g class="${IC_ISO_CUBE_SHELL_CLASS}">
+          <g class="node" data-object-id="story"><text>S</text></g>
+        </g>
+        <g class="${IC_ISO_CUBE_SHELL_CLASS}">
+          <g class="node" data-object-id="map"><text>M</text></g>
+        </g>
+      </svg>
+    `;
+    surface.append(host);
+    let selected: readonly string[] = [];
+    attachDiagramNodeSelection({ surface, host, onSelectionChange: (ids) => { selected = ids; } });
+    const tap = (objectId: string) => {
+      const node = host.querySelector(`g.node[data-object-id="${objectId}"]`);
+      const target = node ?? host;
+      const base = {
+        bubbles: true,
+        clientX: 15,
+        clientY: 15,
+        button: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+      };
+      target.dispatchEvent(new PointerEvent("pointerdown", base));
+      target.dispatchEvent(new PointerEvent("pointerup", base));
+    };
+    tap("story");
+    tap("map");
+    expect(selected).toEqual(["map", "story"]);
+    expect(host.querySelectorAll(`g.${IC_NODE_SELECTED_CLASS}`).length).toBe(2);
   });
 });

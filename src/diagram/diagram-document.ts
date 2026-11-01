@@ -104,7 +104,7 @@ export {
 export function attachDiagramViewportNodeSelection(options: {
   surface: HTMLElement;
   host: HTMLElement;
-  onSelectionChange?: (objectId: string | null) => void;
+  onSelectionChange?: (selectedIds: readonly string[]) => void;
 }): DiagramNodeSelectionDetach {
   return attachDiagramNodeSelection(options);
 }

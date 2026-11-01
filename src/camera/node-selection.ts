@@ -9,11 +9,13 @@ const TAP_DRAG_THRESHOLD_PX = 6;
 
 export type DiagramNodeSelectionDetach = () => void;
 
+export type DiagramNodeSelectionState = ReadonlySet<string>;
+
 export type AttachDiagramNodeSelectionOptions = {
   surface: HTMLElement;
   host: HTMLElement;
   /** Called after selection changes (including clear). */
-  onSelectionChange?: (objectId: string | null) => void;
+  onSelectionChange?: (selectedIds: readonly string[]) => void;
 };
 
 function objectIdFromTarget(target: EventTarget | null): string | null {
@@ -36,20 +38,46 @@ function objectIdFromShell(shell: Element): string | null {
   return nested?.getAttribute("data-object-id")?.trim() ?? null;
 }
 
-function readSelectionFromHost(host: HTMLElement): string | null {
-  const selected = host.querySelector(
-    `g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS} g.node[data-object-id]`,
-  );
-  return selected?.getAttribute("data-object-id")?.trim() ?? null;
+function selectionIdsSorted(ids: ReadonlySet<string>): readonly string[] {
+  return [...ids].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+function normalizeDiagramNodeSelection(
+  selection: string | null | Iterable<string> | DiagramNodeSelectionState,
+): Set<string> {
+  if (selection === null) {
+    return new Set();
+  }
+  if (typeof selection === "string") {
+    const id = selection.trim();
+    return id ? new Set([id]) : new Set();
+  }
+  if (selection instanceof Set) {
+    return new Set(selection);
+  }
+  return new Set(selection);
+}
+
+function readSelectionFromHost(host: HTMLElement): Set<string> {
+  const ids = new Set<string>();
+  for (const shell of Array.from(
+    host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`),
+  )) {
+    const id = objectIdFromShell(shell);
+    if (id) {
+      ids.add(id);
+    }
+  }
+  return ids;
 }
 
 function syncCubeShellTogglePresentation(
   host: HTMLElement,
-  objectId: string | null,
+  selectedIds: ReadonlySet<string>,
 ): void {
   for (const shell of Array.from(host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`))) {
     const id = objectIdFromShell(shell);
-    const pressed = Boolean(id && id === objectId);
+    const pressed = Boolean(id && selectedIds.has(id));
     shell.classList.toggle(IC_NODE_SELECTED_CLASS, pressed);
     shell.setAttribute("role", "button");
     shell.setAttribute("aria-pressed", pressed ? "true" : "false");
@@ -60,34 +88,47 @@ function syncCubeShellTogglePresentation(
 }
 
 export function clearDiagramNodeSelection(host: HTMLElement): void {
-  syncCubeShellTogglePresentation(host, null);
+  syncCubeShellTogglePresentation(host, new Set());
 }
 
 export function applyDiagramNodeSelection(
   host: HTMLElement,
-  objectId: string | null,
+  selection: string | null | Iterable<string> | DiagramNodeSelectionState,
 ): void {
-  syncCubeShellTogglePresentation(host, objectId);
+  syncCubeShellTogglePresentation(host, normalizeDiagramNodeSelection(selection));
 }
 
-/** Tap-to-toggle diagram cubes; ignores drags used for pan. Returns detach. */
+/** Tap-to-toggle diagram cubes independently; ignores drags used for pan. Returns detach. */
 export function attachDiagramNodeSelection(
   options: AttachDiagramNodeSelectionOptions,
 ): DiagramNodeSelectionDetach {
   /** @type {{ x: number; y: number; objectId: string | null } | null} */
   let tapGesture: { x: number; y: number; objectId: string | null } | null = null;
-  let selectedId: string | null = readSelectionFromHost(options.host);
+  let selectedIds = readSelectionFromHost(options.host);
 
-  const setSelection = (objectId: string | null): void => {
-    let next: string | null = objectId;
-    if (objectId && objectId === selectedId) {
-      next = null;
-    } else if (!objectId) {
-      next = null;
+  const notify = (): void => {
+    options.onSelectionChange?.(selectionIdsSorted(selectedIds));
+  };
+
+  const applySelection = (): void => {
+    applyDiagramNodeSelection(options.host, selectedIds);
+    notify();
+  };
+
+  const toggleObject = (objectId: string | null): void => {
+    if (!objectId) {
+      selectedIds = new Set();
+      applySelection();
+      return;
     }
-    selectedId = next;
-    applyDiagramNodeSelection(options.host, next);
-    options.onSelectionChange?.(next);
+    const next = new Set(selectedIds);
+    if (next.has(objectId)) {
+      next.delete(objectId);
+    } else {
+      next.add(objectId);
+    }
+    selectedIds = next;
+    applySelection();
   };
 
   const onPointerDown = (event: PointerEvent): void => {
@@ -121,7 +162,7 @@ export function attachDiagramNodeSelection(
     const isTap =
       dx * dx + dy * dy < TAP_DRAG_THRESHOLD_PX * TAP_DRAG_THRESHOLD_PX;
     if (isTap) {
-      setSelection(tapGesture.objectId);
+      toggleObject(tapGesture.objectId);
     }
     tapGesture = null;
   };
