@@ -4,12 +4,11 @@
 import { describe, expect, it } from "vitest";
 import {
   applyWorldCameraToHost,
+  centeredArtboardHomeView,
   createArtboard,
   DEFAULT_ARTBOARD_USER_SIZE,
   readViewBoxBaselineFromSvg,
   readWorldCameraFromHost,
-  viewBoxBaselineHome,
-  viewBoxOffsetFromHome,
 } from "@westlane/isocanvas";
 import { applyDemoHomeView } from "../demo/scripts/viewport.js";
 import { demoThemeManager, initDemoTheme } from "../demo/scripts/theme.js";
@@ -34,21 +33,21 @@ describe("demo snap home", () => {
     }
 
     const baseline = readViewBoxBaselineFromSvg(svg);
-    const home = viewBoxBaselineHome(baseline);
-    expect(applyWorldCameraToHost(host, home)).toBe(true);
+    const home = centeredArtboardHomeView(host, baseline);
+    expect(home).not.toBeNull();
+    expect(applyWorldCameraToHost(host, home!)).toBe(true);
 
-    const panned = { ...home, x: home.x - 520, y: home.y - 460 };
+    const panned = { ...home!, x: home!.x - 520, y: home!.y - 460 };
     expect(applyWorldCameraToHost(host, panned)).toBe(true);
-    expect(viewBoxOffsetFromHome(panned, baseline).x).toBeCloseTo(-520, 0);
 
     window.location.hash = "#demo/card-grid&view=1/500/500";
     expect(applyDemoHomeView(host)).toBe(true);
 
     const camera = readWorldCameraFromHost(host)!;
-    expect(viewBoxOffsetFromHome(camera, readViewBoxBaselineFromSvg(svg))).toEqual({
-      x: 0,
-      y: 0,
-    });
+    expect(camera.w).toBeCloseTo(home!.w, 0);
+    expect(camera.h).toBeCloseTo(home!.h, 0);
+    expect(camera.x).toBeCloseTo(home!.x, 0);
+    expect(camera.y).toBeCloseTo(home!.y, 0);
     expect(window.location.hash).not.toContain("&view=1/500/500");
   });
 });

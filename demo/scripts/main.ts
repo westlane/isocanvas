@@ -13,6 +13,7 @@ import { attachViewportDebug } from "./shell/viewport-debug.js";
 import { getDemoLogger } from "./log.js";
 import {
   applyDemoIsometricOrientationToHost,
+  demoWorldCameraLayerOptions,
   getArtboardSlice,
   getDemoSessionPersistenceAdapter,
   hydrateDemoSession,
@@ -44,12 +45,12 @@ import {
   applyDemoHomeView,
   applyViewportFromHash,
   applyViewportFromUrlFrame,
-  attachInfiniteCanvasViewport,
+  attachDemoIsoStageViewport,
   bindViewportUrlSync,
   parseViewportUrlFrame,
   syncRouteHashForTool,
 } from "./viewport.js";
-import { createArtboard, DEFAULT_ARTBOARD_USER_SIZE } from "@westlane/isocanvas";
+import { createIsoCanvasStage, DEFAULT_ARTBOARD_USER_SIZE } from "@westlane/isocanvas";
 
 bootstrapDemoChromeFromStorage();
 
@@ -65,13 +66,20 @@ const {
   viewTitle: viewTitleEl,
 } = shell;
 
-const artboard = createArtboard({
-  userSize: DEFAULT_ARTBOARD_USER_SIZE,
-  contentId: "diagram-host",
-  embedDotGrid: false,
+const isoStage = createIsoCanvasStage({
+  className: "ic-stage-viewport",
+  worldCamera: demoWorldCameraLayerOptions(),
+  artboards: [
+    {
+      id: "main",
+      userSize: DEFAULT_ARTBOARD_USER_SIZE,
+      contentId: "diagram-host",
+      embedDotGrid: false,
+    },
+  ],
 });
-viewportEl.replaceChildren(artboard.root);
-const hostEl = artboard.content;
+viewportEl.replaceChildren(isoStage.container);
+const hostEl = isoStage.getArtboard("main")!.host;
 hostEl.classList.add("diagram-host");
 const log = getDemoLogger("demo");
 
@@ -121,10 +129,10 @@ bindDemoKeyboardShortcuts({
 });
 
 const viewportDebug = attachViewportDebug(hostEl);
-attachInfiniteCanvasViewport({
+attachDemoIsoStageViewport({
+  stage: isoStage,
   surface: frameEl,
-  viewport: viewportEl,
-  host: hostEl,
+  notifyHost: hostEl,
 });
 bindViewportUrlSync({
   host: hostEl,

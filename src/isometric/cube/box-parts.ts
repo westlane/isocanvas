@@ -26,7 +26,7 @@ import {
   ISO_CANVAS_LABEL_FONT_WEIGHT,
   ISO_CUBE_LABEL_FONT_SIZE_PX,
 } from "./canvas-text-style.js";
-import { stackFaceOpacity, stackLabelFontSizePx, stackLabelOpacity } from "./stack-opacity.js";
+import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
 import type { StackLayerPresentation } from "../../types/diagram.js";
 
 function faceRect(
@@ -60,7 +60,6 @@ function applyStackLayerPresentation(
     parts.faces[id].fillOpacity = faceOpacity;
   }
   parts.label.getElement().setAttribute("opacity", String(labelOpacity));
-  parts.label.fontSize = stackLabelFontSizePx(ISO_CUBE_LABEL_FONT_SIZE_PX, presentation);
 }
 
 function paintStackLayerDataset(el: Element, presentation: StackLayerPresentation): void {
@@ -77,15 +76,17 @@ export function mountIsoBoxOnStageShell(
     omitBottomFace?: boolean;
     orientation?: IsometricOrientation;
     stackLayer?: StackLayerPresentation;
+    labelFontSizePx?: number;
   },
 ): void {
   const orientation = options?.orientation ?? DEFAULT_ISOMETRIC_ORIENTATION;
+  const labelFontSizePx = options?.labelFontSizePx ?? ISO_CUBE_LABEL_FONT_SIZE_PX;
   const boxShell = new IsometricGroup({
     left: spec.left - stageGround.left,
     right: spec.right - stageGround.right,
     top: spec.elevation ?? 0,
   });
-  const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation);
+  const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
   if (options?.stackLayer) {
     applyStackLayerPresentation({ faces, label }, options.stackLayer);
     paintStackLayerDataset(boxShell.getElement(), options.stackLayer);
@@ -116,7 +117,8 @@ export function mountIsoBoxOnStageShell(
 function createIsoBoxLabel(
   spec: Pick<IsoBoxSpec, "label" | "width" | "depth" | "height">,
   colors: IsoCanvasColors,
-  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+  orientation: IsometricOrientation,
+  labelFontSizePx: number,
 ): IsometricText {
   const { width: w, depth: d, height: h } = spec;
   const layout = isoBoxTopFaceLabelLayout(w, d, h, orientation);
@@ -126,7 +128,7 @@ function createIsoBoxLabel(
     left: layout.left,
     right: layout.right,
     top: layout.top,
-    fontSize: ISO_CUBE_LABEL_FONT_SIZE_PX,
+    fontSize: labelFontSizePx,
     fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
     fontStyle: "normal",
     fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
@@ -143,6 +145,7 @@ export function createLocalIsoBoxParts(
   spec: IsoBoxSpec,
   colors: IsoCanvasColors,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+  labelFontSizePx: number = ISO_CUBE_LABEL_FONT_SIZE_PX,
 ): { faces: Record<IsoFaceId, IsometricRectangle>; label: IsometricText } {
   const { width: w, depth: d, height: h } = spec;
   const fills = themedCubeFaceColors(colors);
@@ -156,7 +159,7 @@ export function createLocalIsoBoxParts(
     );
   }
 
-  return { faces, label: createIsoBoxLabel(spec, colors, orientation) };
+  return { faces, label: createIsoBoxLabel(spec, colors, orientation, labelFontSizePx) };
 }
 
 export function mountAnchoredFace(

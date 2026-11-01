@@ -2,7 +2,7 @@
 
 import { type IsometricCanvas, IsometricGroup, IsometricPath } from "@elchininet/isometric";
 import type { ArtboardPlaneStage, ArtboardUserSize, PlaneBoxSpec } from "../types/artboard.js";
-import type { IsoBoxSpec, IsoFaceId } from "../types/diagram.js";
+import type { IsoBoxSpec, IsoFaceId, IsometricOrientation } from "../types/diagram.js";
 import type { IsoCanvasColors } from "../types/theme.js";
 import { setViewportCenteredMeet, writeViewBoxToSvg } from "../camera/view-box/attributes.js";
 import { writeViewBoxHomeMetadata } from "../camera/view-box/baseline.js";
@@ -18,6 +18,7 @@ import {
 } from "./cube/box-parts.js";
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
+import { uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
 import { addArtboardStageShell, createArtboardStageShell, DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME, type ArtboardStageShellChrome } from "./stage/stage-shell.js";
 
@@ -86,6 +87,8 @@ function artboardStageMountEntries(stage: ArtboardPlaneStage): IsoCanvasMountEnt
 function isoBoxMountEntries(
   specs: readonly IsoBoxSpec[],
   colors: IsoCanvasColors,
+  labelFontSizePx: number,
+  orientation: IsometricOrientation,
   options?: { omitBottomFace?: boolean },
 ): IsoCanvasMountEntry[] {
   const specsSorted = [...specs].sort(
@@ -93,7 +96,7 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, label } = createLocalIsoBoxParts(spec, colors);
+    const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
     for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
       if (options?.omitBottomFace && id === "bottom") {
         continue;
@@ -191,6 +194,7 @@ export function mountPlaneBoxesOnCanvas(
   });
   const shellChrome =
     options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
+  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
   const mountTarget = options.omitArtboardShell
     ? (() => {
         const anchor = new IsometricGroup({
@@ -211,6 +215,7 @@ export function mountPlaneBoxesOnCanvas(
     mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {
       omitBottomFace: true,
       orientation,
+      labelFontSizePx,
       ...(stackLayer ? { stackLayer } : {}),
     });
   }
@@ -223,6 +228,8 @@ export function mountIsoBoxesOnCanvas(
   colors: IsoCanvasColors,
   options?: { artboardUserSize?: ArtboardUserSize; artboardDivisions?: number },
 ): void {
+  const orientation = readIsometricOrientationFromCanvas(canvas);
+  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
   const entries: IsoCanvasMountEntry[] = [];
   if (options?.artboardUserSize) {
     entries.push(
@@ -237,7 +244,7 @@ export function mountIsoBoxesOnCanvas(
       }),
     );
   }
-  entries.push(...isoBoxMountEntries(specs, colors));
+  entries.push(...isoBoxMountEntries(specs, colors, labelFontSizePx, orientation));
   mountEntriesInPaintOrder(canvas, entries);
 }
 

@@ -1,8 +1,10 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
+import type { IsoCanvasStage } from "@westlane/isocanvas";
 import {
+  applyArtboardHomeCamera,
   attachWorldCameraPanZoom,
-  centeredArtboardHomeView,
+  readWorldCameraFromHost,
   urlFrameFromViewportCameras,
   viewportCamerasFromParts,
   type ViewportCameras,
@@ -27,16 +29,15 @@ export function applyDemoHomeView(host: HTMLElement): boolean {
   if (!svg) {
     return false;
   }
-  const base = syncDemoBaselineFromSvg(svg);
-  const viewBox = centeredArtboardHomeView(host, base);
-  if (!viewBox) {
+  syncDemoBaselineFromSvg(svg);
+  if (!applyArtboardHomeCamera(host)) {
     return false;
   }
-  const applied = applyDemoWorldCameraToHost(host, viewBox);
-  if (!applied) {
+  const camera = readWorldCameraFromHost(host);
+  if (!camera) {
     return false;
   }
-  setDemoCanvasCamera({ viewBox });
+  setDemoCanvasCamera({ viewBox: camera });
   const stripped = stripViewFromHashFragment(window.location.hash.replace(/^#/, ""));
   history.replaceState(history.state, "", `#${stripped}`);
   host.dispatchEvent(new CustomEvent("viewport-url-push", { bubbles: true }));
@@ -44,11 +45,30 @@ export function applyDemoHomeView(host: HTMLElement): boolean {
   return true;
 }
 
+export function attachDemoIsoStageViewport(options: {
+  stage: IsoCanvasStage;
+  surface: HTMLElement;
+  notifyHost: HTMLElement;
+}): () => void {
+  return options.stage.attachPanZoom({
+    surface: options.surface,
+    resyncOnHostEvent: "viewport-debug-tick",
+    onViewBoxApplied: (viewBox, { notify }) => {
+      setDemoCanvasCamera({ viewBox });
+      if (notify) {
+        notifyDemoCanvasCameraChanged(options.notifyHost);
+      }
+    },
+  });
+}
+
+/** @deprecated Use {@link attachDemoIsoStageViewport} with `createIsoCanvasStage`. */
 export function attachInfiniteCanvasViewport(options: {
   surface: HTMLElement;
   viewport: HTMLElement;
   host: HTMLElement;
 }): () => void {
+  void options.viewport;
   return attachWorldCameraPanZoom({
     surface: options.surface,
     host: options.host,

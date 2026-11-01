@@ -3,13 +3,16 @@
 
 import { describe, expect, it, beforeEach } from "vitest";
 import {
+  applyArtboardHomeCamera,
   artboardDivisionPitch,
   artboardDotStep,
   artboardPlaneCellCenteredFootprint,
   artboardSnapFootprintToDots,
+  createArtboard,
   DEFAULT_ARTBOARD_DOTS_PER_CELL,
   DEFAULT_ARTBOARD_GRID_DIVISIONS,
   DEFAULT_ARTBOARD_USER_SIZE,
+  elementUserBBox,
   isoBoxSpecFromPlaneBox,
   isoSizeFromDiagramUser,
   artboardPlaneToIsoGround,
@@ -69,19 +72,23 @@ describe("card grid plane placement", () => {
   });
 
   it("keeps the artboard outline inside the viewBox", () => {
-    const host = document.createElement("div");
-    document.body.appendChild(host);
-    mountCardGrid(host, demoThemeManager().getTheme().colors);
-    const svg = host.querySelector("svg");
+    const artboard = createArtboard({
+      embedDotGrid: false,
+      userSize: DEFAULT_ARTBOARD_USER_SIZE,
+    });
+    document.body.appendChild(artboard.root);
+    mountCardGrid(artboard.content, demoThemeManager().getTheme().colors);
+    applyArtboardHomeCamera(artboard.content);
+    const svg = artboard.content.querySelector("svg");
     expect(svg).toBeTruthy();
     const vb = svg!.viewBox.baseVal;
-    const outline = host.querySelector("path.ic-artboard-outline")!;
-    const outlineBox = viewBoxBounds(outline);
-    expect(outlineBox.minX).toBeGreaterThanOrEqual(vb.x - 1);
-    expect(outlineBox.maxX).toBeLessThanOrEqual(vb.x + vb.width + 1);
-    expect(outlineBox.minY).toBeGreaterThanOrEqual(vb.y - 1);
-    expect(outlineBox.maxY).toBeLessThanOrEqual(vb.y + vb.height + 1);
-    host.remove();
+    const outline = artboard.content.querySelector("path.ic-artboard-outline")!;
+    const outlineBox = elementUserBBox(outline as SVGGraphicsElement, svg);
+    expect(outlineBox.x).toBeGreaterThanOrEqual(vb.x - 1);
+    expect(outlineBox.x + outlineBox.width).toBeLessThanOrEqual(vb.x + vb.width + 1);
+    expect(outlineBox.y).toBeGreaterThanOrEqual(vb.y - 1);
+    expect(outlineBox.y + outlineBox.height).toBeLessThanOrEqual(vb.y + vb.height + 1);
+    artboard.root.remove();
   });
 
   it("fits each card footprint inside exactly one guide cell (max one card per cell)", () => {
@@ -172,19 +179,23 @@ describe("card grid plane placement", () => {
   });
 
   it("keeps the artboard outline inside the viewBox when rotated 90°", () => {
-    const host = document.createElement("div");
-    paintIsometricOrientation(host, "rotated");
-    document.body.appendChild(host);
-    mountCardGrid(host, demoThemeManager().getTheme().colors);
-    const svg = host.querySelector("svg");
+    const artboard = createArtboard({
+      embedDotGrid: false,
+      userSize: DEFAULT_ARTBOARD_USER_SIZE,
+    });
+    paintIsometricOrientation(artboard.root, "rotated");
+    document.body.appendChild(artboard.root);
+    mountCardGrid(artboard.content, demoThemeManager().getTheme().colors);
+    applyArtboardHomeCamera(artboard.content);
+    const svg = artboard.content.querySelector("svg");
     expect(svg).toBeTruthy();
     const vb = svg!.viewBox.baseVal;
-    const outline = host.querySelector("path.ic-artboard-outline")!;
-    const outlineBox = viewBoxBounds(outline);
-    expect(outlineBox.minX).toBeGreaterThanOrEqual(vb.x - 1);
-    expect(outlineBox.maxX).toBeLessThanOrEqual(vb.x + vb.width + 1);
-    expect(outlineBox.minY).toBeGreaterThanOrEqual(vb.y - 1);
-    expect(outlineBox.maxY).toBeLessThanOrEqual(vb.y + vb.height + 1);
-    host.remove();
+    const outline = artboard.content.querySelector("path.ic-artboard-outline")!;
+    const outlineBox = elementUserBBox(outline as SVGGraphicsElement, svg);
+    expect(outlineBox.x).toBeGreaterThanOrEqual(vb.x - 1);
+    expect(outlineBox.x + outlineBox.width).toBeLessThanOrEqual(vb.x + vb.width + 1);
+    expect(outlineBox.y).toBeGreaterThanOrEqual(vb.y - 1);
+    expect(outlineBox.y + outlineBox.height).toBeLessThanOrEqual(vb.y + vb.height + 1);
+    artboard.root.remove();
   });
 });

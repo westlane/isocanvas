@@ -27,6 +27,7 @@ import type { PlaneBoxSpec } from "../types/artboard.js";
 import type { ArtboardPlaneStage } from "../types/artboard.js";
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../layout/artboard.js";
 import { defaultIsoArtboardStage, mountIsometricCanvasOnHost } from "../isometric/stage/stage.js";
+import { frameDiagramSceneCamera } from "./diagram-document.js";
 
 const MIN_EXTRUSION = 0.35;
 const MAX_EXTRUSION = 1.1;
@@ -82,7 +83,6 @@ export function renderDiagramScene(
 ): SVGSVGElement {
   const stage = artboardStageFromScene(scene);
   const canvas = mountIsometricCanvasOnHost(host, stage);
-  const { width: artboardW, height: artboardH } = stage;
 
   for (const edge of scene.edges ?? []) {
     const fromNode = scene.nodes.find((node) => node.id === edge.from);
@@ -133,7 +133,6 @@ export function renderDiagramScene(
   });
 
   const svg = decorateCubeCanvas(canvas);
-  svg.dataset.debugBaseW = String(artboardW);
-  svg.dataset.debugBaseH = String(artboardH);
+  frameDiagramSceneCamera(host);
   return svg;
 }

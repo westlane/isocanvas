@@ -5,6 +5,9 @@ import type { DotGridProjection } from "../types/grid.js";
 import { defaultDotGridPhase, DEFAULT_DOT_GRID_SIZE_PX } from "./surface.js";
 import { isometricDotGridPlaneMatrix } from "./projection.js";
 import { DEFAULT_ARTBOARD_DOTS_PER_CELL } from "../layout/artboard.js";
+import {
+  parseSvgPathMoveLinePoints,
+} from "../layout/artboard-ground-path.js";
 import { IC_ARTBOARD_OUTLINE_LAYER_CLASS } from "../layout/artboard-outline.js";
 
 export type SyncSvgDotGridOptions = {
@@ -151,11 +154,7 @@ function planeToGroundMatrix(
   outline: SVGPathElement,
   plane: { width: number; height: number },
 ): string {
-  const d = outline.getAttribute("d") ?? "";
-  const pts = [...d.matchAll(/[ML]\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/g)].map((m) => ({
-    x: Number(m[1]),
-    y: Number(m[2]),
-  }));
+  const pts = parseSvgPathMoveLinePoints(outline.getAttribute("d") ?? "");
   const [xEnd, , yEnd, origin] = pts;
   if (!xEnd || !yEnd || !origin) {
     throw new Error("Artboard outline path is missing ground corners");

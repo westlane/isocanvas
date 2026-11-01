@@ -24,9 +24,7 @@ export function setViewportCenteredMeet(svg: SVGSVGElement): void {
 
 export function writeViewBoxToSvg(svg: SVGSVGElement, viewBox: ViewBox): void {
   svg.setAttribute("viewBox", [viewBox.x, viewBox.y, viewBox.w, viewBox.h].join(" "));
-  if (!svg.getAttribute("preserveAspectRatio")) {
-    svg.setAttribute("preserveAspectRatio", VIEWPORT_CENTERED_MEET);
-  }
+  setViewportCenteredMeet(svg);
 }
 
 /** Match {@link worldTransformFromViewBox} / SVG `preserveAspectRatio` meet alignment. */

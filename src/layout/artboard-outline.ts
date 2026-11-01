@@ -4,6 +4,7 @@ import type { ArtboardUserSize } from "../types/artboard.js";
 import type { ViewBox } from "../types/core.js";
 import { userPxToIsoUnits } from "../isometric/cube/cube.js";
 import { viewBoxForArtboardPlaneIsoCanvas } from "./artboard-coords.js";
+import { elementUserBBox } from "../svg/svg-bbox.js";
 
 /** Class on the isometric ground path for the logical artboard footprint. */
 export const IC_ARTBOARD_OUTLINE_CLASS = "ic-artboard-outline";
@@ -38,13 +39,25 @@ export function viewBoxForMountedCubeCanvas(
   fallbackUserSize: ArtboardUserSize,
   paddingPx = 0,
 ): ViewBox {
+  const outline = svg.querySelector(`path.${IC_ARTBOARD_OUTLINE_CLASS}`);
+  if (outline instanceof SVGGraphicsElement) {
+    const box = elementUserBBox(outline, svg);
+    if (box.width > 0 && box.height > 0) {
+      return {
+        x: box.x - paddingPx,
+        y: box.y - paddingPx,
+        w: box.width + paddingPx * 2,
+        h: box.height + paddingPx * 2,
+      };
+    }
+  }
   const framed = svg.querySelector(":scope > g.ic-cube-canvas-origin");
   const target =
     framed instanceof SVGGraphicsElement
       ? framed
       : svg.querySelector(`path.${IC_ARTBOARD_OUTLINE_CLASS}`);
   if (target instanceof SVGGraphicsElement) {
-    const box = target.getBBox();
+    const box = elementUserBBox(target, svg);
     if (box.width > 0 && box.height > 0) {
       return {
         x: box.x - paddingPx,

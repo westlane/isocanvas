@@ -1,14 +1,12 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
-import { applyWorldCameraToHost } from "../camera/world/apply-world-camera.js";
-import { attachWorldCameraPanZoom } from "../camera/world-pan-zoom.js";
 import {
-  centeredArtboardHomeView,
-  viewBoxCenterArtboardInCamera,
+  applyArtboardHomeCamera,
   type ViewBoxCenterArtboardOptions,
+  DEFAULT_VIEWBOX_CENTER_ARTBOARD_OPTIONS,
 } from "../camera/fit/center-artboard-view.js";
-import { readViewBoxBaselineFromSvg } from "../camera/view-box/baseline.js";
 import type { WorldCameraPanZoomDetach } from "../camera/world-pan-zoom.js";
+import { attachWorldCameraPanZoom } from "../camera/world-pan-zoom.js";
 import {
   applyArtboardUserSize,
   createArtboard,
@@ -59,19 +57,9 @@ export function syncDiagramArtboardToScene(
 
 export function frameDiagramSceneCamera(
   host: HTMLElement,
-  options: ViewBoxCenterArtboardOptions = { contentPaddingRatio: 0.1 },
+  options: ViewBoxCenterArtboardOptions = DEFAULT_VIEWBOX_CENTER_ARTBOARD_OPTIONS,
 ): void {
-  const svg = host.querySelector("svg");
-  if (!(svg instanceof SVGSVGElement)) {
-    return;
-  }
-  const baseline = readViewBoxBaselineFromSvg(svg);
-  const viewBox =
-    viewBoxCenterArtboardInCamera(host, baseline, options) ??
-    centeredArtboardHomeView(host, baseline);
-  if (viewBox) {
-    applyWorldCameraToHost(host, viewBox);
-  }
+  applyArtboardHomeCamera(host, options);
 }
 
 export function attachDiagramViewportPanZoom(options: {

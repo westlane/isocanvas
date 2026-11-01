@@ -42,7 +42,6 @@ export const cardGridTool: DemoToolPlugin = {
   label: "Grid",
   description: "3×2 lattice via cube canvas library.",
   async mount({ host }) {
-    refreshDemoCanvasCamera(host);
     mountCardGrid(host, demoThemeManager().getTheme().colors);
   },
 };
@@ -52,7 +51,6 @@ export const cardStackTool: DemoToolPlugin = {
   label: "Stack",
   description: "Three stacks on the middle row (3, 7, and 14 cards).",
   async mount({ host }) {
-    refreshDemoCanvasCamera(host);
     mountCardStack(host, demoThemeManager().getTheme().colors);
   },
 };

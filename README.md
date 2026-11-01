@@ -46,7 +46,7 @@ Or markup:
 </div>
 ```
 
-Flat surface (grid fills the stage without an artboard frame):
+Flat surface (grid fills the viewport without an artboard frame):
 
 ```ts
 import { createDotGridSurface } from "@westlane/isocanvas";
@@ -55,6 +55,35 @@ const { surface, grid } = createDotGridSurface({ sizePx: 18 });
 viewport.replaceChildren(surface);
 surface.appendChild(diagramHost);
 ```
+
+## Stage (map-style)
+
+One container owns the viewport camera and a registry of artboards (like a Mapbox / MapTiler map with layers):
+
+```ts
+import { createIsoCanvasStage, renderDiagramScene } from "@westlane/isocanvas";
+
+const stage = createIsoCanvasStage({
+  className: "ic-stage-viewport",
+  artboards: [
+    { id: "main", embedDotGrid: false, contentId: "diagram-host" },
+    { id: "inset", embedDotGrid: false, userSize: { width: 520, height: 320 } },
+  ],
+  activeArtboardId: "main",
+});
+
+appViewport.replaceChildren(stage.container);
+stage.attachPanZoom({ surface: appViewport });
+
+const main = stage.getArtboard("main")!;
+renderDiagramScene(main.host, scene);
+stage.fitView();
+
+stage.setActiveArtboard("inset");
+stage.getArtboards(); // programmatic access to every artboard + host
+```
+
+Use `fitArtboard(id)` / `fitView()` for the default centered camera. Each artboard remembers its own view when you switch with `setActiveArtboard`.
 
 3. **Tune** on a parent:
 
