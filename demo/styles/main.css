@@ -1,0 +1,19 @@
+/* Full stack for the isocanvas demo / showcase app */
+
+@import "@westlane/isocanvas/theme/schemes.css";
+@import "@westlane/isocanvas/canvas-chrome.css";
+@import "@westlane/isocanvas/theme/diagram-surfaces.css";
+@import "@westlane/isocanvas/theme/wireframe.css";
+@import "./showcase.css";
+
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
