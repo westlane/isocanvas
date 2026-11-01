@@ -37,13 +37,6 @@
   );
   --ic-artboard-front-stroke-width: 1.5px;
   --ic-artboard-front-stroke: var(--ic-artboard-front-edge-light);
-  --ic-iso-cube-selected-rim-stroke: color-mix(in oklch, white 52%, var(--zui-accent, #9333ea));
-  --ic-iso-cube-selected-rim-stroke-width: 1.75px;
-  --ic-iso-cube-selected-rim-glow: color-mix(
-    in oklch,
-    var(--ic-iso-cube-selected-rim-stroke) 55%,
-    transparent
-  );
   --ic-surface-muted: var(--zui-surface, #f8fafc);
   --ic-ink: var(--zui-ink, #1e293b);
   --ic-ink-muted: var(--zui-ink-muted, #64748b);
@@ -56,13 +49,15 @@
   /* Selected pressed faces — tints defined on svg[data-diagram-renderer] in diagram-surfaces.css */
   --ic-iso-cube-selected-left-tint-percent: 14%;
   --ic-iso-cube-selected-side-tint-percent: 40%;
-  --ic-iso-cube-press-bottom-opacity: 0.25;
+  --ic-iso-cube-press-bottom-opacity: 0.08;
+  --ic-iso-cube-press-bottom-scale-rest: 1;
+  --ic-iso-cube-press-bottom-scale: 1.1;
   --ic-iso-cube-press-bottom-transition-duration: 0.16s;
-  --ic-iso-cube-volume-scale-active: 0.94;
-  --ic-iso-cube-volume-scale-selected: 0.92;
-  --ic-iso-cube-volume-scale-selected-active: 0.88;
-  --ic-iso-cube-volume-press-offset-x: 2px;
-  --ic-iso-cube-volume-press-offset-y: -7px;
+  --ic-iso-cube-volume-scale-active: 0.99;
+  --ic-iso-cube-volume-scale-selected: 0.99;
+  --ic-iso-cube-volume-scale-selected-active: 0.99;
+  --ic-iso-cube-volume-press-offset-x: 0px;
+  --ic-iso-cube-volume-press-offset-y: 0px;
   --ic-iso-cube-volume-transition-duration: 0.16s;
 
   /* Dot grid geometry (dot color: theme/layout/artboard-grid.css) */
