@@ -105,7 +105,10 @@ export function mountCardStack(host: HTMLElement, colors: IsoCanvasColors): SVGS
   const stage = defaultIsoArtboardStage();
   const boxes = DEMO_STACK_COLUMNS.flatMap((column) => planeBoxesForColumn(column));
 
-  mountPlaneBoxesOnCanvas(canvas, boxes, colors, { stage });
+  mountPlaneBoxesOnCanvas(canvas, boxes, colors, {
+    stage,
+    artboardShellChrome: "full",
+  });
 
   return decorateCubeCanvas(canvas);
 }

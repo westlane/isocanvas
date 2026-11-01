@@ -6,7 +6,7 @@ import {
   IsometricRectangle,
   IsometricText,
   PlaneView,
-} from "ic-canvas";
+} from "@elchininet/isometric";
 import type { IsoBoxSpec, IsoFaceId, IsometricOrientation } from "../../types/diagram.js";
 import type { IsoCanvasColors } from "../../types/theme.js";
 import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";

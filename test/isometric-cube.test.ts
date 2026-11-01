@@ -2,7 +2,7 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { IsometricCanvas, PlaneView } from "ic-canvas";
+import { IsometricCanvas, PlaneView } from "@elchininet/isometric";
 import {
   DEFAULT_ISO_CANVAS_COLORS,
   DEFAULT_CUBE_CANVAS_SCALE,
@@ -378,6 +378,26 @@ describe("isometric cube (library shape)", () => {
     const svg = renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors());
     expect(svg.getAttribute("data-diagram-renderer")).toBe(DIAGRAM_RENDERER);
     expect(host.querySelectorAll("g.node[data-object-id]")).toHaveLength(3);
+    host.remove();
+  });
+
+  it("renders diagram scene with default artboard shell (slab, dots, no guides)", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors());
+    expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();
+    expect(host.querySelectorAll("path.ic-artboard-face--front[d]")).toHaveLength(1);
+    expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(0);
+    host.remove();
+  });
+
+  it("renders macro guides when artboardShellChrome is full", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors(), {
+      artboardShellChrome: "full",
+    });
+    expect(host.querySelectorAll("path.ic-artboard-guide[d]").length).toBeGreaterThan(0);
     host.remove();
   });
 });

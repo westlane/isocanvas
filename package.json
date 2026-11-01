@@ -15,9 +15,14 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./persistence": {
+      "types": "./dist/persistence/index.d.ts",
+      "import": "./dist/persistence/index.js",
+      "default": "./dist/persistence/index.js"
     },
     "./dot-grid.css": "./theme/layout/dot-grid.css",
     "./layout.css": "./theme/layout/layout.css",
@@ -29,6 +34,7 @@
     "./theme/wireframe.css": "./theme/wireframe.css"
   },
   "files": [
+    "dist",
     "src",
     "theme",
     "README.md",
@@ -44,7 +50,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "ic-canvas": "npm:@elchininet/isometric@^4.0.0",
+    "@elchininet/isometric": "^4.0.0",
     "loro.js": "^0.4.0"
   },
   "engines": {

@@ -1,6 +1,6 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
-import { IsometricCanvas } from "ic-canvas";
+import { IsometricCanvas } from "@elchininet/isometric";
 import {
   DEFAULT_ARTBOARD_GRID_DIVISIONS,
   DEFAULT_ARTBOARD_USER_SIZE,
@@ -20,15 +20,17 @@ export function defaultIsoArtboardStage(): ArtboardPlaneStage {
   };
 }
 
-/** Clear host and attach a scaled isometric canvas at the default artboard size. */
-export function mountIsometricCanvasOnHost(host: HTMLElement): IsometricCanvas {
+/** Clear host and attach a scaled isometric canvas sized to `stage` or the default artboard. */
+export function mountIsometricCanvasOnHost(
+  host: HTMLElement,
+  stage: ArtboardPlaneStage = defaultIsoArtboardStage(),
+): IsometricCanvas {
   host.replaceChildren();
-  const { width, height } = DEFAULT_ARTBOARD_USER_SIZE;
   return new IsometricCanvas({
     container: host,
     backgroundColor: "transparent",
     scale: DEFAULT_CUBE_CANVAS_SCALE,
-    width,
-    height,
+    width: stage.width,
+    height: stage.height,
   });
 }

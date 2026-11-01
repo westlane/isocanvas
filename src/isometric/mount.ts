@@ -1,6 +1,6 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
-import { type IsometricCanvas, IsometricPath } from "ic-canvas";
+import { type IsometricCanvas, IsometricGroup, IsometricPath } from "@elchininet/isometric";
 import type { ArtboardPlaneStage, ArtboardUserSize, PlaneBoxSpec } from "../types/artboard.js";
 import type { IsoBoxSpec, IsoFaceId } from "../types/diagram.js";
 import type { IsoCanvasColors } from "../types/theme.js";
@@ -19,7 +19,7 @@ import {
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
-import { addArtboardStageShell, createArtboardStageShell } from "./stage/stage-shell.js";
+import { addArtboardStageShell, createArtboardStageShell, DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME, type ArtboardStageShellChrome } from "./stage/stage-shell.js";
 
 /** One deferred paint step on a cube canvas, ordered by `depth` then `layer`. */
 export type IsoCanvasMountEntry = {
@@ -77,7 +77,7 @@ function artboardStageMountEntries(stage: ArtboardPlaneStage): IsoCanvasMountEnt
       layer: 0,
       mount: (canvas) => {
         const orientation = readIsometricOrientationFromCanvas(canvas);
-        addArtboardStageShell(canvas, createArtboardStageShell(stage, orientation), stage);
+        addArtboardStageShell(canvas, createArtboardStageShell(stage, orientation, "full"), stage);
       },
     },
   ];
@@ -171,11 +171,14 @@ export function mountPlaneBoxesOnCanvas(
   canvas: IsometricCanvas,
   boxes: readonly PlaneBoxSpec[],
   colors: IsoCanvasColors,
-  options: { stage: ArtboardPlaneStage },
+  options: {
+    stage: ArtboardPlaneStage;
+    omitArtboardShell?: boolean;
+    artboardShellChrome?: ArtboardStageShellChrome;
+  },
 ): void {
   const stage = options.stage;
   const orientation = readIsometricOrientationFromCanvas(canvas);
-  const shell = createArtboardStageShell(stage, orientation);
   const stageGround = artboardPlaneToIsoGround(stage.x, stage.y, orientation, stage);
   const planeBoxes = elevateStackLayersAboveArtboardGround(boxes);
   const stackLayers = stackLayerPresentationByBoxId(planeBoxes);
@@ -186,15 +189,31 @@ export function mountPlaneBoxesOnCanvas(
     }
     return (a.elevation ?? 0) - (b.elevation ?? 0);
   });
+  const shellChrome =
+    options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
+  const mountTarget = options.omitArtboardShell
+    ? (() => {
+        const anchor = new IsometricGroup({
+          left: stageGround.left,
+          right: stageGround.right,
+          top: 0,
+        });
+        canvas.addChild(anchor);
+        return anchor;
+      })()
+    : (() => {
+        const shell = createArtboardStageShell(stage, orientation, shellChrome);
+        addArtboardStageShell(canvas, shell, stage);
+        return shell;
+      })();
   for (const spec of specs) {
     const stackLayer = stackLayers.get(spec.id);
-    mountIsoBoxOnStageShell(shell, spec, stageGround, colors, {
+    mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {
       omitBottomFace: true,
       orientation,
       ...(stackLayer ? { stackLayer } : {}),
     });
   }
-  addArtboardStageShell(canvas, shell, stage);
 }
 
 /** Low-level mount when anchors are already in ic-canvas ground space. */

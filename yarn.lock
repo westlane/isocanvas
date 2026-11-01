@@ -114,6 +114,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@elchininet/isometric@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@elchininet/isometric@npm:4.0.0"
+  dependencies:
+    jsdom: "npm:^29.0.1"
+  peerDependencies:
+    jsdom: ^18.0.1
+  checksum: 10c0/1fe6d5d851a9079b0c5cd483a16f5760f73aff335ee5f2c13d4ebffd2dac41a4dd64c37a9a98b83a9a18ebea2ff82d20dd241d3bc52d875a24c1b81728ebac46
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/aix-ppc64@npm:0.28.2"
@@ -672,12 +683,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@westlane/isocanvas@workspace:."
   dependencies:
+    "@elchininet/isometric": "npm:^4.0.0"
     "@types/feather-icons": "npm:^4"
     "@types/node": "npm:^22.15.0"
     "@westlane/pino-blanc": "portal:../pino-blanc"
     feather-icons: "npm:^4.29.2"
     happy-dom: "npm:^20.0.10"
-    ic-canvas: "npm:@elchininet/isometric@^4.0.0"
     loro.js: "npm:^0.4.0"
     typescript: "npm:^5.8.3"
     vite: "npm:^7.1.0"
@@ -1057,17 +1068,6 @@ __metadata:
   dependencies:
     "@exodus/bytes": "npm:^1.6.0"
   checksum: 10c0/66dc3f6f5539cc3beb814fcbfae7eacf4ec38cf824d6e1425b72039b51a40f4456bd8541ba66f4f4fe09cdf885ab5cd5bae6ec6339d6895a930b2fdb83c53025
-  languageName: node
-  linkType: hard
-
-"ic-canvas@npm:@elchininet/isometric@^4.0.0":
-  version: 4.0.0
-  resolution: "@elchininet/isometric@npm:4.0.0"
-  dependencies:
-    jsdom: "npm:^29.0.1"
-  peerDependencies:
-    jsdom: ^18.0.1
-  checksum: 10c0/1fe6d5d851a9079b0c5cd483a16f5760f73aff335ee5f2c13d4ebffd2dac41a4dd64c37a9a98b83a9a18ebea2ff82d20dd241d3bc52d875a24c1b81728ebac46
   languageName: node
   linkType: hard
 

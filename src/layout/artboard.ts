@@ -86,6 +86,16 @@ export function createArtboard(options: CreateArtboardOptions = {}): ArtboardEle
   return { root, surface: null, grid: null, content, userSize };
 }
 
+/** Keep logical user size in sync after layout changes (camera baseline + CSS vars). */
+export function applyArtboardUserSize(root: HTMLElement, userSize: ArtboardUserSize): void {
+  root.dataset.artboardWidth = String(userSize.width);
+  root.dataset.artboardHeight = String(userSize.height);
+  root.style.setProperty("--ic-artboard-user-width", String(userSize.width));
+  root.style.setProperty("--ic-artboard-user-height", String(userSize.height));
+  root.style.setProperty("--ic-artboard-width", `${userSize.width}px`);
+  root.style.setProperty("--ic-artboard-height", `${userSize.height}px`);
+}
+
 /** Plane-space bounds for camera/grid (viewBox top-left); see {@link artboardUserToPlane} for user coords. */
 export function artboardUserBox(userSize: ArtboardUserSize): Box2d {
   return { x: 0, y: 0, width: userSize.width, height: userSize.height };

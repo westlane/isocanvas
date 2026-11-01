@@ -5,7 +5,7 @@ import {
   IsometricGroup,
   IsometricPath,
   IsometricRectangle,
-} from "ic-canvas";
+} from "@elchininet/isometric";
 import type { ArtboardPlaneStage } from "../../types/artboard.js";
 import type { IsometricOrientation } from "../../types/diagram.js";
 import {
@@ -162,10 +162,17 @@ function createIsoGroundGuideLine(
   return path;
 }
 
-/** Ground outline + guides; appearance comes from the artboard theme CSS, not mount props. */
+export type ArtboardStageShellChrome = "full" | "ground-grid-only";
+
+/** Default for {@link renderDiagramScene} and {@link mountPlaneBoxesOnCanvas}. */
+export const DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME: ArtboardStageShellChrome =
+  "ground-grid-only";
+
+/** Ground outline (+ optional chrome); appearance comes from the artboard theme CSS, not mount props. */
 export function createArtboardStageShell(
   stage: ArtboardPlaneStage,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+  chrome: ArtboardStageShellChrome = "full",
 ): IsometricGroup {
   const { width: footprintWidthIso, depth: footprintDepthIso } = isoSizeFromDiagramUser(
     stage.width,
@@ -180,8 +187,6 @@ export function createArtboardStageShell(
     right: anchor.right,
     top: 0,
   });
-  mountArtboardSlabFace(shell, "front", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
-  mountArtboardSlabFace(shell, "side", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
   const ground = new IsometricRectangle({
     planeView: groundLayout.planeView,
     width: groundLayout.width,
@@ -191,6 +196,14 @@ export function createArtboardStageShell(
     top: slabTop,
     className: IC_ARTBOARD_OUTLINE_CLASS,
   });
+  if (chrome === "ground-grid-only") {
+    mountArtboardSlabFace(shell, "front", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
+    mountArtboardSlabFace(shell, "side", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
+    shell.addChild(ground);
+    return shell;
+  }
+  mountArtboardSlabFace(shell, "front", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
+  mountArtboardSlabFace(shell, "side", footprintWidthIso, footprintDepthIso, slabHeightIso, orientation);
   shell.addChild(ground);
   shell.addChild(
     new IsometricRectangle({

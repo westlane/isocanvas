@@ -84,7 +84,10 @@ export function mountCardGrid(host: HTMLElement, colors: IsoCanvasColors): SVGSV
     .sort(compareArtboardLatticeCells)
     .map((cell) => planeBoxFromCell(cell));
 
-  mountPlaneBoxesOnCanvas(canvas, boxes, colors, { stage });
+  mountPlaneBoxesOnCanvas(canvas, boxes, colors, {
+    stage,
+    artboardShellChrome: "full",
+  });
 
   return decorateCubeCanvas(canvas);
 }

@@ -1,6 +1,6 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
-import { IsometricText, PlaneView } from "ic-canvas";
+import { IsometricText, PlaneView } from "@elchininet/isometric";
 import type { DiagramScene, DiagramSceneNode } from "../types/diagram.js";
 import {
   CANVAS_TEXT_NO_STROKE,
@@ -17,8 +17,15 @@ import {
   decorateCubeCanvas,
   mountPlaneBoxesOnCanvas,
 } from "../isometric/mount.js";
+import {
+  DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
+  type ArtboardStageShellChrome,
+} from "../isometric/stage/stage-shell.js";
 import type { IsoCanvasColors } from "../types/theme.js";
+import { DEFAULT_ISO_CANVAS_COLORS } from "../theme/defaults.js";
 import type { PlaneBoxSpec } from "../types/artboard.js";
+import type { ArtboardPlaneStage } from "../types/artboard.js";
+import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../layout/artboard.js";
 import { defaultIsoArtboardStage, mountIsometricCanvasOnHost } from "../isometric/stage/stage.js";
 
 const MIN_EXTRUSION = 0.35;
@@ -45,14 +52,36 @@ function planeBoxFromNode(node: DiagramSceneNode): PlaneBoxSpec {
   };
 }
 
-/** Mount a portable {@link DiagramScene} on the default iso artboard stage. */
+export type RenderDiagramSceneOptions = {
+  /** Skip artboard shell entirely; mount cubes only. */
+  omitArtboardShell?: boolean;
+  /** Override default {@link DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME} (use `"full"` for demo-style guides). */
+  artboardShellChrome?: ArtboardStageShellChrome;
+};
+
+function artboardStageFromScene(scene: DiagramScene): ArtboardPlaneStage {
+  const viewBox = scene.viewBox;
+  if (viewBox && viewBox.w > 0 && viewBox.h > 0) {
+    return {
+      x: viewBox.x,
+      y: viewBox.y,
+      width: viewBox.w,
+      height: viewBox.h,
+      divisions: DEFAULT_ARTBOARD_GRID_DIVISIONS,
+    };
+  }
+  return defaultIsoArtboardStage();
+}
+
+/** Mount a portable {@link DiagramScene} on an iso artboard stage (scene viewBox when present). */
 export function renderDiagramScene(
   host: HTMLElement,
   scene: DiagramScene,
-  colors: IsoCanvasColors,
+  colors: IsoCanvasColors = DEFAULT_ISO_CANVAS_COLORS,
+  options: RenderDiagramSceneOptions = {},
 ): SVGSVGElement {
-  const canvas = mountIsometricCanvasOnHost(host);
-  const stage = defaultIsoArtboardStage();
+  const stage = artboardStageFromScene(scene);
+  const canvas = mountIsometricCanvasOnHost(host, stage);
   const { width: artboardW, height: artboardH } = stage;
 
   for (const edge of scene.edges ?? []) {
@@ -93,7 +122,15 @@ export function renderDiagramScene(
     }
   }
 
-  mountPlaneBoxesOnCanvas(canvas, scene.nodes.map(planeBoxFromNode), colors, { stage });
+  mountPlaneBoxesOnCanvas(canvas, scene.nodes.map(planeBoxFromNode), colors, {
+    stage,
+    ...(options.omitArtboardShell
+      ? { omitArtboardShell: true }
+      : {
+          artboardShellChrome:
+            options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
+        }),
+  });
 
   const svg = decorateCubeCanvas(canvas);
   svg.dataset.debugBaseW = String(artboardW);

@@ -9,7 +9,7 @@ import {
   importLoroDocFromStorage,
   loroDocBytesStorageKey,
   persistLoroDocToStorage,
-} from "@westlane/isocanvas";
+} from "@westlane/isocanvas/persistence";
 import {
   applyDemoSessionSnapshot,
   buildDemoSessionSnapshot,

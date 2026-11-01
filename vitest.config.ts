@@ -6,9 +6,16 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@westlane/isocanvas": path.join(rootDir, "src/index.ts"),
-    },
+    alias: [
+      {
+        find: "@westlane/isocanvas/persistence",
+        replacement: path.join(rootDir, "src/persistence/index.ts"),
+      },
+      {
+        find: "@westlane/isocanvas",
+        replacement: path.join(rootDir, "src/index.ts"),
+      },
+    ],
   },
   test: {
     include: [process.env.IC_GENERATE ? "scripts/**/*.gen.ts" : "test/**/*.test.ts"],

@@ -4,25 +4,27 @@
 import {
   applyWorldCameraToHost as applyWorldCameraCore,
   canvasCameraFromSvg,
+  DEFAULT_ISOMETRIC_ORIENTATION,
+  paintIsometricOrientation,
+  readViewBoxBaselineFromSvg,
+  readWorldCameraFromHost,
+  toggleIsometricOrientation,
+  type CanvasCamera,
+  type IsometricOrientation,
+  type ViewBoxBaseline,
+  type ViewportCameras,
+  type WorldCameraLayerOptions,
+} from "@westlane/isocanvas";
+import {
   createLoroFieldPersistenceWithLocalDocBytes,
   createLocalStoragePersistenceAdapter,
   createMemoryPersistenceAdapter,
   createPersistenceRegistry,
   createSessionStoragePersistenceAdapter,
   createWebStoragePersistenceAdapter,
-  DEFAULT_ISOMETRIC_ORIENTATION,
-  paintIsometricOrientation,
-  readViewBoxBaselineFromSvg,
-  readWorldCameraFromHost,
   snapshotFromVersionedValue,
-  toggleIsometricOrientation,
-  type CanvasCamera,
-  type IsometricOrientation,
   type PersistenceAdapter,
-  type ViewBoxBaseline,
-  type ViewportCameras,
-  type WorldCameraLayerOptions,
-} from "@westlane/isocanvas";
+} from "@westlane/isocanvas/persistence";
 import { getDemoLogger } from "./log.js";
 
 export function canvasRouteKey(route: { groupId: string; itemId: string }): string {

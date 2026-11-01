@@ -1,6 +1,6 @@
 # @westlane/isocanvas
 
-Isometric diagram canvas for browser ESM: viewBox zoom math, phased dot grid + drag snap, SVG bbox helpers, portable `DiagramScene` data, and **cube mounting** via the `ic-canvas` dependency (same package entry).
+Isometric diagram canvas for browser ESM: viewBox zoom math, phased dot grid + drag snap, SVG bbox helpers, portable `DiagramScene` data, and **cube mounting** via **`@elchininet/isometric`**.
 
 See [docs/architecture.md](docs/architecture.md) for the full layer model.
 
@@ -121,4 +121,4 @@ yarn build
 
 ## Consumers
 
-Local apps and `yarn demo` resolve the package entry to **`src/index.ts`**. Run `yarn build` only when you need emitted `dist/`.
+Local apps and `yarn demo` resolve the package entry to **`src/index.ts`**. Run `yarn build` emits **`dist/`** for npm consumers (`import` → `dist/index.js`). Local **`yarn demo`** resolves **`src/`** via Vite aliases (not package exports). Public JS entrypoints: **`@westlane/isocanvas`** (canvas/diagram) and **`@westlane/isocanvas/persistence`** (Loro/session adapters). CSS uses the `./canvas-chrome.css` (etc.) export paths.

@@ -2,7 +2,7 @@
 // Copyright (C) 2026 West Lane - All Rights Reserved
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { IsometricCanvas } from "ic-canvas";
+import { IsometricCanvas } from "@elchininet/isometric";
 import {
   DEFAULT_CUBE_CANVAS_SCALE,
   decorateCubeCanvas,
