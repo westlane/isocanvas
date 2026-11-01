@@ -69,7 +69,7 @@ function artboardStageFromScene(scene: DiagramScene): ArtboardPlaneStage {
       y: viewBox.y,
       width: viewBox.w,
       height: viewBox.h,
-      divisions: DEFAULT_ARTBOARD_GRID_DIVISIONS,
+      divisions: scene.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS,
     };
   }
   return defaultIsoArtboardStage();

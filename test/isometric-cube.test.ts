@@ -415,6 +415,20 @@ describe("isometric cube (library shape)", () => {
     host.remove();
   });
 
+  it("renders artboard ground when scene divisions is 4 (class diagram row band)", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const scene: DiagramScene = {
+      viewBox: { x: 0, y: 0, w: 1000, h: 1000 },
+      divisions: 4,
+      nodes: DIAGRAM_SCENE_FIXTURE.nodes,
+      edges: DIAGRAM_SCENE_FIXTURE.edges,
+    };
+    expect(() => renderDiagramScene(host, scene, activeShowcaseColors())).not.toThrow();
+    expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();
+    host.remove();
+  });
+
   it("renders macro guides when artboardShellChrome is full", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);

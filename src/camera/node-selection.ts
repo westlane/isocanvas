@@ -47,7 +47,7 @@ function syncCubeShellTogglePresentation(
   host: HTMLElement,
   objectId: string | null,
 ): void {
-  for (const shell of host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`)) {
+  for (const shell of Array.from(host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`))) {
     const id = objectIdFromShell(shell);
     const pressed = Boolean(id && id === objectId);
     shell.classList.toggle(IC_NODE_SELECTED_CLASS, pressed);

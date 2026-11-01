@@ -69,10 +69,14 @@ function artboardIsoGroundGuideClass(
   lineIndex: number,
   grid: { divisions: number; subdivisions: number },
 ): string {
-  const macroStride = grid.subdivisions;
-  const subStride = grid.subdivisions / grid.divisions;
+  const fineLinesPerMacro = grid.subdivisions;
+  const macroStride = fineLinesPerMacro;
+  /** Sub-guides: 3×3 inside each macro cell (independent of macro `divisions` count). */
+  const subStride = fineLinesPerMacro / DEFAULT_ARTBOARD_GRID_DIVISIONS;
   if (!Number.isInteger(subStride) || subStride < 1) {
-    throw new Error("Artboard subdivisions must be a multiple of divisions");
+    throw new Error(
+      "Artboard fine lines per macro must be divisible by DEFAULT_ARTBOARD_GRID_DIVISIONS",
+    );
   }
   if (lineIndex % macroStride === 0) {
     return IC_ARTBOARD_GUIDE_CLASS;

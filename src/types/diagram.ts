@@ -22,6 +22,8 @@ export type DiagramSceneEdge = {
 
 export type DiagramScene = {
   viewBox?: ViewBox;
+  /** Macro grid divisions used when placing nodes (must match render artboard stage). */
+  divisions?: number;
   nodes: DiagramSceneNode[];
   edges?: DiagramSceneEdge[];
 };
