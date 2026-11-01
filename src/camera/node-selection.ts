@@ -28,11 +28,12 @@ function diagramObjectSelectable(node: Element | null): boolean {
 }
 
 function selectableNodeFromShell(shell: Element): Element | null {
-  const nested = shell.querySelector("g.node[data-object-id]");
-  if (!nested || !diagramObjectSelectable(nested)) {
-    return null;
+  for (const nested of shell.querySelectorAll("g.node[data-object-id]")) {
+    if (diagramObjectSelectable(nested)) {
+      return nested;
+    }
   }
-  return nested;
+  return null;
 }
 
 function objectIdFromTarget(target: EventTarget | null): string | null {

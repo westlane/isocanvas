@@ -11,10 +11,16 @@ import type { IsoCanvasStage } from "../types/stage.js";
 
 const TAP_DRAG_THRESHOLD_PX = 6;
 
+export type IsoCanvasStageNodeSelectionMode = "toggle" | "single";
+
 export type AttachIsoCanvasStageNodeSelectionOptions = {
   stage: IsoCanvasStage;
   surface: HTMLElement;
   initialSelection?: readonly string[];
+  /** `toggle` = independent latches (demo); `single` = one inspected object at a time. */
+  selectionMode?: IsoCanvasStageNodeSelectionMode;
+  /** When false, skip `onSelectionChange` on the first sync (restored selection). */
+  emitInitialSelection?: boolean;
   /** @deprecated Ignored — pan chrome is applied after pointerdown; do not gate taps on it. */
   panningClass?: string;
   onSelectionChange?: (selectedIds: readonly string[]) => void;
@@ -22,6 +28,15 @@ export type AttachIsoCanvasStageNodeSelectionOptions = {
 
 function diagramObjectSelectable(node: Element | null): boolean {
   return node?.getAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR) !== "false";
+}
+
+function selectableNodeFromShell(shell: Element): Element | null {
+  for (const nested of shell.querySelectorAll("g.node[data-object-id]")) {
+    if (diagramObjectSelectable(nested)) {
+      return nested;
+    }
+  }
+  return null;
 }
 
 function objectIdFromTarget(target: EventTarget | null): string | null {
@@ -36,11 +51,8 @@ function objectIdFromTarget(target: EventTarget | null): string | null {
   if (!shell) {
     return null;
   }
-  const nested = shell.querySelector("g.node[data-object-id]");
-  if (!nested || !diagramObjectSelectable(nested)) {
-    return null;
-  }
-  return nested.getAttribute("data-object-id")?.trim() ?? null;
+  const nested = selectableNodeFromShell(shell);
+  return nested?.getAttribute("data-object-id")?.trim() ?? null;
 }
 
 /** One pointer surface for every artboard on a stage (avoids duplicate move handlers). */
@@ -49,8 +61,14 @@ export function attachIsoCanvasStageNodeSelection(
 ): DiagramNodeSelectionDetach {
   let selectedIds = new Set(options.initialSelection ?? []);
   let tapGesture: { x: number; y: number; objectId: string | null } | null = null;
+  const selectionMode = options.selectionMode ?? "toggle";
+  let initialSyncPending = options.emitInitialSelection === false;
 
   const notify = (): void => {
+    if (initialSyncPending) {
+      initialSyncPending = false;
+      return;
+    }
     const sorted = [...selectedIds].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     options.onSelectionChange?.(sorted);
   };
@@ -65,6 +83,12 @@ export function attachIsoCanvasStageNodeSelection(
   const toggleObject = (objectId: string | null): void => {
     if (!objectId) {
       selectedIds = new Set();
+      applyAll();
+      return;
+    }
+    if (selectionMode === "single") {
+      selectedIds =
+        selectedIds.size === 1 && selectedIds.has(objectId) ? new Set() : new Set([objectId]);
       applyAll();
       return;
     }
