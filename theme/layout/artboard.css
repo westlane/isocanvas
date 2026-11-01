@@ -1,0 +1,163 @@
+/* Logical diagram frame — pairs with src/layout/artboard.ts */
+
+.ic-artboard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100%, var(--ic-artboard-width, 640px));
+  height: min(100%, var(--ic-artboard-height, 360px));
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: var(--ic-artboard-user-width, 520) / var(--ic-artboard-user-height, 320);
+  border-radius: 4px;
+  overflow: hidden;
+  --ic-artboard-surface-fill: color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc));
+}
+
+/* Frame-only artboard: iso ground lives in the cube SVG (`mountArtboardGroundOnCanvas`). */
+.ic-artboard[data-ic-frame-only] {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  filter: none;
+}
+
+.ic-artboard[data-ic-frame-only] > .ic-artboard-content {
+  padding: 0;
+  display: block;
+  place-items: unset;
+}
+
+.ic-artboard > .ic-artboard-content {
+  position: absolute;
+  inset: 0;
+}
+
+.ic-artboard .ic-dot-grid-surface {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  --ic-dot-grid-phase: 0px;
+  --ic-dot-grid-inset: 0;
+  --ic-dot-grid-extent: 100%;
+  /* Dots live in the diagram SVG viewBox (same plane as iso mounts), not the CSS plane. */
+  --ic-dot-grid-layer: svg;
+  --ic-dot-grid-macro-align: plane;
+  /* Macro division lines — visible only in wireframe mode (see theme/wireframe.css). */
+  --ic-artboard-guide-line: transparent;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide) {
+  display: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
+  fill: var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc)));
+  stroke: none;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face {
+  stroke: none;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
+  fill: var(
+    --ic-artboard-front-fill,
+    color-mix(in oklch, var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 88%, black)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
+  fill: var(
+    --ic-artboard-side-fill,
+    color-mix(in oklch, var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 94%, black)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
+  fill: none;
+  stroke: none;
+  pointer-events: none;
+}
+
+/* 3×3 layout guides + frosted fill (under dot plane, above canvas). */
+.ic-artboard .ic-dot-grid-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--ic-artboard-surface-fill);
+  background-image:
+    linear-gradient(
+      to right,
+      transparent calc(100% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(100% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(100% / 3 + 0.5px),
+      transparent calc(100% / 3 + 0.5px),
+      transparent calc(200% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(200% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(200% / 3 + 0.5px),
+      transparent calc(200% / 3 + 0.5px)
+    ),
+    linear-gradient(
+      to bottom,
+      transparent calc(100% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(100% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(100% / 3 + 0.5px),
+      transparent calc(100% / 3 + 0.5px),
+      transparent calc(200% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(200% / 3 - 0.5px),
+      var(--ic-artboard-guide-line) calc(200% / 3 + 0.5px),
+      transparent calc(200% / 3 + 0.5px)
+    );
+}
+
+.ic-artboard-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: var(--ic-pad, 12px);
+  overflow: visible;
+}
+
+.ic-artboard-content svg {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: visible !important;
+}
+
+.ic-artboard .ic-dot-grid-macro {
+  display: none;
+}
+
+/*
+ * Iso artboard ground (cube SVG). Mount code sets geometry + class only; the library's default
+ * presentation attributes lose to these class rules, so no !important is needed here.
+ */
+.ic-artboard-guide,
+.ic-artboard-subguide {
+  stroke: var(--ic-artboard-outline, var(--ic-dot-grid-border, #94a3b8));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  fill: none;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.ic-artboard-subguide {
+  opacity: 0.3;
+}
+
+.ic-artboard-dot-grid {
+  pointer-events: none;
+}
+
+.ic-artboard-dot {
+  fill: var(--ic-dot-grid-dot, color-mix(in oklch, var(--ic-dot-grid-border, #94a3b8) 30%, transparent));
+}

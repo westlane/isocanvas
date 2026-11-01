@@ -1,0 +1,10 @@
+@import "./schemes/dark/catppuccin.css";
+@import "./schemes/light/catppuccin.css";
+@import "./schemes/dark/dracula.css";
+@import "./schemes/light/dracula.css";
+@import "./schemes/dark/gruvbox.css";
+@import "./schemes/light/gruvbox.css";
+@import "./schemes/dark/solarized.css";
+@import "./schemes/light/solarized.css";
+@import "./schemes/dark/tokyo-night.css";
+@import "./schemes/light/tokyo-night.css";

@@ -1,0 +1,5 @@
+/* World camera / viewBox plane — pairs with src/camera/world/apply-world-camera.ts */
+
+[data-ic-world-camera] {
+  /* ViewBox state is stored on the diagram host; SVG sizing is applied in JS. */
+}

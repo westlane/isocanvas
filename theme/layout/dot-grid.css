@@ -1,0 +1,66 @@
+.ic-dot-grid-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.ic-dot-grid-plane {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  left: var(--ic-dot-grid-inset);
+  top: var(--ic-dot-grid-inset);
+  width: var(--ic-dot-grid-extent);
+  height: var(--ic-dot-grid-extent);
+  transform-origin: 0 0;
+}
+
+.ic-dot-grid-macro {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--ic-dot-grid-macro-span, 3), 1fr);
+  grid-template-rows: repeat(var(--ic-dot-grid-macro-span, 3), 1fr);
+}
+
+.ic-dot-grid-macro-cell {
+  border: none;
+}
+
+.ic-dot-grid {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ic-dot-grid-dot);
+  background-image: none;
+  -webkit-mask-image: var(--ic-dot-grid-square-mask);
+  mask-image: var(--ic-dot-grid-square-mask);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: var(--ic-dot-grid-size) var(--ic-dot-grid-size);
+  mask-size: var(--ic-dot-grid-size) var(--ic-dot-grid-size);
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ic-dot-grid {
+    background-color: var(--ic-dot-grid-dot);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ic-dot-grid {
+    -webkit-mask-size: var(--ic-dot-grid-size) var(--ic-dot-grid-size);
+    mask-size: var(--ic-dot-grid-size) var(--ic-dot-grid-size);
+  }
+}

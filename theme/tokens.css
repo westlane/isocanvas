@@ -1,0 +1,47 @@
+/**
+ * Shared design tokens (names + non-scheme defaults).
+ * Color values for each palette live in `schemes/<appearance>/<family>.css` via `[data-ic-theme]`.
+ */
+
+:root {
+  /* Canvas spacing */
+  --ic-space-1: 4px;
+  --ic-space-2: 8px;
+  --ic-space-3: 16px;
+  --ic-space-4: 24px;
+  --ic-gap: var(--ic-dot-grid-size, 18px);
+  --ic-pad: 12px;
+
+  /* Dot grid geometry (colors come from scheme tokens) */
+  --ic-dot-grid-size: 18px;
+  --ic-dot-grid-phase: calc(var(--ic-dot-grid-size) / 2);
+  --ic-dot-grid-mark: 2px;
+  /* Centered square in a 100×100 tile; scales with --ic-dot-grid-size / mask-size. */
+  --ic-dot-grid-square-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='45' y='45' width='10' height='10' fill='%23000'/%3E%3C/svg%3E");
+  --ic-dot-grid-extent: 600%;
+  --ic-dot-grid-inset: -250%;
+  --ic-dot-grid-macro-align: plane;
+  --ic-dot-grid-projection: orthogonal;
+  --ic-dot-grid-dot: color-mix(in oklch, var(--ic-dot-grid-border, #cbd5e1) 30%, transparent);
+  --ic-dot-grid-surface: transparent;
+  --ic-dot-grid-surface-fallback: color-mix(in oklch, var(--zui-surface, #f8fafc) 92%, #ffffff);
+
+  /* Demo shell chrome (values derived from diagram tokens when scheme is active) */
+  --demo-chrome-inset: 14px;
+  --demo-view-title-offset-y: 36px;
+  --demo-view-title-offset-x: 28px;
+  --demo-chrome-bg: var(--zui-surface, #002b36);
+  --demo-chrome-fg: var(--zui-iso-label-fill, #eee8d5);
+  --demo-chrome-fg-muted: color-mix(in oklch, var(--demo-chrome-fg) 65%, transparent);
+  --demo-chrome-control-bg: color-mix(in oklch, var(--demo-chrome-bg) 88%, var(--demo-chrome-fg) 12%);
+  --demo-chrome-divider: color-mix(in oklch, var(--demo-chrome-fg) 11%, transparent);
+
+  /* Floating glass panels (toolbar, viewport debug) */
+  --demo-glass-bg: color-mix(in oklch, var(--demo-chrome-fg, #eee8d5) 8%, transparent);
+  --demo-glass-blur: 18px;
+  --demo-glass-saturate: 1.45;
+  --demo-glass-border: 1px solid color-mix(in oklch, var(--demo-chrome-fg, #eee8d5) 12%, transparent);
+  --demo-glass-radius: 14px;
+  --demo-glass-highlight: inset 0 1px 0 color-mix(in oklch, white 5%, transparent);
+  --demo-glass-elevation: 0 12px 40px color-mix(in oklch, var(--demo-chrome-bg, #002b36) 22%, transparent);
+}

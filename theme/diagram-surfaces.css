@@ -1,0 +1,130 @@
+/* Diagram surface paint — tokens inherit from `.diagram-host`. */
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
+  --ic-label-fill: var(--zui-iso-label-fill, #212121);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  fill: var(--ic-label-fill);
+  stroke: none;
+  paint-order: fill;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] text:not(.ic-iso-cube-label) {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  stroke: none;
+  paint-order: fill;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] text tspan {
+  stroke: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face {
+  stroke-width: var(--ic-theme-iso-face-stroke-width, 1px);
+  vector-effect: non-scaling-stroke;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--top {
+  stroke: var(
+    --ic-iso-face-stroke-top,
+    color-mix(in oklch, var(--zui-iso-top-fill, #cbd5e1) 50%, transparent)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
+  stroke: var(
+    --ic-iso-face-stroke-front,
+    color-mix(in oklch, var(--zui-iso-front-fill, #cbd5e1) 50%, transparent)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
+  stroke: var(
+    --ic-iso-face-stroke-side,
+    color-mix(in oklch, var(--zui-iso-right-fill, #cbd5e1) 50%, transparent)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom {
+  stroke: var(
+    --ic-iso-face-stroke-bottom,
+    color-mix(in oklch, var(--zui-iso-bottom-fill, #cbd5e1) 50%, transparent)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--back,
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--left {
+  stroke: var(
+    --ic-iso-face-stroke-recess,
+    color-mix(in oklch, var(--zui-iso-left-fill, #cbd5e1) 50%, transparent)
+  );
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.node[data-object-id] :is(path, polygon, rect) {
+  vector-effect: non-scaling-stroke;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] > rect.ic-cube-canvas-bg {
+  fill: none !important;
+  stroke: none !important;
+  pointer-events: none;
+}
+
+g.node[data-object-id],
+g.node[data-object-id] :is(rect, line, path, polygon, polyline, text, tspan) {
+  cursor: pointer;
+  pointer-events: all;
+}
+
+rect.align-bounds-guide {
+  stroke: var(--zui-accent, #7c3aed);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.85;
+}
+
+rect.align-artboard-guide {
+  stroke: var(--demo-chrome-fg-muted, #64748b);
+  stroke-width: 1;
+  stroke-dasharray: 6 5;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.75;
+}
+
+text.align-artboard-label {
+  fill: var(--demo-chrome-fg-muted, #64748b);
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  pointer-events: none;
+}
+
+line.align-active-guide {
+  stroke: var(--zui-accent, #7c3aed);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.95;
+}
+
+text.align-node-label {
+  fill: var(--zui-iso-label-fill, var(--zui-ink, #212121));
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+g.node[data-object-id].align-node--selected > :is(rect, path):first-of-type {
+  stroke: var(--zui-accent, #7c3aed) !important;
+  stroke-width: 2px !important;
+}
