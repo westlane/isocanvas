@@ -12,10 +12,35 @@
   --ic-gap: var(--ic-dot-grid-size, 18px);
   --ic-pad: 12px;
 
-  /* Iso cube interaction — >1 brightens on hover */
-  --ic-iso-cube-hover-brightness: 1.06;
-  --ic-iso-cube-active-scale: 0.985;
-  --ic-iso-cube-active-brightness: 0.94;
+  /* Page chrome — light schemes: dark key color desk; dark schemes: accent wash on surface. */
+  --ic-canvas-chrome-bg: color-mix(
+    in oklch,
+    var(--zui-accent-dark, #3b0764) 72%,
+    black
+  );
+  --ic-canvas-chrome-fg: color-mix(in oklch, white 92%, var(--zui-accent, #9333ea));
+  --ic-canvas-chrome-fg-muted: color-mix(in oklch, var(--ic-canvas-chrome-fg) 68%, transparent);
+  --ic-canvas-chrome-grain-opacity: 0.085;
+  --ic-canvas-chrome-grain-size: 168px;
+  --ic-artboard-float-shadow: drop-shadow(0 56px 200px color-mix(in oklch, black 18%, transparent))
+    drop-shadow(0 28px 100px color-mix(in oklch, black 10%, transparent));
+  --ic-surface-muted: var(--zui-surface, #f8fafc);
+  --ic-ink: var(--zui-ink, #1e293b);
+  --ic-ink-muted: var(--zui-ink-muted, #64748b);
+
+  /* Iso cube toggle — fill + footprint-aligned press bottom (no shell transform) */
+  --ic-iso-cube-hover-fill-mix: 12%;
+  --ic-iso-cube-active-fill-mix: 8%;
+  --ic-iso-cube-selected-hover-fill-mix: 6%;
+  --ic-iso-cube-selected-active-fill-mix: 10%;
+  --ic-iso-cube-press-bottom-opacity: 0.25;
+  --ic-iso-cube-press-bottom-transition-duration: 0.16s;
+  --ic-iso-cube-volume-scale-active: 0.94;
+  --ic-iso-cube-volume-scale-selected: 0.92;
+  --ic-iso-cube-volume-scale-selected-active: 0.88;
+  --ic-iso-cube-volume-press-offset-x: 2px;
+  --ic-iso-cube-volume-press-offset-y: -7px;
+  --ic-iso-cube-volume-transition-duration: 0.16s;
 
   /* Dot grid geometry (dot color: theme/layout/artboard-grid.css) */
   --ic-dot-grid-size: 18px;
@@ -48,4 +73,15 @@
   --demo-glass-radius: 14px;
   --demo-glass-highlight: inset 0 1px 0 color-mix(in oklch, white 5%, transparent);
   --demo-glass-elevation: 0 12px 40px color-mix(in oklch, var(--demo-chrome-bg, #002b36) 22%, transparent);
+}
+
+:root:is([data-ic-theme$="-dark"], [data-demo-appearance="dark"]) {
+  --ic-canvas-chrome-bg: color-mix(
+    in oklch,
+    var(--zui-accent, #9333ea) 32%,
+    var(--zui-surface, #1e1e2e)
+  );
+  --ic-canvas-chrome-fg: var(--zui-ink, #cdd6f4);
+  --ic-canvas-chrome-fg-muted: var(--zui-ink-muted, #a6adc8);
+  --ic-canvas-chrome-grain-opacity: 0.06;
 }

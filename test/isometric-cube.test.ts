@@ -21,6 +21,7 @@ import {
   isoBoxSpecFromPlaneBox,
   isoCubeFaceRectLayout,
   isoCubeFaceRectLayoutForPlaneTopLeft,
+  isoFootprintMarginBottomLayout,
   ISO_CUBE_MOUNT_FACE_ORDER,
   ISO_GRID_AXIS_X,
   mountIsoBoxesOnCanvas,
@@ -160,9 +161,10 @@ describe("isometric cube (library shape)", () => {
     const svg = mountCardGrid(host, activeShowcaseColors());
     expect(svg.getAttribute("data-diagram-renderer")).toBe(DIAGRAM_RENDERER);
     expect(host.querySelectorAll("g.node[data-object-id]")).toHaveLength(9);
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(45);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(54);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--top[d]")).toHaveLength(9);
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face--bottom[d]")).toHaveLength(0);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face--bottom[d]")).toHaveLength(9);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-press-bottom[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-artboard-outline[d]")).toHaveLength(1);
     expect(host.querySelectorAll("path.ic-artboard-outline-layer[d]")).toHaveLength(1);
     expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(4);
@@ -188,7 +190,7 @@ describe("isometric cube (library shape)", () => {
     paintIsometricOrientation(host, "rotated");
     document.body.appendChild(host);
     mountCardGrid(host, activeShowcaseColors());
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(45);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(54);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--front[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--side[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--top[d]")).toHaveLength(9);
@@ -370,6 +372,28 @@ describe("isometric cube (library shape)", () => {
       }
       expect(layout.top ?? 0, face).toBeLessThanOrEqual(h + eps);
     }
+  });
+
+  it("isoFootprintMarginBottomLayout at zero margin matches base bottom", () => {
+    const w = 2;
+    const d = 1.25;
+    const h = 0.9;
+    const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", w, d, h);
+    const aligned = isoFootprintMarginBottomLayout(w, d, h, "default", 0);
+    expect(aligned).toEqual(base);
+  });
+
+  it("isoFootprintMarginBottomLayout expands bottom by equal plane margin", () => {
+    const w = 2;
+    const d = 1.25;
+    const h = 0.9;
+    const m = 0.08;
+    const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", w, d, h);
+    const spread = isoFootprintMarginBottomLayout(w, d, h, "default", m);
+    expect(spread.width).toBeCloseTo((base.width ?? 0) + 2 * m);
+    expect(spread.height).toBeCloseTo((base.height ?? 0) + 2 * m);
+    expect(spread.left).toBeCloseTo((base.left ?? 0) - m);
+    expect(spread.right).toBeCloseTo((base.right ?? 0) - m);
   });
 
   it("renders diagram scene nodes", () => {

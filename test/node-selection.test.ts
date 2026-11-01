@@ -30,9 +30,12 @@ describe("diagram node selection", () => {
     applyDiagramNodeSelection(host, "map");
     const shells = host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`);
     expect(shells[0]?.classList.contains(IC_NODE_SELECTED_CLASS)).toBe(false);
+    expect(shells[0]?.getAttribute("aria-pressed")).toBe("false");
     expect(shells[1]?.classList.contains(IC_NODE_SELECTED_CLASS)).toBe(true);
+    expect(shells[1]?.getAttribute("aria-pressed")).toBe("true");
     clearDiagramNodeSelection(host);
     expect(shells[1]?.classList.contains(IC_NODE_SELECTED_CLASS)).toBe(false);
+    expect(shells[1]?.getAttribute("aria-pressed")).toBe("false");
   });
 
   it("selects when tapping a cube face path", () => {
@@ -84,5 +87,12 @@ describe("diagram node selection", () => {
     expect(
       host.querySelector(`g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`),
     ).toBeTruthy();
+
+    face!.dispatchEvent(new PointerEvent("pointerdown", base));
+    face!.dispatchEvent(new PointerEvent("pointerup", base));
+    expect(selected).toBe(null);
+    expect(
+      host.querySelector(`g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`),
+    ).toBeFalsy();
   });
 });

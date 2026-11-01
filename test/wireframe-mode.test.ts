@@ -176,7 +176,7 @@ describe("wireframe mode", () => {
       /--ic-grid-lines-stroke:[\s\S]*var\(--ic-grid-line-ink\)/,
     );
     expect(css).toMatch(
-      /:root:is\(\[data-ic-theme\$="-light"\][\s\S]*--ic-grid-lines-stroke-mix:\s*52%/,
+      /:root:is\(\[data-ic-theme\$="-light"\][\s\S]*--ic-grid-lines-stroke-mix:\s*68%/,
     );
   });
 });

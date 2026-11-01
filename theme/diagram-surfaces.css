@@ -56,7 +56,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
   );
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom {
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
   stroke: var(
     --ic-iso-face-stroke-bottom,
     color-mix(in oklch, var(--zui-iso-bottom-fill, #cbd5e1) 50%, transparent)
@@ -83,74 +83,187 @@ svg[data-diagram-renderer="ic-cube-canvas"] > rect.ic-cube-canvas-bg {
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell {
   cursor: pointer;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
   transform-box: fill-box;
   transform-origin: center bottom;
-  transition: transform 0.1s ease;
+  transition: transform var(--ic-iso-cube-volume-transition-duration, 0.16s) ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active g.ic-iso-cube-volume {
+  transform: translate(
+      var(--ic-iso-cube-volume-press-offset-x, 2px),
+      var(--ic-iso-cube-volume-press-offset-y, -7px)
+    )
+    scale(var(--ic-iso-cube-volume-scale-active, 0.94));
+  transition-duration: 0.05s;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected g.ic-iso-cube-volume {
+  transform: translate(
+      var(--ic-iso-cube-volume-press-offset-x, 2px),
+      var(--ic-iso-cube-volume-press-offset-y, -7px)
+    )
+    scale(var(--ic-iso-cube-volume-scale-selected, 0.92));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active g.ic-iso-cube-volume {
+  transform: translate(
+      var(--ic-iso-cube-volume-press-offset-x, 2px),
+      var(--ic-iso-cube-volume-press-offset-y, -7px)
+    )
+    scale(var(--ic-iso-cube-volume-scale-selected-active, 0.88));
+  transition-duration: 0.05s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
+    transition-duration: 0.01ms;
+  }
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell path.ic-iso-cube-face {
   pointer-events: all;
-  transition: filter 0.12s ease;
+  transition: fill 0.12s ease;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:hover:not(:active) path.ic-iso-cube-face {
-  filter: brightness(var(--ic-iso-cube-hover-brightness, 1.06));
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-press-bottom {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ic-iso-cube-press-bottom-transition-duration, 0.16s) ease;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active {
-  transform: scale(var(--ic-iso-cube-active-scale, 0.985));
-  transition-duration: 0.05s;
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:is(:active, .ic-node--selected, [aria-pressed="true"])
+  path.ic-iso-cube-press-bottom {
+  opacity: var(--ic-iso-cube-press-bottom-opacity, 0.25);
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:active path.ic-iso-cube-face {
-  filter: brightness(var(--ic-iso-cube-active-brightness, 1.06));
+@media (prefers-reduced-motion: reduce) {
+  svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-press-bottom {
+    transition-duration: 0.01ms;
+  }
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face {
-  filter: none;
-  stroke: var(--zui-selected-border, #ffffff) !important;
-  stroke-width: max(var(--ic-theme-selected-stroke-width, 1px), 1.5px) !important;
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-press-bottom {
+  fill: var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--top {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-top-fill, #e9d5ff) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-front-fill, #ddd6fe) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-right-fill, #c4b5fd) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-bottom-fill, #a78bfa) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):hover:not(:active)
+  path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-left-fill, #8b5cf6) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--top {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-top-fill, #e9d5ff) calc(100% - var(--ic-iso-cube-active-fill-mix, 8%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-front-fill, #ddd6fe) calc(100% - var(--ic-iso-cube-active-fill-mix, 8%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-right-fill, #c4b5fd) calc(100% - var(--ic-iso-cube-active-fill-mix, 8%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-bottom-fill, #a78bfa) calc(100% - var(--ic-iso-cube-active-fill-mix, 8%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):active path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-left-fill, #8b5cf6) calc(100% - var(--ic-iso-cube-active-fill-mix, 8%)),
+    black
+  ) !important;
+}
+
+/* Toggled on — latched “pressed” using scheme selected face fills */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face:not(.ic-iso-cube-press-bottom) {
+  stroke-width: var(--ic-theme-iso-face-stroke-width, 1px);
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--top {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-top-fill, #e9d5ff) 42%,
-    white
-  ) !important;
+  fill: var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--front {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-front-fill, #ddd6fe) 38%,
-    white
-  ) !important;
+  fill: var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--side {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-right-fill, #c4b5fd) 36%,
-    white
-  ) !important;
+  fill: var(--zui-iso-selected-right-fill, var(--zui-iso-right-fill, #a78bfa)) !important;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--bottom {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa) 32%,
-    white
-  ) !important;
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6)) !important;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--left {
+  fill: var(--zui-iso-selected-left-fill, var(--zui-iso-left-fill, #7c3aed)) !important;
+}
+
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--back {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-left-fill, #8b5cf6) 30%,
-    white
-  ) !important;
+  fill: var(--zui-iso-selected-left-fill, var(--zui-iso-left-fill, #7c3aed)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,
@@ -159,12 +272,96 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
   fill: var(--ic-label-fill) !important;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face {
-  filter: brightness(var(--ic-iso-cube-selected-active-brightness, 1.03));
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--top {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe))
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face {
-  filter: brightness(var(--ic-iso-cube-selected-hover-brightness, 1.02));
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd))
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-right-fill, var(--zui-iso-right-fill, #a78bfa))
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6))
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-left-fill, var(--zui-iso-left-fill, #7c3aed))
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--top {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe))
+      calc(100% - var(--ic-iso-cube-selected-active-fill-mix, 10%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-front-fill, var(--zui-iso-front-fill, #c4b5fd))
+      calc(100% - var(--ic-iso-cube-selected-active-fill-mix, 10%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-right-fill, var(--zui-iso-right-fill, #a78bfa))
+      calc(100% - var(--ic-iso-cube-selected-active-fill-mix, 10%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-bottom-fill, var(--zui-iso-bottom-fill, #8b5cf6))
+      calc(100% - var(--ic-iso-cube-selected-active-fill-mix, 10%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--zui-iso-selected-left-fill, var(--zui-iso-left-fill, #7c3aed))
+      calc(100% - var(--ic-iso-cube-selected-active-fill-mix, 10%)),
+    black
+  ) !important;
 }
 
 g.node[data-object-id],

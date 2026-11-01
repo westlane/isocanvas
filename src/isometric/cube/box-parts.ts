@@ -13,6 +13,8 @@ import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";
 import {
   ISO_CUBE_MOUNT_FACE_ORDER,
   IC_ISO_CUBE_SHELL_CLASS,
+  IC_ISO_CUBE_PRESS_BOTTOM_CLASS,
+  IC_ISO_CUBE_VOLUME_CLASS,
   isoCubeFaceClassName,
   isoCubeFaceRectLayoutForPlaneTopLeft,
 } from "./cube-faces.js";
@@ -94,15 +96,32 @@ export function mountIsoBoxOnStageShell(
   });
   cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
   const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+  const fills = themedCubeFaceColors(colors);
   if (options?.stackLayer) {
     applyStackLayerPresentation({ faces, label }, options.stackLayer);
     paintStackLayerDataset(boxShell.getElement(), options.stackLayer);
   }
+  const volumeGroup = new IsometricGroup({ left: 0, right: 0, top: 0 });
+  volumeGroup.getElement().classList.add(IC_ISO_CUBE_VOLUME_CLASS);
   for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
     if (options?.omitBottomFace && id === "bottom") {
+      const { width: w, depth: d, height: h } = spec;
+      const footprintLayout = isoCubeFaceRectLayoutForPlaneTopLeft(
+        "bottom",
+        w,
+        d,
+        h,
+        orientation,
+      );
+      const pressBottom = faceRect("bottom", fills.bottom, footprintLayout);
+      pressBottom.getElement().classList.add(IC_ISO_CUBE_PRESS_BOTTOM_CLASS);
+      if (options.stackLayer) {
+        pressBottom.fillOpacity = stackFaceOpacity(options.stackLayer);
+      }
+      cubeShell.addChild(pressBottom);
       continue;
     }
-    cubeShell.addChild(faces[id]);
+    volumeGroup.addChild(faces[id]);
   }
   const node = new IsometricGroup({
     id: spec.id,
@@ -117,7 +136,8 @@ export function mountIsoBoxOnStageShell(
     paintStackLayerDataset(nodeEl, options.stackLayer);
   }
   node.addChild(label);
-  cubeShell.addChild(node);
+  volumeGroup.addChild(node);
+  cubeShell.addChild(volumeGroup);
   boxShell.addChild(cubeShell);
   shell.addChild(boxShell);
 }

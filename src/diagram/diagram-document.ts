@@ -7,6 +7,7 @@ import {
 } from "../camera/fit/center-artboard-view.js";
 import type { DiagramNodeSelectionDetach } from "../camera/node-selection.js";
 import { attachDiagramNodeSelection } from "../camera/node-selection.js";
+import { saveDiagramViewportToStorage } from "../camera/diagram-viewport-persistence.js";
 import type { WorldCameraPanZoomDetach } from "../camera/world-pan-zoom.js";
 import { attachWorldCameraPanZoom } from "../camera/world-pan-zoom.js";
 import {
@@ -74,9 +75,31 @@ export function frameDiagramSceneCamera(
 export function attachDiagramViewportPanZoom(options: {
   surface: HTMLElement;
   host: HTMLElement;
+  /** When set, pan/zoom viewBox is persisted to `localStorage` under this key. */
+  persistViewportStorageKey?: string;
 }): WorldCameraPanZoomDetach {
-  return attachWorldCameraPanZoom(options);
+  const { persistViewportStorageKey, ...panZoomOptions } = options;
+  if (!persistViewportStorageKey) {
+    return attachWorldCameraPanZoom(panZoomOptions);
+  }
+  return attachWorldCameraPanZoom({
+    ...panZoomOptions,
+    onViewBoxApplied: (viewBox, context) => {
+      if (context.notify) {
+        saveDiagramViewportToStorage(persistViewportStorageKey, viewBox);
+      }
+    },
+  });
 }
+
+export {
+  clearDiagramViewportStorage,
+  loadDiagramViewportFromStorage,
+  parseDiagramViewportStorageSnapshot,
+  restoreDiagramViewportFromStorage,
+  saveDiagramViewportToStorage,
+  serializeDiagramViewportStorageSnapshot,
+} from "../camera/diagram-viewport-persistence.js";
 
 export function attachDiagramViewportNodeSelection(options: {
   surface: HTMLElement;

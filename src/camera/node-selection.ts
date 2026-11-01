@@ -2,7 +2,7 @@
 
 import { IC_ISO_CUBE_SHELL_CLASS } from "../isometric/cube/cube-faces.js";
 
-/** Applied to {@link IC_ISO_CUBE_SHELL_CLASS} when its object is selected. */
+/** Applied to {@link IC_ISO_CUBE_SHELL_CLASS} when its object is toggled on (pressed latched). */
 export const IC_NODE_SELECTED_CLASS = "ic-node--selected";
 
 const TAP_DRAG_THRESHOLD_PX = 6;
@@ -31,46 +31,63 @@ function objectIdFromTarget(target: EventTarget | null): string | null {
   return fromShell || null;
 }
 
-function cubeShellForObjectId(host: HTMLElement, objectId: string): Element | null {
-  const node = host.querySelector(
-    `g.node[data-object-id="${CSS.escape(objectId)}"]`,
+function objectIdFromShell(shell: Element): string | null {
+  const nested = shell.querySelector("g.node[data-object-id]");
+  return nested?.getAttribute("data-object-id")?.trim() ?? null;
+}
+
+function readSelectionFromHost(host: HTMLElement): string | null {
+  const selected = host.querySelector(
+    `g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS} g.node[data-object-id]`,
   );
-  if (!node) {
-    return null;
+  return selected?.getAttribute("data-object-id")?.trim() ?? null;
+}
+
+function syncCubeShellTogglePresentation(
+  host: HTMLElement,
+  objectId: string | null,
+): void {
+  for (const shell of host.querySelectorAll(`g.${IC_ISO_CUBE_SHELL_CLASS}`)) {
+    const id = objectIdFromShell(shell);
+    const pressed = Boolean(id && id === objectId);
+    shell.classList.toggle(IC_NODE_SELECTED_CLASS, pressed);
+    shell.setAttribute("role", "button");
+    shell.setAttribute("aria-pressed", pressed ? "true" : "false");
+    if (id) {
+      shell.setAttribute("aria-label", id);
+    }
   }
-  return node.closest(`g.${IC_ISO_CUBE_SHELL_CLASS}`) ?? node;
 }
 
 export function clearDiagramNodeSelection(host: HTMLElement): void {
-  for (const shell of host.querySelectorAll(
-    `g.${IC_ISO_CUBE_SHELL_CLASS}.${IC_NODE_SELECTED_CLASS}`,
-  )) {
-    shell.classList.remove(IC_NODE_SELECTED_CLASS);
-  }
+  syncCubeShellTogglePresentation(host, null);
 }
 
 export function applyDiagramNodeSelection(
   host: HTMLElement,
   objectId: string | null,
 ): void {
-  clearDiagramNodeSelection(host);
-  if (!objectId) {
-    return;
-  }
-  const shell = cubeShellForObjectId(host, objectId);
-  shell?.classList.add(IC_NODE_SELECTED_CLASS);
+  syncCubeShellTogglePresentation(host, objectId);
 }
 
-/** Tap-to-select diagram cubes; ignores drags used for pan. Returns detach. */
+/** Tap-to-toggle diagram cubes; ignores drags used for pan. Returns detach. */
 export function attachDiagramNodeSelection(
   options: AttachDiagramNodeSelectionOptions,
 ): DiagramNodeSelectionDetach {
   /** @type {{ x: number; y: number; objectId: string | null } | null} */
   let tapGesture: { x: number; y: number; objectId: string | null } | null = null;
+  let selectedId: string | null = readSelectionFromHost(options.host);
 
   const setSelection = (objectId: string | null): void => {
-    applyDiagramNodeSelection(options.host, objectId);
-    options.onSelectionChange?.(objectId);
+    let next: string | null = objectId;
+    if (objectId && objectId === selectedId) {
+      next = null;
+    } else if (!objectId) {
+      next = null;
+    }
+    selectedId = next;
+    applyDiagramNodeSelection(options.host, next);
+    options.onSelectionChange?.(next);
   };
 
   const onPointerDown = (event: PointerEvent): void => {

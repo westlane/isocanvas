@@ -10,6 +10,15 @@ export const IC_ISO_CUBE_FACE_CLASS = "ic-iso-cube-face";
 /** Groups cube faces + label node for hit-testing and hover paint. */
 export const IC_ISO_CUBE_SHELL_CLASS = "ic-iso-cube-shell";
 
+/** Full footprint highlight; {@link IC_ISO_CUBE_VOLUME_CLASS} shrinks inside it when pressed. */
+export const IC_ISO_CUBE_PRESS_BOTTOM_CLASS = "ic-iso-cube-press-bottom";
+
+/** Cube faces + label; CSS scale from bottom center when shell is pressed / selected. */
+export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
+
+/** @deprecated Use {@link IC_ISO_CUBE_PRESS_BOTTOM_CLASS}. */
+export const IC_ISO_CUBE_FOOTPRINT_INSET_CLASS = IC_ISO_CUBE_PRESS_BOTTOM_CLASS;
+
 export function isoCubeFaceClassName(face: IsoFaceId): string {
   return `${IC_ISO_CUBE_FACE_CLASS} ic-iso-cube-face--${face}`;
 }
@@ -102,6 +111,74 @@ export function isoCubeFaceRectLayoutForPlaneTopLeft(
     return isoCubeFaceRectLayoutRotatedPlaneTopLeft(face, width, depth, height);
   }
   return isoCubeFaceRectLayoutDefaultPlaneTopLeft(face, width, depth, height);
+}
+
+/**
+ * Bottom TOP-plane rect outset by a constant margin in iso plane units (equal on all four sides).
+ */
+export function isoFootprintMarginBottomLayout(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation,
+  marginIso: number,
+): FaceRectLayout {
+  const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", width, depth, height, orientation);
+  const m = marginIso;
+  if (m <= 0) {
+    return { ...base };
+  }
+  if (orientation === "rotated") {
+    return {
+      ...base,
+      width: depth + 2 * m,
+      height: width + 2 * m,
+      left: -m,
+      right: -m,
+    };
+  }
+  return {
+    ...base,
+    width: depth + 2 * m,
+    height: width + 2 * m,
+    left: -width - m,
+    right: -m,
+  };
+}
+
+/**
+ * Bottom TOP-plane rect expanded uniformly about the footprint center (even margin on all sides).
+ * Matches {@link isoCubeFaceRectLayoutForPlaneTopLeft}("bottom", …) at scale 1.
+ * @deprecated Prefer {@link isoFootprintMarginBottomLayout} for equal plane margin.
+ */
+export function isoFootprintOutsetBottomLayout(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation,
+  scale: number,
+): FaceRectLayout {
+  const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", width, depth, height, orientation);
+  if (scale === 1) {
+    return { ...base };
+  }
+  const s = scale;
+  if (orientation === "rotated") {
+    return {
+      ...base,
+      width: depth * s,
+      height: width * s,
+      left: (width * (1 - s)) / 2,
+      right: (depth * (1 - s)) / 2,
+    };
+  }
+  return {
+    ...base,
+    width: depth * s,
+    height: width * s,
+    left: (-width * (1 + s)) / 2,
+    right: (depth * (1 - s)) / 2,
+  };
 }
 
 /** Library rectangle props per face (local to footprint anchor). TOP plane: width→r (depth), height→l (width). */
