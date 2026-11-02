@@ -9,7 +9,7 @@ import { setViewportCenteredMeet, writeViewBoxToSvg } from "../camera/view-box/a
 import { writeViewBoxHomeMetadata } from "../camera/view-box/baseline.js";
 import { viewBoxForMountedCubeCanvas } from "../layout/artboard-outline.js";
 import { artboardPlaneToIsoGround } from "./diagram-user.js";
-import { readIsometricOrientationFromCanvas } from "./orientation.js";
+import { readIsometricOrientationFromCanvas, isometricCanvasMountHost } from "./orientation.js";
 import { isoBoxSpecsOnArtboardGround } from "./plane-layout.js";
 import {
   createLocalIsoBoxParts,
@@ -19,7 +19,7 @@ import {
 } from "./cube/box-parts.js";
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
-import { uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
+import { fitIsoCubeTopLabelFontSizePx, readIsoCubeLabelTheme, uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
 import {
   addArtboardStageShell,
@@ -196,6 +196,7 @@ export function mountPlaneBoxesOnCanvas(
 ): void {
   const stage = options.stage;
   const orientation = readIsometricOrientationFromCanvas(canvas);
+  const themeScope = isometricCanvasMountHost(canvas);
   const stageGround = artboardPlaneToIsoGround(stage.x, stage.y, orientation, stage);
   const planeBoxes = elevateStackLayersAboveArtboardGround(boxes);
   const stackLayers = stackLayerPresentationByBoxId(planeBoxes);
@@ -208,7 +209,6 @@ export function mountPlaneBoxesOnCanvas(
   });
   const shellChrome =
     options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
-  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
   const planeRowMount = options.planeRowMount;
   const planeGridMount = options.planeGridMount;
   const mountTarget = options.omitArtboardShell
@@ -230,22 +230,31 @@ export function mountPlaneBoxesOnCanvas(
           shellChrome,
         )
       : planeRowMount && planeRowMount.columns.length > 0
-      ? mountArtboardPlaneRowShellsOnCanvas(
-          canvas,
-          stage,
-          planeRowMount,
-          orientation,
-          shellChrome,
-        )
-      : mountArtboardShellOnCanvas(
-          canvas,
-          stage,
-          orientation,
-          shellChrome,
-          options.artboardCollection,
-        );
+        ? mountArtboardPlaneRowShellsOnCanvas(
+            canvas,
+            stage,
+            planeRowMount,
+            orientation,
+            shellChrome,
+          )
+        : mountArtboardShellOnCanvas(
+            canvas,
+            stage,
+            orientation,
+            shellChrome,
+            options.artboardCollection,
+          );
   for (const spec of specs) {
     const stackLayer = stackLayers.get(spec.id);
+    const labelFontSizePx = spec.omitCubeLabel
+      ? readIsoCubeLabelTheme(themeScope).fontSizePx
+      : fitIsoCubeTopLabelFontSizePx({
+          label: spec.label,
+          widthIso: spec.width,
+          depthIso: spec.depth,
+          orientation,
+          themeScope,
+        });
     mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {
       omitBottomFace: true,
       orientation,
@@ -263,7 +272,8 @@ export function mountIsoBoxesOnCanvas(
   options?: { artboardUserSize?: ArtboardUserSize; artboardDivisions?: number },
 ): void {
   const orientation = readIsometricOrientationFromCanvas(canvas);
-  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
+  const themeScope = isometricCanvasMountHost(canvas);
+  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation, themeScope });
   const entries: IsoCanvasMountEntry[] = [];
   if (options?.artboardUserSize) {
     entries.push(

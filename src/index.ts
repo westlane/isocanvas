@@ -50,6 +50,7 @@ export * from "./layout/snap/snap-point.js";
 export * from "./layout/spacing-tokens.js";
 export * from "./layout/diagram-node-footprint.js";
 export * from "./layout/diagram-node-label-footprint.js";
+export * from "./motion/index.js";
 export * from "./diagram/scene-node-cube-sizing.js";
 export * from "./svg/svg-bbox.js";
 export * from "./theme/color-math.js";

@@ -17,8 +17,8 @@ const DEFAULT_MACRO_PITCH = artboardDivisionPitch(
 );
 const DEFAULT_DOT_STEP = artboardDotStep(DEFAULT_MACRO_PITCH);
 
-/** Standard domain cube width on the default artboard dot lattice (was 5; +2 dots). */
-export const DIAGRAM_NODE_FOOTPRINT_WIDTH_DOT_SPAN = 7;
+/** Standard domain cube width on the default artboard dot lattice (was 5; +3 dots). */
+export const DIAGRAM_NODE_FOOTPRINT_WIDTH_DOT_SPAN = 8;
 
 /** Plane footprint width for diagram nodes and iso mounts (diagram user px). */
 export const DIAGRAM_NODE_FOOTPRINT_WIDTH_PX =

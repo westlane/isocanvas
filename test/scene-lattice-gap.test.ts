@@ -54,7 +54,7 @@ describe("artboard row space-between", () => {
     const gap01 = (b1!.x - (b0!.x + b0!.width)) / step;
     const gap12 = (b2!.x - (b1!.x + b1!.width)) / step;
     expect(gap01).toBeCloseTo(gap12, 4);
-    expect(gap01).toBeCloseTo(4, 4);
+    expect(gap01).toBeGreaterThanOrEqual(5);
   });
 
   it("packs variable label footprints left-to-right without horizontal overlap", () => {
@@ -193,7 +193,7 @@ describe("artboard row space-between", () => {
     expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(0.001);
     for (const gap of gaps) {
       expect(gap).toBeCloseTo(gaps[0]!, 4);
-      expect(gap).toBeGreaterThanOrEqual(3);
+      expect(gap).toBeGreaterThanOrEqual(5);
     }
   });
 

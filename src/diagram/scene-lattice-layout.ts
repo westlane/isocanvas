@@ -51,7 +51,7 @@ export function shiftDiagramSceneNodesDownDots(
  */
 export const DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING = 3;
 /** Minimum clear fine-line gap between neighbors in a space-between row (class diagram columns). */
-export const DEFAULT_ROW_INTER_COLUMN_GAP_LINES = 3;
+export const DEFAULT_ROW_INTER_COLUMN_GAP_LINES = 5;
 export type MacroGridCellLayoutOptions = {
   stage?: ArtboardPlaneStage;
   /** Leading-edge inset in fine guide lines (default {@link DEFAULT_ARTBOARD_LAYOUT_DOT_INSET}). */

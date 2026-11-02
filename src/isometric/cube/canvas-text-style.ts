@@ -12,12 +12,11 @@ import {
 import {
   formatIsoCanvasLabelText,
   ISO_CANVAS_LABEL_LETTER_SPACING_EM,
-  ISO_CUBE_LABEL_FONT_SIZE_MIN_PX,
   ISO_CUBE_LABEL_FONT_SIZE_PX,
-  ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET,
-  ISO_CUBE_TOP_LABEL_EDGE_INSET,
   measureIsoCanvasLabelTextWidthPx,
+  readIsoCubeLabelTheme,
   truncateIsoCanvasLabelText,
+  type IsoCubeLabelTheme,
 } from "./label-text.js";
 
 /** Cube canvas library defaults text/shapes to black stroke — solid iso uses fills only. */
@@ -41,20 +40,24 @@ export const ISO_EDGE_LABEL_FONT_SIZE_PX = 22;
 
 export {
   formatIsoCanvasLabelText,
+  IC_ISO_CUBE_LABEL_THEME_VARS,
   ISO_CANVAS_LABEL_FONT_FAMILY,
   ISO_CANVAS_LABEL_FONT_WEIGHT,
   ISO_CANVAS_LABEL_LETTER_SPACING_EM,
   ISO_CUBE_LABEL_FONT_SIZE_MIN_PX,
   ISO_CUBE_LABEL_FONT_SIZE_PX,
+  ISO_CUBE_LABEL_THEME_DEFAULTS,
   ISO_CUBE_LABEL_TRUNCATE_AFTER_CHARS,
   ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS,
   ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET,
   ISO_CUBE_TOP_LABEL_EDGE_INSET,
   measureIsoCanvasLabelTextWidthPx,
+  readIsoCubeLabelTheme,
   truncateIsoCanvasLabelText,
+  type IsoCubeLabelTheme,
 } from "./label-text.js";
 
-/** Matches `theme/diagram-surfaces.css` (SVG `letter-spacing` on cube-canvas text). */
+/** Matches `theme/tokens.css` + `theme/diagram-surfaces.css` (SVG `letter-spacing` on cube-canvas text). */
 export const ISO_CANVAS_LABEL_LETTER_SPACING = `${ISO_CANVAS_LABEL_LETTER_SPACING_EM}em`;
 
 /** Top-face span available to the label baseline (iso units). */
@@ -80,9 +83,11 @@ export function isoCubeTopFaceLabelMaxWidthPx(
   depthIso: number,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
   canvasScale: number = DEFAULT_CUBE_CANVAS_SCALE,
+  theme?: IsoCubeLabelTheme,
 ): number {
+  const t = theme ?? readIsoCubeLabelTheme(typeof document !== "undefined" ? document.documentElement : null);
   const alongIso = isoCubeTopFaceLabelAlongEdgeIsoUnits(widthIso, depthIso, orientation);
-  return alongIso * canvasScale * ISO_CUBE_TOP_LABEL_EDGE_INSET;
+  return alongIso * canvasScale * t.edgeInset;
 }
 
 export function isoCubeTopFaceLabelMaxHeightPx(
@@ -90,9 +95,11 @@ export function isoCubeTopFaceLabelMaxHeightPx(
   depthIso: number,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
   canvasScale: number = DEFAULT_CUBE_CANVAS_SCALE,
+  theme?: IsoCubeLabelTheme,
 ): number {
+  const t = theme ?? readIsoCubeLabelTheme(typeof document !== "undefined" ? document.documentElement : null);
   const crossIso = isoCubeTopFaceLabelCrossEdgeIsoUnits(widthIso, depthIso, orientation);
-  return crossIso * canvasScale * ISO_CUBE_TOP_LABEL_EDGE_INSET * ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET;
+  return crossIso * canvasScale * t.edgeInset * t.crossAxisInset;
 }
 
 export function displayIsoCubeTopLabelText(options: {
@@ -122,8 +129,11 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
   orientation?: IsometricOrientation;
   baseFontSizePx?: number;
   canvasScale?: number;
+  /** Host element for `--ic-iso-cube-label-*` (defaults to `documentElement`). */
+  themeScope?: Element | null;
 }): number {
-  const baseFontSizePx = options.baseFontSizePx ?? ISO_CUBE_LABEL_FONT_SIZE_PX;
+  const theme = readIsoCubeLabelTheme(options.themeScope ?? (typeof document !== "undefined" ? document.documentElement : null));
+  const baseFontSizePx = options.baseFontSizePx ?? theme.fontSizePx;
   const canvasScale = options.canvasScale ?? DEFAULT_CUBE_CANVAS_SCALE;
   const orientation = options.orientation ?? DEFAULT_ISOMETRIC_ORIENTATION;
 
@@ -132,6 +142,7 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
     options.depthIso,
     orientation,
     canvasScale,
+    theme,
   );
 
   const formatted = formatIsoCanvasLabelText(options.label);
@@ -140,6 +151,7 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
     options.depthIso,
     orientation,
     canvasScale,
+    theme,
   );
 
   let fit = baseFontSizePx;
@@ -147,12 +159,12 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
     fit = maxHeightPx;
   }
   while (
-    fit > ISO_CUBE_LABEL_FONT_SIZE_MIN_PX &&
-    measureIsoCanvasLabelTextWidthPx(formatted, fit) > maxWidthPx
+    fit > theme.fontSizeMinPx &&
+    measureIsoCanvasLabelTextWidthPx(formatted, fit, theme) > maxWidthPx
   ) {
     fit -= 1;
   }
-  return Math.max(ISO_CUBE_LABEL_FONT_SIZE_MIN_PX, Math.min(baseFontSizePx, fit));
+  return Math.max(theme.fontSizeMinPx, Math.min(baseFontSizePx, fit));
 }
 
 /** One font size for every cube label in a mount so titles stay on-face and match each other. */
@@ -162,9 +174,13 @@ export function uniformIsoCubeTopLabelFontSizePx(
     orientation?: IsometricOrientation;
     baseFontSizePx?: number;
     canvasScale?: number;
+    themeScope?: Element | null;
   },
 ): number {
-  const baseFontSizePx = options?.baseFontSizePx ?? ISO_CUBE_LABEL_FONT_SIZE_PX;
+  const theme = readIsoCubeLabelTheme(
+    options?.themeScope ?? (typeof document !== "undefined" ? document.documentElement : null),
+  );
+  const baseFontSizePx = options?.baseFontSizePx ?? theme.fontSizePx;
   if (specs.length === 0) {
     return baseFontSizePx;
   }
@@ -180,6 +196,7 @@ export function uniformIsoCubeTopLabelFontSizePx(
       ...(options?.orientation !== undefined ? { orientation: options.orientation } : {}),
       baseFontSizePx,
       ...(options?.canvasScale !== undefined ? { canvasScale: options.canvasScale } : {}),
+      themeScope: options?.themeScope,
     });
     uniform = Math.min(uniform, fit);
   }

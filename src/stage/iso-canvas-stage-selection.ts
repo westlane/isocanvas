@@ -5,6 +5,10 @@ import {
   applyDiagramNodeSelection,
   type DiagramNodeSelectionDetach,
 } from "../camera/node-selection.js";
+import {
+  applyIsoCubePointerPressToHost,
+  restoreIsoCubeExtrusionOnHost,
+} from "../isometric/cube/extrusion-press.js";
 import { IC_ISO_CUBE_SHELL_CLASS } from "../isometric/cube/cube-faces.js";
 import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../types/diagram-interaction.js";
 import type { IsoCanvasStage } from "../types/stage.js";
@@ -108,11 +112,17 @@ export function attachIsoCanvasStageNodeSelection(
     if (event.button !== 0) {
       return;
     }
+    const objectId = objectIdFromTarget(event.target);
     tapGesture = {
       x: event.clientX,
       y: event.clientY,
-      objectId: objectIdFromTarget(event.target),
+      objectId,
     };
+    if (objectId) {
+      for (const entry of options.stage.getArtboards()) {
+        applyIsoCubePointerPressToHost(entry.host, objectId, selectedIds);
+      }
+    }
   };
 
   const onPointerMove = (event: PointerEvent): void => {
@@ -135,6 +145,10 @@ export function attachIsoCanvasStageNodeSelection(
     const isTap = dx * dx + dy * dy < TAP_DRAG_THRESHOLD_PX * TAP_DRAG_THRESHOLD_PX;
     if (isTap) {
       toggleObject(tapGesture.objectId);
+    } else {
+      for (const entry of options.stage.getArtboards()) {
+        restoreIsoCubeExtrusionOnHost(entry.host, selectedIds);
+      }
     }
     tapGesture = null;
   };

@@ -64,13 +64,16 @@ svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
   --ic-label-fill: var(--zui-iso-label-fill, #212121);
   text-anchor: middle;
   dominant-baseline: central;
+  transform-box: fill-box;
+  transform-origin: center center;
+  transition: transform var(--ic-iso-cube-volume-transition-duration, 0.16s) ease;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-family: var(--ic-iso-cube-label-font-family);
   font-style: normal;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-weight: var(--ic-iso-cube-label-font-weight);
+  letter-spacing: calc(var(--ic-iso-cube-label-letter-spacing-em) * 1em);
   fill: var(--ic-label-fill);
   stroke: none;
   paint-order: fill;
@@ -145,44 +148,6 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
   cursor: pointer;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
-  transform-box: fill-box;
-  transform-origin: center bottom;
-  transition: transform var(--ic-iso-cube-volume-transition-duration, 0.16s) ease;
-}
-
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):active g.ic-iso-cube-volume {
-  transform: translate(
-      var(--ic-iso-cube-volume-press-offset-x, 0px),
-      var(--ic-iso-cube-volume-press-offset-y, 0px)
-    )
-    scale(var(--ic-iso-cube-volume-scale-active, 0.99));
-  transition-duration: 0.05s;
-}
-
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected g.ic-iso-cube-volume {
-  transform: translate(
-      var(--ic-iso-cube-volume-press-offset-x, 0px),
-      var(--ic-iso-cube-volume-press-offset-y, 0px)
-    )
-    scale(var(--ic-iso-cube-volume-scale-selected, 0.99));
-}
-
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:active g.ic-iso-cube-volume {
-  transform: translate(
-      var(--ic-iso-cube-volume-press-offset-x, 0px),
-      var(--ic-iso-cube-volume-press-offset-y, 0px)
-    )
-    scale(var(--ic-iso-cube-volume-scale-selected-active, 0.99));
-  transition-duration: 0.05s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
-    transition-duration: 0.01ms;
-  }
-}
-
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]) path.ic-iso-cube-face {
   pointer-events: all;
   transition: fill 0.12s ease;
@@ -194,20 +159,26 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-diagram-sel
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-press-bottom {
-  opacity: 0;
+  fill: var(--ic-iso-cube-ground-shadow-fill) !important;
+  stroke: none;
+  opacity: var(--ic-iso-cube-ground-shadow-opacity-rest, 0.08);
   pointer-events: none;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(var(--ic-iso-cube-press-bottom-scale-rest, 1));
   transition:
-    opacity var(--ic-iso-cube-press-bottom-transition-duration, 0.16s) ease,
-    transform var(--ic-iso-cube-press-bottom-transition-duration, 0.16s) ease;
+    fill var(--ic-iso-cube-press-bottom-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-press-bottom-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1)),
+    opacity var(--ic-iso-cube-press-bottom-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-press-bottom-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1));
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(:active, .ic-node--selected, [aria-pressed="true"])
   path.ic-iso-cube-press-bottom {
-  opacity: var(--ic-iso-cube-press-bottom-opacity, 0.08);
-  transform: scale(var(--ic-iso-cube-press-bottom-scale, 1.1));
+  fill: var(--ic-iso-cube-ground-shadow-fill-pressed) !important;
+  opacity: var(--ic-iso-cube-ground-shadow-opacity-pressed, 0.12);
+  transition:
+    fill var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1)),
+    opacity var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -312,10 +283,6 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--left,
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--back {
   fill: var(--ic-iso-cube-selected-left-pressed-fill) !important;
-}
-
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(:active, .ic-node--selected) path.ic-iso-cube-press-bottom {
-  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,

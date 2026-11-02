@@ -17,6 +17,9 @@ export const IC_ISO_CUBE_PRESS_BOTTOM_CLASS = "ic-iso-cube-press-bottom";
 /** Cube faces + label; CSS scale from bottom center when shell is pressed / selected. */
 export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
 
+/** Outset on the ground TOP plane for the cube drop shadow (iso units). */
+export const ISO_CUBE_GROUND_SHADOW_MARGIN_ISO = 0.16;
+
 /** @deprecated Use {@link IC_ISO_CUBE_PRESS_BOTTOM_CLASS}. */
 export const IC_ISO_CUBE_FOOTPRINT_INSET_CLASS = IC_ISO_CUBE_PRESS_BOTTOM_CLASS;
 

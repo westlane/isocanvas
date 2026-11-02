@@ -2,6 +2,10 @@
 // Copyright (c) 2026 West Lane
 
 import { IC_ISO_CUBE_SHELL_CLASS } from "../isometric/cube/cube-faces.js";
+import {
+  applyIsoCubePointerPressToHost,
+  restoreIsoCubeExtrusionOnHost,
+} from "../isometric/cube/extrusion-press.js";
 import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../types/diagram-interaction.js";
 
 /** Applied to {@link IC_ISO_CUBE_SHELL_CLASS} when its object is toggled on (pressed latched). */
@@ -109,6 +113,7 @@ function syncCubeShellTogglePresentation(
     shell.setAttribute("aria-pressed", pressed ? "true" : "false");
     shell.setAttribute("aria-label", id);
   }
+  restoreIsoCubeExtrusionOnHost(host, selectedIds);
 }
 
 export function clearDiagramNodeSelection(host: HTMLElement): void {
@@ -159,11 +164,15 @@ export function attachDiagramNodeSelection(
     if (event.button !== 0) {
       return;
     }
+    const objectId = objectIdFromTarget(event.target);
     tapGesture = {
       x: event.clientX,
       y: event.clientY,
-      objectId: objectIdFromTarget(event.target),
+      objectId,
     };
+    if (objectId) {
+      applyIsoCubePointerPressToHost(options.host, objectId, selectedIds);
+    }
   };
 
   const onPointerMove = (event: PointerEvent): void => {
@@ -187,6 +196,8 @@ export function attachDiagramNodeSelection(
       dx * dx + dy * dy < TAP_DRAG_THRESHOLD_PX * TAP_DRAG_THRESHOLD_PX;
     if (isTap) {
       toggleObject(tapGesture.objectId);
+    } else {
+      restoreIsoCubeExtrusionOnHost(options.host, selectedIds);
     }
     tapGesture = null;
   };

@@ -77,16 +77,39 @@
   --ic-iso-cube-selected-front-pressed-fill-mix: 9%;
   --ic-iso-cube-selected-bottom-pressed-fill-mix: 9%;
   --ic-iso-cube-selected-side-tint-percent: 40%;
-  --ic-iso-cube-press-bottom-opacity: 0.08;
+  --ic-iso-cube-ground-shadow-darken-rest: 10%;
+  --ic-iso-cube-ground-shadow-darken-pressed: 16%;
+  --ic-iso-cube-ground-shadow-fill: color-mix(
+    in oklch,
+    var(--ic-artboard-top-fill) calc(100% - var(--ic-iso-cube-ground-shadow-darken-rest)),
+    black
+  );
+  --ic-iso-cube-ground-shadow-fill-pressed: color-mix(
+    in oklch,
+    var(--ic-artboard-top-fill) calc(100% - var(--ic-iso-cube-ground-shadow-darken-pressed)),
+    black
+  );
+  --ic-iso-cube-ground-shadow-opacity-rest: 0.08;
+  --ic-iso-cube-ground-shadow-opacity-pressed: 0.12;
   --ic-iso-cube-press-bottom-scale-rest: 1;
-  --ic-iso-cube-press-bottom-scale: 1.1;
-  --ic-iso-cube-press-bottom-transition-duration: 0.16s;
-  --ic-iso-cube-volume-scale-active: 0.99;
-  --ic-iso-cube-volume-scale-selected: 0.99;
-  --ic-iso-cube-volume-scale-selected-active: 0.99;
-  --ic-iso-cube-volume-press-offset-x: 0px;
-  --ic-iso-cube-volume-press-offset-y: 0px;
+  --ic-iso-cube-press-bottom-scale: 1;
+  --ic-iso-cube-press-bottom-transition-duration-press: 0.5s;
+  --ic-iso-cube-press-bottom-transition-duration-release: 0.14s;
+  --ic-iso-cube-press-bottom-transition-ease-press: cubic-bezier(0.32, 1.05, 0.58, 1);
+  --ic-iso-cube-press-bottom-transition-ease-release: cubic-bezier(0.2, 1.35, 0.4, 1);
+  --ic-iso-cube-extrusion-press-ratio: 0.88;
+  --ic-iso-cube-extrusion-press-ratio-deep: 0.84;
   --ic-iso-cube-volume-transition-duration: 0.16s;
+
+  /* Iso cube top labels — paint in diagram-surfaces; JS reads for measure/fit/truncate */
+  --ic-iso-cube-label-font-size-px: 52;
+  --ic-iso-cube-label-font-size-min-px: 16;
+  --ic-iso-cube-label-edge-inset: 0.86;
+  --ic-iso-cube-label-cross-axis-inset: 0.94;
+  --ic-iso-cube-label-letter-spacing-em: 0.12;
+  --ic-iso-cube-label-truncate-after-chars: 20;
+  --ic-iso-cube-label-font-weight: 900;
+  --ic-iso-cube-label-font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
 
   /* Dot grid geometry (dot color: theme/layout/artboard-grid.css) */
   --ic-dot-grid-size: 18px;

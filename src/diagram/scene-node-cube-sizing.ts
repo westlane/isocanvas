@@ -4,6 +4,7 @@
 import type { DiagramSceneNode } from "../types/diagram.js";
 import type { IsometricOrientation } from "../types/diagram.js";
 import { diagramUserFootprintPxForCubeLabel } from "../layout/diagram-node-label-footprint.js";
+import { DIAGRAM_NODE_FOOTPRINT } from "../layout/diagram-node-footprint.js";
 import {
   uniformIsoCubeTopLabelFontSizePx,
 } from "../isometric/cube/canvas-text-style.js";
@@ -66,8 +67,20 @@ export function diagramSceneNodesSizedForCubeLabels(
     provisionalLabelSpecs(once, planeBoxFromNode),
     { orientation },
   );
-  if (refinedFontSizePx === labelFontSizePx) {
-    return once;
+  const sized =
+    refinedFontSizePx === labelFontSizePx
+      ? once
+      : sizeNodesForLabelFont(once, orientation, refinedFontSizePx);
+  return applyUniformCubeFootprintInScene(sized);
+}
+
+/** Same plane footprint for every cube — default lattice size (labels truncate / shrink font). */
+function applyUniformCubeFootprintInScene(
+  nodes: readonly DiagramSceneNode[],
+): DiagramSceneNode[] {
+  if (nodes.length === 0) {
+    return [];
   }
-  return sizeNodesForLabelFont(once, orientation, refinedFontSizePx);
+  const { widthPx, depthPx } = DIAGRAM_NODE_FOOTPRINT;
+  return nodes.map((node) => ({ ...node, w: widthPx, h: depthPx }));
 }

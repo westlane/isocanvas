@@ -18,6 +18,8 @@ import {
   IC_ISO_CUBE_VOLUME_CLASS,
   isoCubeFaceClassName,
   isoCubeFaceRectLayoutForPlaneTopLeft,
+  isoFootprintMarginBottomLayout,
+  ISO_CUBE_GROUND_SHADOW_MARGIN_ISO,
 } from "./cube-faces.js";
 import { themedCubeFaceColors } from "./cube.js";
 import {
@@ -34,6 +36,8 @@ import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
 import type { StackLayerPresentation } from "../../types/diagram.js";
 import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../../types/diagram-interaction.js";
 import { applyCategoryCubeThemeToShell } from "./category-cube-theme.js";
+import { paintIsoCubeShellGeometryDataset } from "./extrusion-press.js";
+import { registerIsoCubeShellLiveParts } from "./iso-cube-live-parts.js";
 
 function faceRect(
   face: IsoFaceId,
@@ -98,6 +102,13 @@ export function mountIsoBoxOnStageShell(
     top: 0,
   });
   cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
+  paintIsoCubeShellGeometryDataset(cubeShell.getElement(), {
+    width: spec.width,
+    depth: spec.depth,
+    height: spec.height,
+    orientation,
+    labelFontSizePx,
+  });
   if (spec.cubeFaceColors) {
     applyCategoryCubeThemeToShell(cubeShell.getElement(), spec.cubeFaceColors);
   }
@@ -105,6 +116,17 @@ export function mountIsoBoxOnStageShell(
     cubeShell.getElement().setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
   }
   const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+  registerIsoCubeShellLiveParts(cubeShell.getElement(), {
+    faces,
+    label,
+    width: spec.width,
+    depth: spec.depth,
+    height: spec.height,
+    orientation,
+    labelFontSizePx,
+    labelText: spec.label,
+    omitLabel: Boolean(spec.omitCubeLabel),
+  });
   const fills = faceFillsForBox(spec, colors);
   if (options?.stackLayer) {
     applyStackLayerPresentation({ faces, label }, options.stackLayer);
@@ -115,12 +137,12 @@ export function mountIsoBoxOnStageShell(
   for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
     if (options?.omitBottomFace && id === "bottom") {
       const { width: w, depth: d, height: h } = spec;
-      const footprintLayout = isoCubeFaceRectLayoutForPlaneTopLeft(
-        "bottom",
+      const footprintLayout = isoFootprintMarginBottomLayout(
         w,
         d,
         h,
         orientation,
+        ISO_CUBE_GROUND_SHADOW_MARGIN_ISO,
       );
       const pressBottom = faceRect("bottom", fills.bottom, footprintLayout);
       pressBottom.getElement().classList.add(IC_ISO_CUBE_PRESS_BOTTOM_CLASS);

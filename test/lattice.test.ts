@@ -89,7 +89,7 @@ describe("artboard lattice layout", () => {
       { widthPx: DEMO_CARD_USER_WIDTH_PX, depthPx: DEMO_CARD_USER_DEPTH_PX },
       macroPitch,
     );
-    expect(snapped.widthPx).toBeCloseTo(7 * step.xPx, 9);
+    expect(snapped.widthPx).toBeCloseTo(8 * step.xPx, 9);
     expect(snapped.depthPx).toBeCloseTo(5 * step.yPx, 9);
     expect(artboardSnapFootprintToDots({ widthPx: 1, depthPx: 1 }, macroPitch).widthPx).toBeCloseTo(
       step.xPx,

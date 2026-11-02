@@ -5,25 +5,24 @@ import type { IsometricOrientation } from "../types/diagram.js";
 import { DEFAULT_ISOMETRIC_ORIENTATION } from "../isometric/orientation.js";
 import {
   formatIsoCanvasLabelText,
-  ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET,
-  ISO_CUBE_TOP_LABEL_EDGE_INSET,
-  ISO_CUBE_LABEL_TRUNCATE_AFTER_CHARS,
   ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS,
   measureIsoCanvasLabelTextWidthPx,
+  readIsoCubeLabelTheme,
+  type IsoCubeLabelTheme,
 } from "../isometric/cube/label-text.js";
 import { DEFAULT_CUBE_CANVAS_SCALE, ISO_DIAGRAM_PX_PER_UNIT } from "../isometric/cube/cube.js";
 
-function labelTextForFootprintSizing(label: string): string {
+function labelTextForFootprintSizing(label: string, theme: IsoCubeLabelTheme): string {
   const formatted = formatIsoCanvasLabelText(label.trim());
   if (!formatted) {
     return "";
   }
-  if ([...formatted].length <= ISO_CUBE_LABEL_TRUNCATE_AFTER_CHARS) {
+  if ([...formatted].length <= theme.truncateAfterChars) {
     return formatted;
   }
   const chars = [...formatted];
   return (
-    chars.slice(0, ISO_CUBE_LABEL_TRUNCATE_AFTER_CHARS).join("") + ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS
+    chars.slice(0, theme.truncateAfterChars).join("") + ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS
   );
 }
 
@@ -34,15 +33,19 @@ export function isoCubeMinAlongEdgeIsoForLabelText(
   options?: {
     orientation?: IsometricOrientation;
     canvasScale?: number;
+    themeScope?: Element | null;
   },
 ): number {
-  const text = labelTextForFootprintSizing(label);
+  const theme = readIsoCubeLabelTheme(
+    options?.themeScope ?? (typeof document !== "undefined" ? document.documentElement : null),
+  );
+  const text = labelTextForFootprintSizing(label, theme);
   if (!text) {
     return 0;
   }
   const canvasScale = options?.canvasScale ?? DEFAULT_CUBE_CANVAS_SCALE;
-  const measuredPx = measureIsoCanvasLabelTextWidthPx(text, fontSizePx);
-  return (measuredPx / (canvasScale * ISO_CUBE_TOP_LABEL_EDGE_INSET)) * 1.14;
+  const measuredPx = measureIsoCanvasLabelTextWidthPx(text, fontSizePx, theme);
+  return (measuredPx / (canvasScale * theme.edgeInset)) * 1.14;
 }
 
 /** Min iso span on the cross axis so `fontSizePx` fits on the top face. */
@@ -50,10 +53,14 @@ export function isoCubeMinCrossEdgeIsoForLabelFontSizePx(
   fontSizePx: number,
   options?: {
     canvasScale?: number;
+    themeScope?: Element | null;
   },
 ): number {
+  const theme = readIsoCubeLabelTheme(
+    options?.themeScope ?? (typeof document !== "undefined" ? document.documentElement : null),
+  );
   const canvasScale = options?.canvasScale ?? DEFAULT_CUBE_CANVAS_SCALE;
-  const crossInset = ISO_CUBE_TOP_LABEL_EDGE_INSET * ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET;
+  const crossInset = theme.edgeInset * theme.crossAxisInset;
   return (fontSizePx / (canvasScale * crossInset)) * 1.06;
 }
 
@@ -65,16 +72,22 @@ export function diagramUserFootprintPxForCubeLabel(options: {
   minDepthPx: number;
   orientation?: IsometricOrientation;
   canvasScale?: number;
+  themeScope?: Element | null;
 }): { widthPx: number; depthPx: number } {
   const orientation = options.orientation ?? DEFAULT_ISOMETRIC_ORIENTATION;
+  const scopeOpts =
+    options.themeScope !== undefined ? { themeScope: options.themeScope } : {};
   const scaleOpts =
     options.canvasScale !== undefined ? { canvasScale: options.canvasScale } : {};
   const alongIso = isoCubeMinAlongEdgeIsoForLabelText(
     options.label,
     options.fontSizePx,
-    { ...scaleOpts, orientation },
+    { ...scaleOpts, ...scopeOpts, orientation },
   );
-  const crossIso = isoCubeMinCrossEdgeIsoForLabelFontSizePx(options.fontSizePx, scaleOpts);
+  const crossIso = isoCubeMinCrossEdgeIsoForLabelFontSizePx(options.fontSizePx, {
+    ...scaleOpts,
+    ...scopeOpts,
+  });
 
   const alongPx = alongIso * ISO_DIAGRAM_PX_PER_UNIT;
   const crossPx = crossIso * ISO_DIAGRAM_PX_PER_UNIT;
