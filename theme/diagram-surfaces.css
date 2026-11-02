@@ -66,13 +66,135 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-cat
   );
 }
 
+/* Hex prism — idle: dark left → light right; lit (:active / .ic-node--selected): inverted. */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-vertical-shell-occluder,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-recess-occluder {
+  fill: var(--ic-hex-shade-dark, var(--zui-iso-left-fill, #8b5cf6)) !important;
+  opacity: 1 !important;
+  stroke: none !important;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-interior-cap {
+  fill: var(--ic-hex-shade-dark, var(--zui-iso-left-fill, #8b5cf6)) !important;
+  opacity: 1 !important;
+  stroke: none !important;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-hex-interior-cap {
+  fill: var(--ic-hex-shade-light, var(--zui-iso-top-fill, #e9d5ff)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] {
+  --ic-hex-shade-dark: var(--zui-iso-left-fill, #8b5cf6);
+  --ic-hex-shade-mid: var(--zui-iso-front-fill, #ddd6fe);
+  --ic-hex-shade-light: var(--zui-iso-top-fill, #e9d5ff);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="0"] {
+  --ic-hex-wall-fill: var(--ic-hex-shade-dark);
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="3"] {
+  --ic-hex-wall-fill: color-mix(in oklch, var(--ic-hex-shade-dark) 67%, var(--ic-hex-shade-mid));
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="4"] {
+  --ic-hex-wall-fill: color-mix(in oklch, var(--ic-hex-shade-dark) 33%, var(--ic-hex-shade-mid));
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="5"] {
+  --ic-hex-wall-fill: var(--ic-hex-shade-mid);
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+/* Left walls lighten idle → hover → pointer down → released (selected, lightest). */
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not([data-diagram-selectable="false"]):active
+  path.ic-iso-cube-face--left {
+  fill: color-mix(in oklch, var(--ic-hex-wall-fill) 45%, var(--ic-hex-shade-light)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-cube-face--side,
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not([data-diagram-selectable="false"]):active
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected:hover:not(:active)
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected:hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+/* Idle hover: only the front-left wall (edge 3) brightens; every other face keeps its idle fill. */
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--left[data-ic-hex-recess-edge="3"] {
+  fill: color-mix(
+    in oklch,
+    var(--ic-hex-wall-fill) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
   --ic-label-fill: var(--zui-iso-label-fill, #212121);
   text-anchor: middle;
   dominant-baseline: central;
-  transform-box: fill-box;
-  transform-origin: center center;
-  transition: transform var(--ic-iso-cube-volume-transition-duration, 0.16s) ease;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
@@ -270,6 +392,44 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
       var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
 }
 
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"])
+  g.ic-iso-cube-volume {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-rest, 1),
+    var(--ic-iso-cube-volume-scale-y-rest, 1)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-release, 0.14s)
+    var(--ic-iso-cube-volume-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(
+    .ic-node--selected,
+    [aria-pressed="true"]
+  )
+  g.ic-iso-cube-volume {
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-pressed, 1.014),
+    var(--ic-iso-cube-volume-scale-y-pressed, 0.978)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-press, 0.5s)
+    var(--ic-iso-cube-volume-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active
+  g.ic-iso-cube-volume {
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-active, 1.022),
+    var(--ic-iso-cube-volume-scale-y-active, 0.962)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-press, 0.5s)
+    var(--ic-iso-cube-volume-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
 /* Ground contact — bottom (front ground) + left base (side ground); no full footprint ring. */
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
   fill: none !important;
@@ -329,15 +489,10 @@ svg[data-diagram-renderer="ic-cube-canvas"]
   svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-front-light {
     transition-duration: 0.01ms;
   }
-}
 
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
-  path.ic-iso-cube-face--top {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-top-fill, #e9d5ff) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
-    white
-  ) !important;
+  svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
+    transition-duration: 0.01ms;
+  }
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
@@ -429,15 +584,6 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label tspan {
   --ic-label-fill: var(--zui-iso-label-fill, #212121);
   fill: var(--ic-label-fill) !important;
-}
-
-svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--top {
-  fill: color-mix(
-    in oklch,
-    var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe))
-      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
-    white
-  ) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-front-light {

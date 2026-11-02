@@ -109,6 +109,7 @@ function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSp
     height,
     planeBoxRole: "domain",
     ...(node.cubeFaceColors !== undefined ? { cubeFaceColors: node.cubeFaceColors } : {}),
+    ...(node.isoPrism !== undefined ? { isoPrism: node.isoPrism } : {}),
     ...overrides,
   };
 }

@@ -5,6 +5,14 @@ import type { ViewBox } from "./core.js";
 
 /** Portable diagram interchange (e.g. domainspec kernel export). Render with `src/isometric/` helpers in apps. */
 
+/** Default iso extrusion footprint (rectangular pillow cube). */
+export const ISO_PRISM_CUBE = "cube" as const;
+
+/** Flat-top hexagonal prism (same mount pipeline and CSS as cube). */
+export const ISO_PRISM_HEXAGON = "hexagon" as const;
+
+export type IsoPrismKind = typeof ISO_PRISM_CUBE | typeof ISO_PRISM_HEXAGON;
+
 export type DiagramSceneNode = {
   id: string;
   label: string;
@@ -20,6 +28,8 @@ export type DiagramSceneNode = {
   };
   /** Per-node iso face fills (continuous row / merged artboards). */
   cubeFaceColors?: DiagramCubeFaceColors;
+  /** Extrusion footprint shape (default {@link ISO_PRISM_CUBE}). */
+  isoPrism?: IsoPrismKind;
 };
 
 /** Lit face paint for one domain cube (overrides theme {@link IsoCanvasColors} at mount). */
@@ -65,6 +75,7 @@ export type IsoBoxSpec = {
   compactLabel?: boolean;
   planeBoxRole?: "domain" | "foundationSlab";
   omitCubeLabel?: boolean;
+  isoPrism?: IsoPrismKind;
 };
 
 export type IsoFaceId = "bottom" | "back" | "left" | "side" | "front" | "top";

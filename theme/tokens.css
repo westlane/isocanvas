@@ -118,7 +118,30 @@
   );
   --ic-iso-cube-extrusion-press-ratio: 0.88;
   --ic-iso-cube-extrusion-press-ratio-deep: 0.84;
+  --ic-iso-cube-volume-scale-x-rest: 1;
+  --ic-iso-cube-volume-scale-y-rest: 1;
+  /* Slight horizontal bulge + vertical squash — reads as a physical button press (cube + hex prism). */
+  --ic-iso-cube-volume-scale-x-pressed: 1.014;
+  --ic-iso-cube-volume-scale-y-pressed: 0.978;
+  --ic-iso-cube-volume-scale-x-active: 1.022;
+  --ic-iso-cube-volume-scale-y-active: 0.962;
   --ic-iso-cube-volume-transition-duration: 0.16s;
+  --ic-iso-cube-volume-transition-duration-press: var(
+    --ic-iso-cube-press-bottom-transition-duration-press,
+    0.5s
+  );
+  --ic-iso-cube-volume-transition-duration-release: var(
+    --ic-iso-cube-press-bottom-transition-duration-release,
+    0.14s
+  );
+  --ic-iso-cube-volume-transition-ease-press: var(
+    --ic-iso-cube-press-bottom-transition-ease-press,
+    cubic-bezier(0.32, 1.05, 0.58, 1)
+  );
+  --ic-iso-cube-volume-transition-ease-release: var(
+    --ic-iso-cube-press-bottom-transition-ease-release,
+    cubic-bezier(0.2, 1.35, 0.4, 1)
+  );
   /* Top-face diagonal triangle overlay (see top-gloss.ts, diagram-surfaces.css) */
   --ic-iso-cube-top-gloss-opacity: 0.012;
   --ic-iso-cube-top-gloss-inset-ratio: 0.09;

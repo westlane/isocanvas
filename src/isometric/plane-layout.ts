@@ -70,6 +70,7 @@ export function isoBoxSpecFromPlaneBox(
     ...(box.compactLabel ? { compactLabel: true } : {}),
     ...(box.planeBoxRole !== undefined ? { planeBoxRole: box.planeBoxRole } : {}),
     ...(box.omitCubeLabel ? { omitCubeLabel: true } : {}),
+    ...(box.isoPrism !== undefined ? { isoPrism: box.isoPrism } : {}),
   };
 }
 

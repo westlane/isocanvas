@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import type { DiagramCubeFaceColors } from "./diagram.js";
+import type { DiagramCubeFaceColors, IsoPrismKind } from "./diagram.js";
 
 /** Logical artboard size in user units (+x right, +y down; origin bottom-left). */
 export type ArtboardUserSize = {
@@ -52,6 +52,8 @@ export type PlaneBoxSpec = {
   monoFaceFill?: string;
   /** Domain cube face overrides (from {@link DiagramSceneNode.cubeFaceColors}). */
   cubeFaceColors?: DiagramCubeFaceColors;
+  /** Extrusion footprint shape (default cube). */
+  isoPrism?: IsoPrismKind;
   /** Smaller top label on companion slabs. */
   compactLabel?: boolean;
   /** When true, mount faces only (caption may be placed elsewhere). */

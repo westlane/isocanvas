@@ -7,9 +7,9 @@ import {
   type IsometricPath,
   IsometricRectangle,
   IsometricText,
-  PlaneView,
 } from "@elchininet/isometric";
-import type { IsoBoxSpec, IsoFaceId, IsometricOrientation } from "../../types/diagram.js";
+import type { IsoBoxSpec, IsoFaceId, IsometricOrientation, IsoPrismKind } from "../../types/diagram.js";
+import { ISO_PRISM_CUBE } from "../../types/diagram.js";
 import type { IsoCanvasColors } from "../../types/theme.js";
 import { DEFAULT_ISOMETRIC_ORIENTATION } from "../orientation.js";
 import {
@@ -23,15 +23,9 @@ import {
   isoFootprintMarginBottomLayout,
   ISO_CUBE_GROUND_SHADOW_MARGIN_ISO,
 } from "./cube-faces.js";
-import { themedCubeFaceColors } from "./cube.js";
+import { faceFillsForBox, createIsoBoxLabel } from "./prism-shared.js";
 import {
-  CANVAS_TEXT_NO_STROKE,
-  displayIsoCubeTopLabelText,
-  IC_ISO_CUBE_LABEL_CLASS,
   ISO_CUBE_FACE_NO_STROKE,
-  isoBoxTopFaceLabelLayout,
-  ISO_CANVAS_LABEL_FONT_FAMILY,
-  ISO_CANVAS_LABEL_FONT_WEIGHT,
   ISO_CUBE_LABEL_FONT_SIZE_PX,
 } from "./canvas-text-style.js";
 import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
@@ -43,35 +37,36 @@ import { registerIsoCubeShellLiveParts } from "./iso-cube-live-parts.js";
 import { createIsoCubeTopGlossTriangle } from "./top-gloss.js";
 import { createIsoCubeBottomRimPaths, isoCubeBottomRimPathList, type IsoCubeBottomRimPaths } from "./bottom-rim.js";
 import { createIsoCubeCurvedTopFace, createIsoCubeCurvedBottomFace, createIsoCubeCurvedFootprintFromLayout } from "./top-face-curve.js";
-import { createIsoCubeCurvedVerticalFace, createIsoCubeFrontLightOverlay, isIsoCurvedVerticalFace, paintIsoCubeCurvedVerticalFacePath } from "./vertical-face-curve.js";
+import { createIsoCubeCurvedVerticalFace, createIsoCubeFrontLightOverlay, isIsoCurvedVerticalFace } from "./vertical-face-curve.js";
+import { isIsoHexagonPrism, IC_ISO_PRISM_ATTR } from "../hexagon/hex.js";
+import { createLocalIsoHexBoxParts } from "../hexagon/hex-box-parts.js";
+import { createIsoHexCurvedFootprintFromLayout } from "../hexagon/hex-footprint-curve.js";
+import { isoHexBottomRimPathList, type IsoHexBottomRimPaths } from "../hexagon/hex-bottom-rim.js";
 
-function faceRect(
-  face: IsoFaceId,
-  fill: string,
-  layout: ReturnType<typeof isoCubeFaceRectLayoutForPlaneTopLeft>,
-): IsometricRectangle {
-  return new IsometricRectangle({
-    planeView: layout.planeView,
-    width: layout.width,
-    height: layout.height,
-    ...(layout.left !== undefined ? { left: layout.left } : {}),
-    ...(layout.right !== undefined ? { right: layout.right } : {}),
-    ...(layout.top !== undefined ? { top: layout.top } : {}),
-    className: isoCubeFaceClassName(face),
-    fillColor: fill,
-    ...ISO_CUBE_FACE_NO_STROKE,
-  });
+function prismBottomRimPathList(
+  prism: IsoPrismKind,
+  paths: IsoCubeBottomRimPaths | IsoHexBottomRimPaths,
+): IsometricPath[] {
+  if (prism === "hexagon") {
+    return isoHexBottomRimPathList(paths as IsoHexBottomRimPaths);
+  }
+  return isoCubeBottomRimPathList(paths as IsoCubeBottomRimPaths);
 }
 
 function applyStackLayerPresentation(
   parts: {
     faces: Record<IsoFaceId, IsometricRectangle | IsometricPath>;
+    recessWalls?: IsometricPath[];
+    recessOccluder?: IsometricPath;
+    verticalShellOccluder?: IsometricPath | undefined;
+    interiorCap?: IsometricPath;
     frontLight: IsometricPath;
     topGloss: IsometricPath;
-    bottomRims: IsoCubeBottomRimPaths;
+    bottomRims: IsoCubeBottomRimPaths | IsoHexBottomRimPaths;
     label: IsometricText;
   },
   presentation: StackLayerPresentation,
+  prism: IsoPrismKind,
 ): void {
   const faceOpacity = stackFaceOpacity(presentation);
   const labelOpacity = stackLabelOpacity(presentation);
@@ -81,9 +76,21 @@ function applyStackLayerPresentation(
     }
     parts.faces[id].fillOpacity = faceOpacity;
   }
+  for (const wall of parts.recessWalls ?? []) {
+    wall.fillOpacity = faceOpacity;
+  }
+  if (parts.verticalShellOccluder) {
+    parts.verticalShellOccluder.fillOpacity = faceOpacity;
+  }
+  if (parts.recessOccluder) {
+    parts.recessOccluder.fillOpacity = faceOpacity;
+  }
+  if (parts.interiorCap) {
+    parts.interiorCap.fillOpacity = faceOpacity;
+  }
   parts.frontLight.fillOpacity = faceOpacity;
   parts.topGloss.fillOpacity = faceOpacity;
-  for (const rim of isoCubeBottomRimPathList(parts.bottomRims)) {
+  for (const rim of prismBottomRimPathList(prism, parts.bottomRims)) {
     rim.getElement().setAttribute("opacity", String(faceOpacity));
   }
   parts.label.getElement().setAttribute("opacity", String(labelOpacity));
@@ -92,6 +99,10 @@ function applyStackLayerPresentation(
 function paintStackLayerDataset(el: Element, presentation: StackLayerPresentation): void {
   el.setAttribute("data-stack-rank", String(presentation.rank));
   el.setAttribute("data-stack-size", String(presentation.size));
+}
+
+function isoPrismKindForSpec(spec: Pick<IsoBoxSpec, "isoPrism">): IsoPrismKind {
+  return spec.isoPrism ?? ISO_PRISM_CUBE;
 }
 
 export function mountIsoBoxOnStageShell(
@@ -108,6 +119,7 @@ export function mountIsoBoxOnStageShell(
 ): void {
   const orientation = options?.orientation ?? DEFAULT_ISOMETRIC_ORIENTATION;
   const labelFontSizePx = options?.labelFontSizePx ?? ISO_CUBE_LABEL_FONT_SIZE_PX;
+  const prismKind = isoPrismKindForSpec(spec);
   const boxShell = new IsometricGroup({
     left: spec.left - stageGround.left,
     right: spec.right - stageGround.right,
@@ -119,6 +131,7 @@ export function mountIsoBoxOnStageShell(
     top: 0,
   });
   cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
+  cubeShell.getElement().setAttribute(IC_ISO_PRISM_ATTR, prismKind);
   paintIsoCubeShellGeometryDataset(cubeShell.getElement(), {
     width: spec.width,
     depth: spec.depth,
@@ -132,14 +145,17 @@ export function mountIsoBoxOnStageShell(
   if (spec.planeBoxRole === "foundationSlab") {
     cubeShell.getElement().setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
   }
-  const { faces, frontLight, topGloss, bottomRims, label } = createLocalIsoBoxParts(
-    spec,
-    colors,
-    orientation,
-    labelFontSizePx,
-  );
+  const hexParts = isIsoHexagonPrism(prismKind)
+    ? createLocalIsoHexBoxParts(spec, colors, orientation, labelFontSizePx)
+    : undefined;
+  const cubeParts = hexParts ?? createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+  const { faces, frontLight, topGloss, bottomRims, label } = hexParts ?? cubeParts;
+  const recessWalls = hexParts?.recessWalls ?? [];
+  const verticalShellOccluder = hexParts?.verticalShellOccluder;
   registerIsoCubeShellLiveParts(cubeShell.getElement(), {
     faces,
+    recessWalls,
+    verticalShellOccluder,
     frontLight,
     topGloss,
     bottomRims,
@@ -152,14 +168,22 @@ export function mountIsoBoxOnStageShell(
     labelFontSizePx,
     labelText: spec.label,
     omitLabel: Boolean(spec.omitCubeLabel),
+    isoPrism: prismKind,
   });
   const fills = faceFillsForBox(spec, colors);
   if (options?.stackLayer) {
-    applyStackLayerPresentation({ faces, frontLight, topGloss, bottomRims, label }, options.stackLayer);
+    applyStackLayerPresentation(
+      { faces, recessWalls, verticalShellOccluder, frontLight, topGloss, bottomRims, label },
+      options.stackLayer,
+      prismKind,
+    );
     paintStackLayerDataset(boxShell.getElement(), options.stackLayer);
   }
   const volumeGroup = new IsometricGroup({ left: 0, right: 0, top: 0 });
   volumeGroup.getElement().classList.add(IC_ISO_CUBE_VOLUME_CLASS);
+  if (hexParts && verticalShellOccluder) {
+    volumeGroup.addChild(verticalShellOccluder);
+  }
   for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
     if (options?.omitBottomFace && id === "bottom") {
       const { width: w, depth: d, height: h } = spec;
@@ -177,7 +201,8 @@ export function mountIsoBoxOnStageShell(
         h,
         orientation,
       );
-      const footprintOccluder = createIsoCubeCurvedFootprintFromLayout(
+      const createFootprint = prismKind === "hexagon" ? createIsoHexCurvedFootprintFromLayout : createIsoCubeCurvedFootprintFromLayout;
+      const footprintOccluder = createFootprint(
         IC_ISO_CUBE_FOOTPRINT_OCCLUDER_CLASS,
         fills.bottom,
         bottomLayout,
@@ -188,17 +213,27 @@ export function mountIsoBoxOnStageShell(
         footprintOccluder.fillOpacity = stackFaceOpacity(options.stackLayer);
       }
       cubeShell.addChild(footprintOccluder);
-      const pressBottom = createIsoCubeCurvedFootprintFromLayout(
-        `${isoCubeFaceClassName("bottom")} ${IC_ISO_CUBE_PRESS_BOTTOM_CLASS}`,
-        fills.bottom,
-        footprintLayout,
-        w,
-        d,
-      );
-      if (options.stackLayer) {
-        pressBottom.fillOpacity = stackFaceOpacity(options.stackLayer);
+      if (prismKind !== "hexagon") {
+        const pressBottom = createFootprint(
+          `${isoCubeFaceClassName("bottom")} ${IC_ISO_CUBE_PRESS_BOTTOM_CLASS}`,
+          fills.bottom,
+          footprintLayout,
+          w,
+          d,
+        );
+        if (options.stackLayer) {
+          pressBottom.fillOpacity = stackFaceOpacity(options.stackLayer);
+        }
+        cubeShell.addChild(pressBottom);
       }
-      cubeShell.addChild(pressBottom);
+      continue;
+    }
+    if (hexParts && (id === "back" || id === "left")) {
+      if (id === "back") {
+        for (const wall of recessWalls) {
+          volumeGroup.addChild(wall);
+        }
+      }
       continue;
     }
     volumeGroup.addChild(faces[id]);
@@ -228,7 +263,7 @@ export function mountIsoBoxOnStageShell(
     node.addChild(label);
   }
   volumeGroup.addChild(node);
-  for (const rim of isoCubeBottomRimPathList(bottomRims)) {
+  for (const rim of prismBottomRimPathList(prismKind, bottomRims)) {
     volumeGroup.addChild(rim);
   }
   cubeShell.addChild(volumeGroup);
@@ -236,68 +271,7 @@ export function mountIsoBoxOnStageShell(
   shell.addChild(boxShell);
 }
 
-function createIsoBoxLabel(
-  spec: Pick<IsoBoxSpec, "label" | "width" | "depth" | "height">,
-  colors: IsoCanvasColors,
-  orientation: IsometricOrientation,
-  labelFontSizePx: number,
-): IsometricText {
-  const { width: w, depth: d, height: h } = spec;
-  const layout = isoBoxTopFaceLabelLayout(w, d, h, orientation);
-  return new IsometricText({
-    planeView: PlaneView.TOP,
-    text: displayIsoCubeTopLabelText({
-      label: spec.label,
-      widthIso: w,
-      depthIso: d,
-      fontSizePx: labelFontSizePx,
-      orientation,
-    }),
-    left: layout.left,
-    right: layout.right,
-    top: layout.top,
-    fontSize: labelFontSizePx,
-    fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
-    fontStyle: "normal",
-    fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
-    fillColor: colors.isoLabelFill,
-    ...CANVAS_TEXT_NO_STROKE,
-    className: IC_ISO_CUBE_LABEL_CLASS,
-    origin: ["center", "center"],
-    rotation: layout.rotation,
-    selectable: false,
-  });
-}
-
-function faceFillsForBox(
-  spec: Pick<IsoBoxSpec, "monoFaceFill" | "cubeFaceColors">,
-  colors: IsoCanvasColors,
-): Record<IsoFaceId, string> {
-  const themed = themedCubeFaceColors(colors);
-  if (spec.monoFaceFill) {
-    const mono = spec.monoFaceFill;
-    return {
-      bottom: mono,
-      back: mono,
-      left: mono,
-      side: mono,
-      front: mono,
-      top: mono,
-    };
-  }
-  const custom = spec.cubeFaceColors;
-  if (!custom) {
-    return themed;
-  }
-  return {
-    top: custom.top,
-    front: custom.front,
-    side: custom.right,
-    left: custom.left,
-    bottom: custom.bottom,
-    back: custom.left,
-  };
-}
+export { faceFillsForBox, createIsoBoxLabel } from "./prism-shared.js";
 
 export function createLocalIsoBoxParts(
   spec: IsoBoxSpec,
@@ -328,11 +302,8 @@ export function createLocalIsoBoxParts(
       faces[id] = createIsoCubeCurvedVerticalFace(id, fills[id], w, d, h, orientation);
       continue;
     }
-    faces[id] = faceRect(
-      id,
-      fills[id],
-      isoCubeFaceRectLayoutForPlaneTopLeft(id, w, d, h, orientation),
-    );
+    const _exhaustive: never = id;
+    return _exhaustive;
   }
 
   const topGloss = createIsoCubeTopGlossTriangle(w, d, h, orientation);

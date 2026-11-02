@@ -16,11 +16,13 @@ import { artboardPlaneToIsoGround } from "./diagram-user.js";
 import { readIsometricOrientationFromCanvas, isometricCanvasMountHost } from "./orientation.js";
 import { isoBoxSpecsOnArtboardGround } from "./plane-layout.js";
 import {
-  createLocalIsoBoxParts,
   mountAnchoredFace,
   mountIsoBoxOnStageShell,
   mountNodeLabel,
 } from "./cube/box-parts.js";
+import {
+  createLocalIsoPrismParts,
+} from "./prism-parts.js";
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
 import { fitIsoCubeTopLabelFontSizePx, readIsoCubeLabelTheme, uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
@@ -111,7 +113,7 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, frontLight, topGloss, bottomRims, label } = createLocalIsoBoxParts(
+    const { faces, recessWalls, frontLight, topGloss, bottomRims, label } = createLocalIsoPrismParts(
       spec,
       colors,
       orientation,
@@ -119,6 +121,18 @@ function isoBoxMountEntries(
     );
     for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
       if (options?.omitBottomFace && id === "bottom") {
+        continue;
+      }
+      if (recessWalls.length > 0 && (id === "back" || id === "left")) {
+        if (id === "back") {
+          recessWalls.forEach((wall, index) => {
+            entries.push({
+              depth: isoFacePaintOrder(spec, "back") + index * 0.00001,
+              layer: FACE_LAYER.back,
+              mount: (c) => mountAnchoredFace(c, spec, wall),
+            });
+          });
+        }
         continue;
       }
       const rect = faces[id];

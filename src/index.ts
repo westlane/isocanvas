@@ -32,7 +32,15 @@ export * from "./isometric/cube/cube-faces.js";
 export * from "./isometric/cube/cube.js";
 export * from "./isometric/diagram-user.js";
 export * from "./isometric/stage/ground-local.js";
+export * from "./isometric/prism-parts.js";
 export * from "./isometric/mount.js";
+export {
+  ISO_PRISM_CUBE,
+  ISO_PRISM_HEXAGON,
+  IC_ISO_PRISM_ATTR,
+  isIsoHexagonPrism,
+  normalizeIsoPrismKind,
+} from "./isometric/hexagon/hex.js";
 export * from "./isometric/orientation.js";
 export * from "./isometric/plane-layout.js";
 export * from "./isometric/stage/stage.js";
