@@ -119,11 +119,17 @@ export function artboardLatticeStageForPlaneBoxInRow(
   const pitch = planeRow.cellWidth + planeRow.gapPx;
   const stripX = stripStage.x ?? 0;
   const stripY = stripStage.y ?? 0;
-  return {
+  const stage: ArtboardPlaneStage = {
     x: stripX + col * pitch,
     y: stripY,
     width: planeRow.cellWidth,
     height: planeRow.cellHeight,
-    divisions: stripStage.divisions,
   };
+  if (stripStage.divisions !== undefined) {
+    stage.divisions = stripStage.divisions;
+  }
+  if (stripStage.subdivisions !== undefined) {
+    stage.subdivisions = stripStage.subdivisions;
+  }
+  return stage;
 }

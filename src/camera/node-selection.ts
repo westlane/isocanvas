@@ -28,7 +28,7 @@ function diagramObjectSelectable(node: Element | null): boolean {
 }
 
 function selectableNodeFromShell(shell: Element): Element | null {
-  for (const nested of shell.querySelectorAll("g.node[data-object-id]")) {
+  for (const nested of Array.from(shell.querySelectorAll("g.node[data-object-id]"))) {
     if (diagramObjectSelectable(nested)) {
       return nested;
     }
