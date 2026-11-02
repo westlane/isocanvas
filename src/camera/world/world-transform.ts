@@ -19,14 +19,8 @@ export function worldTransformFromViewBox(
   const scale = Math.min(scaleX, scaleY);
   const contentW = vb.w * scale;
   const contentH = vb.h * scale;
-  const tx =
-    align === "min"
-      ? -vb.x * scale
-      : (viewportWidthPx - contentW) / 2 - vb.x * scale;
-  const ty =
-    align === "min"
-      ? -vb.y * scale
-      : (viewportHeightPx - contentH) / 2 - vb.y * scale;
+  const tx = align === "min" ? 0 : (viewportWidthPx - contentW) / 2;
+  const ty = align === "min" ? 0 : (viewportHeightPx - contentH) / 2;
   return {
     tx,
     ty,

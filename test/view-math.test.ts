@@ -40,6 +40,22 @@ describe("view-math", () => {
     expect(isValidViewBox(next)).toBe(true);
   });
 
+  it("viewBoxZoomAtPoint keeps the wheel anchor under the same client point", () => {
+    const vb = { x: 10, y: 20, w: 100, h: 100 };
+    const anchor = { x: 40, y: 60 };
+    const factor = wheelZoomFactor(-40);
+    const next = viewBoxZoomAtPoint(vb, anchor.x, anchor.y, factor);
+    const anchorRect = { left: 0, top: 0, width: 200, height: 200 } as DOMRect;
+    const { tx, ty, scale } = worldTransformFromViewBox(vb, 200, 200, "mid");
+    const clientX = tx + (anchor.x - vb.x) * scale;
+    const clientY = ty + (anchor.y - vb.y) * scale;
+    const { tx: ntx, ty: nty, scale: nscale } = worldTransformFromViewBox(next, 200, 200, "mid");
+    const clientXAfter = ntx + (anchor.x - next.x) * nscale;
+    const clientYAfter = nty + (anchor.y - next.y) * nscale;
+    expect(clientXAfter).toBeCloseTo(clientX, 5);
+    expect(clientYAfter).toBeCloseTo(clientY, 5);
+  });
+
   it("viewBoxPanByWorldViewport moves the frame opposite drag", () => {
     const next = viewBoxPanByWorldViewport({ x: 10, y: 20, w: 100, h: 50 }, 10, 0, 200, 100);
     expect(next.x).toBe(5);
@@ -55,8 +71,8 @@ describe("view-math", () => {
     );
     expect(scale).toBe(1);
     expect(sx).toBe(sy);
-    expect(tx).toBe(50 - 10);
-    expect(ty).toBe(0 - 20);
+    expect(tx).toBe(50);
+    expect(ty).toBe(0);
   });
 
   it("worldTranslateStyleFromViewBox omits scale for sharp SVG viewBox zoom", () => {

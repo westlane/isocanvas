@@ -85,8 +85,8 @@ export function dotGridWorldStyleFromViewBox(
   /** Half-cell phase only; viewBox pan lives in {@link planePanXPx} / `tx`, not here (avoids 2× pan on dots). */
   const phaseX = phasedScreenOffset(0, phaseScaled, cellPx);
   const phaseY = phasedScreenOffset(0, phaseScaled, cellPx);
-  const planePanX = insetAnchor + offsetX + tx;
-  const planePanY = insetAnchor + offsetY + ty;
+  const planePanX = insetAnchor + offsetX + tx - vb.x * scale;
+  const planePanY = insetAnchor + offsetY + ty - vb.y * scale;
   return {
     cellPx,
     phasePx: phaseScaled,

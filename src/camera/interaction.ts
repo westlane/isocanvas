@@ -60,6 +60,27 @@ export function viewBoxPanByWorldViewport(
   };
 }
 
+/** Map a client point into the SVG’s current viewBox user space (uses `getScreenCTM`). */
+export function viewBoxUserFromClientOnSvg(
+  svg: SVGSVGElement,
+  clientX: number,
+  clientY: number,
+): { x: number; y: number } | null {
+  const matrix = svg.getScreenCTM();
+  if (!matrix) {
+    return null;
+  }
+  const inverse = matrix.inverse();
+  if (!Number.isFinite(inverse.a)) {
+    return null;
+  }
+  const point = new DOMPoint(clientX, clientY).matrixTransform(inverse);
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+    return null;
+  }
+  return { x: point.x, y: point.y };
+}
+
 /** Map a screen point to viewBox user space (SVG `meet` + optional SVG offset in anchor space). */
 export function viewBoxUserFromClientInWorldViewport(
   clientX: number,

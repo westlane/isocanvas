@@ -4,18 +4,6 @@
 import type { ViewBox } from "../types/core.js";
 import { isValidViewBox, clamp } from "./view-box/clamp.js";
 import { readViewBoxFromSvg, viewBoxAlignFromSvg } from "./view-box/attributes.js";
-import {
-  applyWorldCameraToHost,
-  readWorldCameraFromHost,
-  readWorldCameraViewport,
-} from "./world/apply-world-camera.js";
-import { applyWorldCameraViewBoxToHost } from "./world/view-box-host.js";
-import {
-  viewBoxPanByWorldViewport,
-  viewBoxUserFromClientInWorldViewport,
-  viewBoxZoomAtPoint,
-  wheelZoomFactor,
-} from "./interaction.js";
 import type { WorldCameraLayerOptions } from "../types/camera.js";
 
 /** Options for {@link attachWorldCameraPanZoom}. */
@@ -227,30 +215,35 @@ export function attachWorldCameraPanZoom(
       return;
     }
     event.preventDefault();
-    const vb = readLogicalViewBoxFromHost(options.host, svg);
+    const vb = readViewBoxFromSvg(svg);
     const align = viewBoxAlignFromSvg(svg);
-    const { x: userX, y: userY } = viewBoxUserFromClientInWorldViewport(
-      event.clientX,
-      event.clientY,
-      anchorRect,
-      vb,
-      width,
-      height,
-      offsetX,
-      offsetY,
-      align,
-    );
+    const fromSvg = viewBoxUserFromClientOnSvg(svg, event.clientX, event.clientY);
+    const { x: userX, y: userY } =
+      fromSvg ??
+      viewBoxUserFromClientInWorldViewport(
+        event.clientX,
+        event.clientY,
+        anchorRect,
+        vb,
+        width,
+        height,
+        offsetX,
+        offsetY,
+        align,
+      );
     if (event.shiftKey) {
       applyCamera(
         viewBoxPanByWorldViewport(vb, event.deltaX, event.deltaY, width, height, align),
       );
       return;
     }
-    const factor = wheelZoomFactor(event.deltaY);
+    const deltaY = normalizedWheelDelta(event.deltaY, event.deltaMode, height);
+    const factor = wheelZoomFactor(deltaY);
     applyCamera(viewBoxZoomAtPoint(vb, userX, userY, factor));
   };
 
   const capture = { capture: true };
+  const wheelOpts = { passive: false, capture: true } as const;
   const onContextMenu = (event: Event): void => {
     event.preventDefault();
   };
@@ -259,7 +252,7 @@ export function attachWorldCameraPanZoom(
   options.surface.addEventListener("pointermove", onPointerMove, capture);
   options.surface.addEventListener("pointerup", endPan, capture);
   options.surface.addEventListener("pointercancel", endPan, capture);
-  options.surface.addEventListener("wheel", onWheel, { passive: false });
+  options.surface.addEventListener("wheel", onWheel, wheelOpts);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("resize", resyncWorld);
@@ -275,7 +268,7 @@ export function attachWorldCameraPanZoom(
     options.surface.removeEventListener("pointermove", onPointerMove, capture);
     options.surface.removeEventListener("pointerup", endPan, capture);
     options.surface.removeEventListener("pointercancel", endPan, capture);
-    options.surface.removeEventListener("wheel", onWheel);
+    options.surface.removeEventListener("wheel", onWheel, wheelOpts);
     window.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("keyup", onKeyUp);
     window.removeEventListener("resize", resyncWorld);
