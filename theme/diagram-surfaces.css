@@ -105,6 +105,15 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--top {
   );
 }
 
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-top-gloss {
+  fill: var(--ic-iso-cube-top-gloss-color, #000) !important;
+  stroke: none;
+  pointer-events: none;
+  opacity: var(--ic-iso-cube-top-gloss-opacity, 0.02);
+  mix-blend-mode: var(--ic-iso-cube-top-gloss-blend, multiply);
+  transition: opacity 0.12s ease;
+}
+
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
   stroke: var(
     --ic-iso-face-stroke-front,

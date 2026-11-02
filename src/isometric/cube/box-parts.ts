@@ -4,6 +4,7 @@
 import {
   type IsometricCanvas,
   IsometricGroup,
+  type IsometricPath,
   IsometricRectangle,
   IsometricText,
   PlaneView,
@@ -38,6 +39,7 @@ import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../../types/diagram-interaction.
 import { applyCategoryCubeThemeToShell } from "./category-cube-theme.js";
 import { paintIsoCubeShellGeometryDataset } from "./extrusion-press.js";
 import { registerIsoCubeShellLiveParts } from "./iso-cube-live-parts.js";
+import { createIsoCubeTopGlossTriangle } from "./top-gloss.js";
 
 function faceRect(
   face: IsoFaceId,
@@ -58,7 +60,11 @@ function faceRect(
 }
 
 function applyStackLayerPresentation(
-  parts: { faces: Record<IsoFaceId, IsometricRectangle>; label: IsometricText },
+  parts: {
+    faces: Record<IsoFaceId, IsometricRectangle>;
+    topGloss: IsometricPath;
+    label: IsometricText;
+  },
   presentation: StackLayerPresentation,
 ): void {
   const faceOpacity = stackFaceOpacity(presentation);
@@ -69,6 +75,7 @@ function applyStackLayerPresentation(
     }
     parts.faces[id].fillOpacity = faceOpacity;
   }
+  parts.topGloss.fillOpacity = faceOpacity;
   parts.label.getElement().setAttribute("opacity", String(labelOpacity));
 }
 
@@ -115,9 +122,10 @@ export function mountIsoBoxOnStageShell(
   if (spec.planeBoxRole === "foundationSlab") {
     cubeShell.getElement().setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
   }
-  const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+  const { faces, topGloss, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
   registerIsoCubeShellLiveParts(cubeShell.getElement(), {
     faces,
+    topGloss,
     label,
     width: spec.width,
     depth: spec.depth,
@@ -129,7 +137,7 @@ export function mountIsoBoxOnStageShell(
   });
   const fills = faceFillsForBox(spec, colors);
   if (options?.stackLayer) {
-    applyStackLayerPresentation({ faces, label }, options.stackLayer);
+    applyStackLayerPresentation({ faces, topGloss, label }, options.stackLayer);
     paintStackLayerDataset(boxShell.getElement(), options.stackLayer);
   }
   const volumeGroup = new IsometricGroup({ left: 0, right: 0, top: 0 });
@@ -153,6 +161,9 @@ export function mountIsoBoxOnStageShell(
       continue;
     }
     volumeGroup.addChild(faces[id]);
+    if (id === "top") {
+      volumeGroup.addChild(topGloss);
+    }
   }
   const node = new IsometricGroup({
     id: spec.id,
@@ -246,7 +257,7 @@ export function createLocalIsoBoxParts(
   colors: IsoCanvasColors,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
   labelFontSizePx: number = ISO_CUBE_LABEL_FONT_SIZE_PX,
-): { faces: Record<IsoFaceId, IsometricRectangle>; label: IsometricText } {
+): { faces: Record<IsoFaceId, IsometricRectangle>; topGloss: IsometricPath; label: IsometricText } {
   const { width: w, depth: d, height: h } = spec;
   const fills = faceFillsForBox(spec, colors);
   const faces = {} as Record<IsoFaceId, IsometricRectangle>;
@@ -259,18 +270,20 @@ export function createLocalIsoBoxParts(
     );
   }
 
+  const topGloss = createIsoCubeTopGlossTriangle(w, d, h, orientation);
+
   const labelSize = spec.compactLabel ? labelFontSizePx * 0.72 : labelFontSizePx;
   const labelColors =
     spec.cubeFaceColors?.labelFill !== undefined
       ? { ...colors, isoLabelFill: spec.cubeFaceColors.labelFill }
       : colors;
-  return { faces, label: createIsoBoxLabel(spec, labelColors, orientation, labelSize) };
+  return { faces, topGloss, label: createIsoBoxLabel(spec, labelColors, orientation, labelSize) };
 }
 
 export function mountAnchoredFace(
   canvas: IsometricCanvas,
   spec: IsoBoxSpec,
-  face: IsometricRectangle,
+  face: IsometricRectangle | IsometricPath,
 ): void {
   const shell = new IsometricGroup({
     left: spec.left,

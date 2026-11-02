@@ -100,6 +100,10 @@
   --ic-iso-cube-extrusion-press-ratio: 0.88;
   --ic-iso-cube-extrusion-press-ratio-deep: 0.84;
   --ic-iso-cube-volume-transition-duration: 0.16s;
+  /* Top-face diagonal triangle overlay (see top-gloss.ts, diagram-surfaces.css) */
+  --ic-iso-cube-top-gloss-opacity: 0.02;
+  --ic-iso-cube-top-gloss-color: #000;
+  --ic-iso-cube-top-gloss-blend: multiply;
 
   /* Iso cube top labels — paint in diagram-surfaces; JS reads for measure/fit/truncate */
   --ic-iso-cube-label-font-size-px: 52;

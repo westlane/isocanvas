@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import { type IsometricCanvas, IsometricGroup, IsometricPath } from "@elchininet/isometric";
+import {
+  type IsometricCanvas,
+  IsometricGroup,
+  IsometricPath,
+} from "@elchininet/isometric";
 import type { ArtboardPlaneStage, ArtboardUserSize, PlaneBoxSpec } from "../types/artboard.js";
 import type { IsoBoxSpec, IsoFaceId, IsometricOrientation } from "../types/diagram.js";
 import type { IsoCanvasColors } from "../types/theme.js";
@@ -107,7 +111,7 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+    const { faces, topGloss, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
     for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
       if (options?.omitBottomFace && id === "bottom") {
         continue;
@@ -118,6 +122,13 @@ function isoBoxMountEntries(
         layer: FACE_LAYER[id],
         mount: (c) => mountAnchoredFace(c, spec, rect),
       });
+      if (id === "top") {
+        entries.push({
+          depth: isoFacePaintOrder(spec, "top") + 0.001,
+          layer: FACE_LAYER.top,
+          mount: (c) => mountAnchoredFace(c, spec, topGloss),
+        });
+      }
     }
     entries.push({
       depth: isoFacePaintOrder(spec, "top"),

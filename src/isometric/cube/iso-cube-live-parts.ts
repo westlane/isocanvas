@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import type { IsometricRectangle, IsometricText } from "@elchininet/isometric";
+import type { IsometricPath, IsometricRectangle, IsometricText } from "@elchininet/isometric";
 import type { IsoFaceId, IsometricOrientation } from "../../types/diagram.js";
 import {
   ISO_CUBE_MOUNT_FACE_ORDER,
@@ -11,9 +11,11 @@ import {
   displayIsoCubeTopLabelText,
   isoBoxTopFaceLabelLayout,
 } from "./canvas-text-style.js";
+import { paintIsoCubeTopGlossTrianglePath } from "./top-gloss.js";
 
 export type IsoCubeShellLiveParts = {
   faces: Record<IsoFaceId, IsometricRectangle>;
+  topGloss: IsometricPath;
   label: IsometricText;
   width: number;
   depth: number;
@@ -76,6 +78,14 @@ export function applyIsoCubeExtrusionRatioToLiveParts(
     );
     applyFaceRectLayout(parts.faces[face], layout);
   }
+
+  paintIsoCubeTopGlossTrianglePath(
+    parts.topGloss,
+    width,
+    depth,
+    extrusionHeight,
+    orientation,
+  );
 
   if (parts.omitLabel || !parts.labelText.trim()) {
     return;

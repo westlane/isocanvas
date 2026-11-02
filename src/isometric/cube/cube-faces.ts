@@ -17,6 +17,34 @@ export const IC_ISO_CUBE_PRESS_BOTTOM_CLASS = "ic-iso-cube-press-bottom";
 /** Cube faces + label; CSS scale from bottom center when shell is pressed / selected. */
 export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
 
+/** Diagonal triangle overlay on the top face (one half of the parallelogram; not a hit target). */
+export const IC_ISO_CUBE_TOP_GLOSS_CLASS = "ic-iso-cube-top-gloss";
+
+export type IsoTopPlaneAnchor = { right: number; left: number; top: number };
+
+/**
+ * Shade triangle for the top face: diagonal bisects the footprint parallelogram (A→C).
+ * Corners A(r0,l0), B(r0+dr,l0), C(r0+dr,l0+dl), D(r0,l0+dl) → triangle A, B, C (opposite half of A→C).
+ */
+export function isoCubeTopFaceDiagonalShadeTriangleAnchors(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("top", width, depth, height, orientation);
+  const r0 = layout.right ?? 0;
+  const l0 = layout.left ?? 0;
+  const dr = layout.width;
+  const dl = layout.height;
+  const t = layout.top ?? height;
+  return [
+    { right: r0, left: l0, top: t },
+    { right: r0 + dr, left: l0, top: t },
+    { right: r0 + dr, left: l0 + dl, top: t },
+  ];
+}
+
 /** Outset on the ground TOP plane for the cube drop shadow (iso units). */
 export const ISO_CUBE_GROUND_SHADOW_MARGIN_ISO = 0.16;
 
