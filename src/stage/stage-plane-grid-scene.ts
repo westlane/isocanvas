@@ -7,7 +7,7 @@ import type { DiagramScene, DiagramSceneEdge, DiagramSceneNode } from "../types/
 import { nodesInColumnCell } from "./stage-plane-row-scene.js";
 
 import type { PlaneGridCellSlot } from "../types/stage.js";
-import { artboardCollectionLabelBandPx } from "../isometric/stage/stage-shell.js";
+import { artboardCollectionLabelBandPx } from "./collection-label-band.js";
 
 export type { PlaneGridCellSlot };
 

@@ -226,16 +226,7 @@ export const ARTBOARD_COLLECTION_LABEL_MARGIN_DOTS = 0;
 const COLLECTION_LABEL_NUDGE_PLANE_X_PX = -18;
 const COLLECTION_LABEL_NUDGE_PLANE_Y_PX = 10;
 
-/** Reserve +y plane space below each artboard row so collection badges clear the next row. */
-export function artboardCollectionLabelBandPx(): number {
-  return (
-    COLLECTION_LABEL_FLOAT_OFF_PX +
-    COLLECTION_LABEL_NUDGE_PLANE_Y_PX +
-    ARTBOARD_COLLECTION_LABEL_FONT_SIZE_PX +
-    COLLECTION_BADGE_PAD_Y_PX * 2 +
-    20
-  );
-}
+export { artboardCollectionLabelBandPx } from "../../stage/collection-label-band.js";
 
 function collectionBadgeSideFill(topFill: string): string {
   return topFill === "#3b0764" ? "#2e0654" : topFill;
