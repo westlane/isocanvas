@@ -159,7 +159,9 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]) path.ic-iso-cube-face {
   pointer-events: all;
-  transition: fill 0.12s ease;
+  transition:
+    fill 0.12s ease,
+    stroke 0.12s ease;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-diagram-selectable="false"] path.ic-iso-cube-face {
@@ -188,6 +190,42 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
       var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1)),
     opacity var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
       var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
+/* Pressed — extra darken on the two ground rim segments only (front bottom + side bottom). */
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
+  fill: none !important;
+  pointer-events: none;
+  stroke-width: var(--ic-theme-iso-face-stroke-width, 1px);
+  vector-effect: non-scaling-stroke;
+  stroke: transparent;
+  transition: stroke 0.12s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(:active, .ic-node--selected, [aria-pressed="true"])
+  path.ic-iso-cube-bottom-rim--front {
+  stroke: color-mix(
+    in oklch,
+    var(
+      --ic-iso-face-stroke-front,
+      color-mix(in oklch, var(--zui-iso-front-fill, #cbd5e1) 50%, transparent)
+    ) calc(100% - var(--ic-iso-cube-pressed-bottom-edge-stroke-darken, 32%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(:active, .ic-node--selected, [aria-pressed="true"])
+  path.ic-iso-cube-bottom-rim--side {
+  stroke: color-mix(
+    in oklch,
+    var(
+      --ic-iso-face-stroke-side,
+      color-mix(in oklch, var(--zui-iso-right-fill, #cbd5e1) 50%, transparent)
+    ) calc(100% - var(--ic-iso-cube-pressed-bottom-edge-stroke-darken, 32%)),
+    black
+  ) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

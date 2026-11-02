@@ -39,6 +39,10 @@
   display: none;
 }
 
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
+  display: none;
+}
+
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
   fill: var(--ic-wireframe-front-face-fill, color-mix(in oklch, var(--ic-wireframe-iso-stroke) 8%, transparent)) !important;
 }

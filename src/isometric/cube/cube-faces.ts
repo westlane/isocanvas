@@ -20,6 +20,11 @@ export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
 /** Diagonal triangle overlay on the top face (one half of the parallelogram; not a hit target). */
 export const IC_ISO_CUBE_TOP_GLOSS_CLASS = "ic-iso-cube-top-gloss";
 
+/** Press-only darken overlays on the two ground rim segments (front + side). */
+export const IC_ISO_CUBE_BOTTOM_RIM_CLASS = "ic-iso-cube-bottom-rim";
+export const IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS = "ic-iso-cube-bottom-rim--front";
+export const IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS = "ic-iso-cube-bottom-rim--side";
+
 export type IsoTopPlaneAnchor = { right: number; left: number; top: number };
 
 /**
@@ -42,6 +47,40 @@ export function isoCubeTopFaceDiagonalShadeTriangleAnchors(
     { right: r0, left: l0, top: t },
     { right: r0 + dr, left: l0, top: t },
     { right: r0 + dr, left: l0 + dl, top: t },
+  ];
+}
+
+/** Ground-level segment on the front face (visible “bottom” edge of the button). */
+export function isoCubeFrontBottomRimAnchors(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("front", width, depth, height, orientation);
+  const r = layout.right ?? 0;
+  const l0 = layout.left ?? 0;
+  const t = 0;
+  return [
+    { right: r, left: l0, top: t },
+    { right: r, left: l0 + layout.width, top: t },
+  ];
+}
+
+/** Ground-level segment on the side face (visible “bottom left” edge of the button). */
+export function isoCubeSideBottomRimAnchors(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("side", width, depth, height, orientation);
+  const r0 = layout.right ?? 0;
+  const l = layout.left ?? 0;
+  const t = 0;
+  return [
+    { right: r0, left: l, top: t },
+    { right: r0 + layout.width, left: l, top: t },
   ];
 }
 

@@ -111,7 +111,12 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, topGloss, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
+    const { faces, topGloss, bottomRimFront, bottomRimSide, label } = createLocalIsoBoxParts(
+      spec,
+      colors,
+      orientation,
+      labelFontSizePx,
+    );
     for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
       if (options?.omitBottomFace && id === "bottom") {
         continue;
@@ -127,6 +132,16 @@ function isoBoxMountEntries(
           depth: isoFacePaintOrder(spec, "top") + 0.001,
           layer: FACE_LAYER.top,
           mount: (c) => mountAnchoredFace(c, spec, topGloss),
+        });
+        entries.push({
+          depth: isoFacePaintOrder(spec, "front") + 0.002,
+          layer: FACE_LAYER.front,
+          mount: (c) => mountAnchoredFace(c, spec, bottomRimFront),
+        });
+        entries.push({
+          depth: isoFacePaintOrder(spec, "side") + 0.002,
+          layer: FACE_LAYER.side,
+          mount: (c) => mountAnchoredFace(c, spec, bottomRimSide),
         });
       }
     }
