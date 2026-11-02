@@ -7,14 +7,19 @@ import {
   IC_ISO_CUBE_BOTTOM_RIM_CLASS,
   IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS,
   IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS,
-  isoCubeFrontBottomRimAnchors,
-  isoCubeSideBottomRimAnchors,
 } from "./cube-faces.js";
+import {
+  isoCubeVerticalFaceGroundEdge,
+  paintIsoCubeCurvedGroundEdgePath,
+} from "./vertical-face-curve.js";
 
-function bottomRimLine(
+function bottomRimCurve(
   modifierClass: string,
-  from: { right: number; left: number; top: number },
-  to: { right: number; left: number; top: number },
+  face: "front" | "side",
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation,
 ): IsometricPath {
   const path = new IsometricPath({
     className: `${IC_ISO_CUBE_BOTTOM_RIM_CLASS} ${modifierClass}`,
@@ -23,20 +28,57 @@ function bottomRimLine(
     strokeWidth: 1,
     autoclose: false,
   });
-  path.moveTo(from.right, from.left, from.top).lineTo(to.right, to.left, to.top);
+  const [from, to] = isoCubeVerticalFaceGroundEdge(face, width, depth, height, orientation);
+  paintIsoCubeCurvedGroundEdgePath(path, from, to, width, depth, height, orientation);
   return path;
 }
+
+export type IsoCubeBottomRimPaths = {
+  front: IsometricPath;
+  side: IsometricPath;
+};
 
 export function createIsoCubeBottomRimPaths(
   width: number,
   depth: number,
   height: number,
   orientation: IsometricOrientation,
-): { front: IsometricPath; side: IsometricPath } {
-  const [frontA, frontB] = isoCubeFrontBottomRimAnchors(width, depth, height, orientation);
-  const [sideA, sideB] = isoCubeSideBottomRimAnchors(width, depth, height, orientation);
+): IsoCubeBottomRimPaths {
   return {
-    front: bottomRimLine(IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS, frontA, frontB),
-    side: bottomRimLine(IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS, sideA, sideB),
+    front: bottomRimCurve(
+      IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS,
+      "front",
+      width,
+      depth,
+      height,
+      orientation,
+    ),
+    side: bottomRimCurve(
+      IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS,
+      "side",
+      width,
+      depth,
+      height,
+      orientation,
+    ),
   };
+}
+
+export function paintIsoCubeBottomRimPaths(
+  paths: IsoCubeBottomRimPaths,
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation,
+): void {
+  const [frontFrom, frontTo] = isoCubeVerticalFaceGroundEdge(
+    "front",
+    width,
+    depth,
+    height,
+    orientation,
+  );
+  const [sideFrom, sideTo] = isoCubeVerticalFaceGroundEdge("side", width, depth, height, orientation);
+  paintIsoCubeCurvedGroundEdgePath(paths.front, frontFrom, frontTo, width, depth, height, orientation);
+  paintIsoCubeCurvedGroundEdgePath(paths.side, sideFrom, sideTo, width, depth, height, orientation);
 }

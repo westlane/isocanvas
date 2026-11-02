@@ -300,8 +300,9 @@ describe("isometric cube (library shape)", () => {
     expect(axisAlignedBox).toBe(false);
     const cardTop = svg.querySelector("path.ic-iso-cube-face--top");
     expect(cardTop).toBeTruthy();
-    const topPts = pathPoints(cardTop!.getAttribute("d") ?? "");
-    expect(topPts.length).toBeGreaterThanOrEqual(4);
+    const topD = cardTop!.getAttribute("d") ?? "";
+    expect(topD).toMatch(/[CA]/);
+    expect(pathPoints(topD).length).toBeGreaterThanOrEqual(1);
     host.remove();
   });
 

@@ -77,7 +77,7 @@
   --ic-iso-cube-selected-front-pressed-fill-mix: 9%;
   --ic-iso-cube-selected-bottom-pressed-fill-mix: 9%;
   --ic-iso-cube-selected-side-tint-percent: 40%;
-  --ic-iso-cube-ground-shadow-darken-rest: 10%;
+  --ic-iso-cube-ground-shadow-darken-rest: 14%;
   --ic-iso-cube-ground-shadow-darken-pressed: 16%;
   --ic-iso-cube-ground-shadow-fill: color-mix(
     in oklch,
@@ -86,13 +86,15 @@
   );
   --ic-iso-cube-ground-shadow-fill-pressed: color-mix(
     in oklch,
-    var(--ic-artboard-top-fill) calc(100% - var(--ic-iso-cube-ground-shadow-darken-pressed)),
+    var(--zui-iso-front-fill, var(--zui-iso-top-fill, var(--ic-artboard-top-fill)))
+      calc(100% - var(--ic-iso-cube-ground-shadow-darken-pressed, 16%)),
     black
   );
-  --ic-iso-cube-ground-shadow-opacity-rest: 0.08;
+  --ic-iso-cube-ground-shadow-opacity-rest: 0.14;
   --ic-iso-cube-ground-shadow-opacity-pressed: 0.12;
+  --ic-iso-cube-footprint-occluder-fill: var(--ic-artboard-top-fill, #f8fafc);
   --ic-iso-cube-press-bottom-scale-rest: 1;
-  --ic-iso-cube-press-bottom-scale: 1;
+  --ic-iso-cube-press-bottom-scale: 0.97;
   --ic-iso-cube-press-bottom-transition-duration-press: 0.5s;
   --ic-iso-cube-press-bottom-transition-duration-release: 0.14s;
   --ic-iso-cube-press-bottom-transition-ease-press: cubic-bezier(0.32, 1.05, 0.58, 1);
@@ -101,12 +103,17 @@
   --ic-iso-cube-extrusion-press-ratio-deep: 0.84;
   --ic-iso-cube-volume-transition-duration: 0.16s;
   /* Top-face diagonal triangle overlay (see top-gloss.ts, diagram-surfaces.css) */
-  --ic-iso-cube-top-gloss-opacity: 0.02;
+  --ic-iso-cube-top-gloss-opacity: 0.012;
+  --ic-iso-cube-top-gloss-inset-ratio: 0.09;
   --ic-iso-cube-top-gloss-color: #000;
   --ic-iso-cube-top-gloss-blend: multiply;
-  --ic-iso-cube-pressed-bottom-edge-stroke-darken: 14%;
-  --ic-iso-cube-lift-bottom-edge-stroke-darken: 5%;
-  --ic-iso-cube-lift-bottom-rim-stroke-width: 1.25px;
+  --ic-iso-cube-bottom-edge-stroke-darken: 10%;
+  --ic-iso-cube-bottom-rim-stroke-width: 1.5px;
+  --ic-iso-cube-bottom-rim-stroke-opacity: 1;
+  --ic-iso-cube-face-edge-stroke-width: 1px;
+  --ic-iso-cube-face-edge-stroke-opacity: 1;
+  --ic-iso-cube-face-edge-stroke-darken: 10%;
+  --ic-iso-cube-side-face-edge-stroke-darken: 8%;
 
   /* Iso cube top labels — paint in diagram-surfaces; JS reads for measure/fit/truncate */
   --ic-iso-cube-label-font-size-px: 52;

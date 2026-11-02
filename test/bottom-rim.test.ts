@@ -25,7 +25,7 @@ describe("iso cube bottom rim overlays", () => {
     return demoThemeManager().getTheme().colors;
   }
 
-  it("mounts front and side rim paths with line geometry", () => {
+  it("mounts front and side rim paths with curved ground-edge geometry", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     mountCardGrid(host, activeShowcaseColors());
@@ -35,9 +35,8 @@ describe("iso cube bottom rim overlays", () => {
     expect(sideRim).toBeTruthy();
     for (const el of [frontRim!, sideRim!]) {
       const d = el.getAttribute("d") ?? "";
-      const pts = pathPoints(d);
-      expect(pts.length).toBe(2);
-      expect(Math.hypot(pts[1]!.x - pts[0]!.x, pts[1]!.y - pts[0]!.y)).toBeGreaterThan(4);
+      expect(d).toMatch(/[CA]/);
+      expect(pathPoints(d).length).toBeGreaterThanOrEqual(1);
     }
     host.remove();
   });

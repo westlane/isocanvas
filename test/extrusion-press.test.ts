@@ -23,12 +23,12 @@ describe("iso cube extrusion press", () => {
     const shell = host.querySelector("g.ic-iso-cube-shell");
     const parts = getIsoCubeShellLiveParts(shell!);
     expect(parts).toBeTruthy();
-    const restFrontHeight = parts!.faces.front.height;
-    expect(restFrontHeight).toBeCloseTo(parts!.height);
+    const restExtrusion = parts!.extrusionHeight;
+    expect(restExtrusion).toBeCloseTo(parts!.height);
     applyIsoCubeExtrusionPressToShell(shell!, ISO_CUBE_EXTRUSION_PRESS_RATIO);
-    expect(parts!.faces.front.height).toBeCloseTo(parts!.height * ISO_CUBE_EXTRUSION_PRESS_RATIO);
+    expect(parts!.extrusionHeight).toBeCloseTo(parts!.height * ISO_CUBE_EXTRUSION_PRESS_RATIO);
     applyIsoCubeExtrusionPressToShell(shell!, 1);
-    expect(parts!.faces.front.height).toBeCloseTo(restFrontHeight);
+    expect(parts!.extrusionHeight).toBeCloseTo(restExtrusion);
     applyDiagramNodeSelection(host, "card-1");
     expect(host.querySelector("g.ic-iso-cube-shell.ic-node--selected")).toBeTruthy();
     host.remove();

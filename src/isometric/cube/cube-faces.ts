@@ -14,6 +14,9 @@ export const IC_ISO_CUBE_SHELL_CLASS = "ic-iso-cube-shell";
 /** Full footprint highlight; {@link IC_ISO_CUBE_VOLUME_CLASS} shrinks inside it when pressed. */
 export const IC_ISO_CUBE_PRESS_BOTTOM_CLASS = "ic-iso-cube-press-bottom";
 
+/** Opaque artboard-matched pad under the cube (blocks grid); not the visible shadow ring. */
+export const IC_ISO_CUBE_FOOTPRINT_OCCLUDER_CLASS = "ic-iso-cube-footprint-occluder";
+
 /** Cube faces + label; CSS scale from bottom center when shell is pressed / selected. */
 export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
 
@@ -24,12 +27,74 @@ export const IC_ISO_CUBE_TOP_GLOSS_CLASS = "ic-iso-cube-top-gloss";
 export const IC_ISO_CUBE_BOTTOM_RIM_CLASS = "ic-iso-cube-bottom-rim";
 export const IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS = "ic-iso-cube-bottom-rim--front";
 export const IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS = "ic-iso-cube-bottom-rim--side";
+export const IC_ISO_CUBE_BOTTOM_RIM_BACK_CLASS = "ic-iso-cube-bottom-rim--back";
+export const IC_ISO_CUBE_BOTTOM_RIM_LEFT_CLASS = "ic-iso-cube-bottom-rim--left";
 
 export type IsoTopPlaneAnchor = { right: number; left: number; top: number };
 
+/** Bulge on each footprint edge in iso units (× min(width, depth)). */
+export const ISO_CUBE_FOOTPRINT_CURVE_BULGE_RATIO = 0.045;
+
+/** Inset top gloss triangle corners toward footprint center (0–1 lerp). */
+export const ISO_CUBE_TOP_GLOSS_INSET_RATIO = 0.09;
+
+/** Diagonal gloss edge bulge as a fraction of footprint edge bulge. */
+export const ISO_CUBE_TOP_GLOSS_DIAGONAL_BULGE_RATIO = 0.55;
+
+/** @deprecated Use {@link ISO_CUBE_FOOTPRINT_CURVE_BULGE_RATIO}. */
+export const ISO_CUBE_TOP_FACE_CURVE_BULGE_RATIO = ISO_CUBE_FOOTPRINT_CURVE_BULGE_RATIO;
+
+type FootprintLayout = {
+  width: number;
+  height: number;
+  left?: number;
+  right?: number;
+  top?: number;
+};
+
+/** Footprint parallelogram corners A→B→C→D from a TOP-plane face layout. */
+export function isoCubeFootprintCornerAnchorsFromLayout(
+  layout: FootprintLayout,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const r0 = layout.right ?? 0;
+  const l0 = layout.left ?? 0;
+  const dr = layout.width;
+  const dl = layout.height;
+  const t = layout.top ?? 0;
+  return [
+    { right: r0, left: l0, top: t },
+    { right: r0 + dr, left: l0, top: t },
+    { right: r0 + dr, left: l0 + dl, top: t },
+    { right: r0, left: l0 + dl, top: t },
+  ];
+}
+
 /**
- * Shade triangle for the top face: diagonal bisects the footprint parallelogram (A→C).
- * Corners A(r0,l0), B(r0+dr,l0), C(r0+dr,l0+dl), D(r0,l0+dl) → triangle A, B, C (opposite half of A→C).
+ * Top footprint parallelogram corners A→B→C→D (same layout as the flat top rect).
+ */
+export function isoCubeTopFaceCornerAnchors(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("top", width, depth, height, orientation);
+  return isoCubeFootprintCornerAnchorsFromLayout(layout);
+}
+
+/** Bottom footprint corners (same bulge silhouette as top, at ground elevation). */
+export function isoCubeBottomFaceCornerAnchors(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
+): [IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", width, depth, height, orientation);
+  return isoCubeFootprintCornerAnchorsFromLayout(layout);
+}
+
+/**
+ * Shade triangle for the top face: diagonal A→C; this is the A–D–C half (complement of A–B–C).
  */
 export function isoCubeTopFaceDiagonalShadeTriangleAnchors(
   width: number,
@@ -37,17 +102,8 @@ export function isoCubeTopFaceDiagonalShadeTriangleAnchors(
   height: number,
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
 ): [IsoTopPlaneAnchor, IsoTopPlaneAnchor, IsoTopPlaneAnchor] {
-  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("top", width, depth, height, orientation);
-  const r0 = layout.right ?? 0;
-  const l0 = layout.left ?? 0;
-  const dr = layout.width;
-  const dl = layout.height;
-  const t = layout.top ?? height;
-  return [
-    { right: r0, left: l0, top: t },
-    { right: r0 + dr, left: l0, top: t },
-    { right: r0 + dr, left: l0 + dl, top: t },
-  ];
+  const [a, , c, d] = isoCubeTopFaceCornerAnchors(width, depth, height, orientation);
+  return [a, d, c];
 }
 
 /** Ground-level segment on the front face (visible “bottom” edge of the button). */

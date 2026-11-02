@@ -111,7 +111,7 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, topGloss, bottomRimFront, bottomRimSide, label } = createLocalIsoBoxParts(
+    const { faces, topGloss, bottomRims, label } = createLocalIsoBoxParts(
       spec,
       colors,
       orientation,
@@ -136,12 +136,12 @@ function isoBoxMountEntries(
         entries.push({
           depth: isoFacePaintOrder(spec, "front") + 0.002,
           layer: FACE_LAYER.front,
-          mount: (c) => mountAnchoredFace(c, spec, bottomRimFront),
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.front),
         });
         entries.push({
           depth: isoFacePaintOrder(spec, "side") + 0.002,
           layer: FACE_LAYER.side,
-          mount: (c) => mountAnchoredFace(c, spec, bottomRimSide),
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.side),
         });
       }
     }

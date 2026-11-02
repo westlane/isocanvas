@@ -394,9 +394,9 @@ export function dotGridDotCssFromGridLineInk(gridLineInkHex: string): string {
   return `color-mix(in oklch, ${lighter} ${pct}%, transparent)`;
 }
 
-/** Solid iso card edge — slightly darker than that face fill, at 50% opacity. */
-export const ISO_SOLID_FACE_STROKE_DARKEN = 0.08;
-export const ISO_SOLID_FACE_STROKE_OPACITY = 0.5;
+/** Solid iso card edge — slightly darker than that face fill. */
+export const ISO_SOLID_FACE_STROKE_DARKEN = 0.11;
+export const ISO_SOLID_FACE_STROKE_OPACITY = 0.78;
 
 export function isoSolidFaceStrokeCssFromFill(faceFillHex: string): string {
   const tinted = blendHexWithBlack(normalizeHex(faceFillHex), ISO_SOLID_FACE_STROKE_DARKEN);
