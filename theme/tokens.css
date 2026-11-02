@@ -99,6 +99,23 @@
   --ic-iso-cube-press-bottom-transition-duration-release: 0.14s;
   --ic-iso-cube-press-bottom-transition-ease-press: cubic-bezier(0.32, 1.05, 0.58, 1);
   --ic-iso-cube-press-bottom-transition-ease-release: cubic-bezier(0.2, 1.35, 0.4, 1);
+  --ic-iso-cube-front-light-spread-on: 118%;
+  --ic-iso-cube-front-light-transition-duration-press: var(
+    --ic-iso-cube-press-bottom-transition-duration-press,
+    0.5s
+  );
+  --ic-iso-cube-front-light-transition-duration-release: var(
+    --ic-iso-cube-press-bottom-transition-duration-release,
+    0.14s
+  );
+  --ic-iso-cube-front-light-transition-ease-press: var(
+    --ic-iso-cube-press-bottom-transition-ease-press,
+    cubic-bezier(0.32, 1.05, 0.58, 1)
+  );
+  --ic-iso-cube-front-light-transition-ease-release: var(
+    --ic-iso-cube-press-bottom-transition-ease-release,
+    cubic-bezier(0.2, 1.35, 0.4, 1)
+  );
   --ic-iso-cube-extrusion-press-ratio: 0.88;
   --ic-iso-cube-extrusion-press-ratio-deep: 0.84;
   --ic-iso-cube-volume-transition-duration: 0.16s;
@@ -107,13 +124,24 @@
   --ic-iso-cube-top-gloss-inset-ratio: 0.09;
   --ic-iso-cube-top-gloss-color: #000;
   --ic-iso-cube-top-gloss-blend: multiply;
-  --ic-iso-cube-bottom-edge-stroke-darken: 10%;
-  --ic-iso-cube-bottom-rim-stroke-width: 1.5px;
-  --ic-iso-cube-bottom-rim-stroke-opacity: 1;
+  --ic-iso-cube-bottom-edge-stroke-darken: 12%;
+  --ic-iso-cube-bottom-rim-stroke-width: 1px;
+  --ic-iso-cube-bottom-rim-stroke-opacity: 0.36;
+  --ic-iso-cube-bottom-rim-stroke-opacity-pressed-left: 0.14;
+  /* Toward-viewer base segment (front ground rim) — softer than the left base rim. */
+  --ic-iso-cube-bottom-rim-stroke-opacity-bottom: 0.18;
+  --ic-iso-cube-bottom-rim-stroke-opacity-pressed-bottom: 0.12;
   --ic-iso-cube-face-edge-stroke-width: 1px;
-  --ic-iso-cube-face-edge-stroke-opacity: 1;
-  --ic-iso-cube-face-edge-stroke-darken: 10%;
-  --ic-iso-cube-side-face-edge-stroke-darken: 8%;
+  --ic-iso-cube-visible-face-edge-stroke-darken: 8%;
+  --ic-iso-cube-visible-face-edge-stroke-opacity: 0.34;
+  --ic-iso-cube-visible-face-edge-stroke-opacity-pressed: 0.44;
+  --ic-iso-cube-front-face-edge-stroke-darken: 5%;
+  --ic-iso-cube-front-face-edge-stroke-opacity: 0.16;
+  --ic-iso-cube-front-face-edge-stroke-opacity-pressed: 0.18;
+  /* Legacy alias — bottom rim + generic face block */
+  --ic-iso-cube-face-edge-stroke-opacity: var(--ic-iso-cube-visible-face-edge-stroke-opacity);
+  --ic-iso-cube-face-edge-stroke-darken: var(--ic-iso-cube-visible-face-edge-stroke-darken);
+  --ic-iso-cube-side-face-edge-stroke-darken: var(--ic-iso-cube-visible-face-edge-stroke-darken);
 
   /* Iso cube top labels — paint in diagram-surfaces; JS reads for measure/fit/truncate */
   --ic-iso-cube-label-font-size-px: 52;

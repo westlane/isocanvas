@@ -381,14 +381,14 @@ export function artboardFrontEdgeLightCss(artboardTopFillHex) {
 const ISO_FACE_SHADE_LIGHT = {
     topWhite: 0.56,
     frontWhite: 0.34,
-    sideBlack: 0.16,
-    recessBlack: 0.24,
+    sideBlack: 0.09,
+    recessBlack: 0.19,
 };
 const ISO_FACE_SHADE_DARK = {
     topWhite: 0.26,
     frontBlack: 0.06,
-    sideBlack: 0.2,
-    recessBlack: 0.32,
+    sideBlack: 0.14,
+    recessBlack: 0.28,
 };
 export function isoFaceFillsFromSchemeAccent(accentHex, appearance) {
     const accent = normalizeHex(accentHex);

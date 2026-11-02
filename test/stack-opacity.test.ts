@@ -22,19 +22,19 @@ describe("stack layer opacity", () => {
     const map = stackLayerPresentationByBoxId(boxes);
     expect(map.get("a")).toEqual({ rank: 0, size: 3 });
     expect(map.get("c")).toEqual({ rank: 2, size: 3 });
-    expect(stackFaceOpacity(map.get("a")!)).toBeLessThan(stackFaceOpacity(map.get("c")!));
+    expect(stackFaceOpacity(map.get("a")!)).toBe(1);
     expect(stackLabelOpacity(map.get("a")!)).toBeLessThan(stackLabelOpacity(map.get("c")!));
     expect(stackLabelOpacity(map.get("c")!)).toBe(1);
     expect(stackFaceOpacity(map.get("c")!)).toBe(1);
   });
 
-  it("fades card faces toward the bottom of a stack", () => {
+  it("keeps stacked card faces fully opaque", () => {
     const top = { rank: 6, size: 7 };
     const second = { rank: 5, size: 7 };
     const bottom = { rank: 0, size: 7 };
     expect(stackFaceOpacity(top)).toBe(1);
-    expect(stackFaceOpacity(second)).toBeLessThan(0.9);
-    expect(stackFaceOpacity(bottom)).toBeCloseTo(0.32, 2);
+    expect(stackFaceOpacity(second)).toBe(1);
+    expect(stackFaceOpacity(bottom)).toBe(1);
     expect(stackLabelOpacity(top)).toBe(1);
     expect(stackLabelOpacity(second)).toBeLessThan(0.5);
     expect(stackLabelOpacity(top) - stackLabelOpacity(second)).toBeGreaterThan(0.45);

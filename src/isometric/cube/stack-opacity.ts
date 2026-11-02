@@ -67,11 +67,9 @@ export function stackLayerDepthFraction(presentation: StackLayerPresentation): n
   return presentation.rank / (presentation.size - 1);
 }
 
-const STACK_FACE_OPACITY_MIN = 0.32;
 const STACK_LABEL_OPACITY_MIN = 0.1;
 /** >1 keeps top label crisp while dropping quickly on the card just below. */
 const STACK_LABEL_CURVE_EXPONENT = 4.5;
-const STACK_FACE_CURVE_EXPONENT = 1.35;
 /** Label font at stack bottom relative to the base cube label size. */
 const STACK_LABEL_FONT_SCALE_MIN = 0.55;
 
@@ -80,9 +78,8 @@ function stackOpacityFromDepth(t: number, min: number, curveExponent: number): n
   return min + (1 - min) * eased;
 }
 
-export function stackFaceOpacity(presentation: StackLayerPresentation): number {
-  const t = stackLayerDepthFraction(presentation);
-  return stackOpacityFromDepth(t, STACK_FACE_OPACITY_MIN, STACK_FACE_CURVE_EXPONENT);
+export function stackFaceOpacity(_presentation: StackLayerPresentation): number {
+  return 1;
 }
 
 export function stackLabelOpacity(presentation: StackLayerPresentation): number {

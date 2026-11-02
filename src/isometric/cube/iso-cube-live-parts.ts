@@ -13,6 +13,7 @@ import {
 } from "./canvas-text-style.js";
 import { paintIsoCubeTopGlossTrianglePath } from "./top-gloss.js";
 import { paintIsoCubeCurvedTopFacePath } from "./top-face-curve.js";
+import { paintIsoCubeBottomRimPaths, type IsoCubeBottomRimPaths } from "./bottom-rim.js";
 import {
   isIsoCurvedVerticalFace,
   paintIsoCubeCurvedVerticalFacePath,
@@ -20,7 +21,9 @@ import {
 
 export type IsoCubeShellLiveParts = {
   faces: Record<IsoFaceId, IsometricRectangle | IsometricPath>;
+  frontLight: IsometricPath;
   topGloss: IsometricPath;
+  bottomRims: IsoCubeBottomRimPaths;
   label: IsometricText;
   width: number;
   depth: number;
@@ -97,6 +100,17 @@ export function applyIsoCubeExtrusionRatioToLiveParts(
         orientation,
       );
       parts.faces[face].update();
+      if (face === "front") {
+        paintIsoCubeCurvedVerticalFacePath(
+          parts.frontLight,
+          "front",
+          width,
+          depth,
+          extrusionHeight,
+          orientation,
+        );
+        parts.frontLight.update();
+      }
       continue;
     }
     const layout = isoCubeFaceRectLayoutForPlaneTopLeft(
@@ -116,6 +130,10 @@ export function applyIsoCubeExtrusionRatioToLiveParts(
     extrusionHeight,
     orientation,
   );
+
+  paintIsoCubeBottomRimPaths(parts.bottomRims, width, depth, extrusionHeight, orientation);
+  parts.bottomRims.bottom.update();
+  parts.bottomRims.left.update();
 
   if (parts.omitLabel || !parts.labelText.trim()) {
     return;

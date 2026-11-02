@@ -111,7 +111,7 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, topGloss, bottomRims, label } = createLocalIsoBoxParts(
+    const { faces, frontLight, topGloss, bottomRims, label } = createLocalIsoBoxParts(
       spec,
       colors,
       orientation,
@@ -127,6 +127,13 @@ function isoBoxMountEntries(
         layer: FACE_LAYER[id],
         mount: (c) => mountAnchoredFace(c, spec, rect),
       });
+      if (id === "front") {
+        entries.push({
+          depth: isoFacePaintOrder(spec, "front") + 0.0005,
+          layer: FACE_LAYER.front,
+          mount: (c) => mountAnchoredFace(c, spec, frontLight),
+        });
+      }
       if (id === "top") {
         entries.push({
           depth: isoFacePaintOrder(spec, "top") + 0.001,
@@ -136,12 +143,12 @@ function isoBoxMountEntries(
         entries.push({
           depth: isoFacePaintOrder(spec, "front") + 0.002,
           layer: FACE_LAYER.front,
-          mount: (c) => mountAnchoredFace(c, spec, bottomRims.front),
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.bottom),
         });
         entries.push({
-          depth: isoFacePaintOrder(spec, "side") + 0.002,
-          layer: FACE_LAYER.side,
-          mount: (c) => mountAnchoredFace(c, spec, bottomRims.side),
+          depth: isoFacePaintOrder(spec, "left") + 0.002,
+          layer: FACE_LAYER.left,
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.left),
         });
       }
     }

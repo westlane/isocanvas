@@ -23,12 +23,18 @@ export const IC_ISO_CUBE_VOLUME_CLASS = "ic-iso-cube-volume";
 /** Diagonal triangle overlay on the top face (one half of the parallelogram; not a hit target). */
 export const IC_ISO_CUBE_TOP_GLOSS_CLASS = "ic-iso-cube-top-gloss";
 
-/** Press-only darken overlays on the two ground rim segments (front + side). */
+/** Lit front fill revealed from center when the shell is pressed / selected (CSS mask). */
+export const IC_ISO_CUBE_FRONT_LIGHT_CLASS = "ic-iso-cube-front-light";
+
+/** Ground contact strokes — front (bottom) + side (screen-left base) edges (see bottom-rim.ts). */
 export const IC_ISO_CUBE_BOTTOM_RIM_CLASS = "ic-iso-cube-bottom-rim";
-export const IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS = "ic-iso-cube-bottom-rim--front";
-export const IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS = "ic-iso-cube-bottom-rim--side";
-export const IC_ISO_CUBE_BOTTOM_RIM_BACK_CLASS = "ic-iso-cube-bottom-rim--back";
+/** Front face ground edge — visible bottom of the button. */
+export const IC_ISO_CUBE_BOTTOM_RIM_BOTTOM_CLASS = "ic-iso-cube-bottom-rim--bottom";
+/** Side face ground edge — visible bottom-left base segment (styled with left ink, not right). */
 export const IC_ISO_CUBE_BOTTOM_RIM_LEFT_CLASS = "ic-iso-cube-bottom-rim--left";
+
+/** @deprecated Closed full-footprint ring; use partial {@link IC_ISO_CUBE_BOTTOM_RIM_CLASS} segments. */
+export const IC_ISO_CUBE_FOOTPRINT_CONTACT_CLASS = "ic-iso-cube-footprint-contact";
 
 export type IsoTopPlaneAnchor = { right: number; left: number; top: number };
 

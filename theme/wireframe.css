@@ -40,11 +40,16 @@
   display: none;
 }
 
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-front-light {
+  display: none;
+}
+
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-top-gloss {
   display: none;
 }
 
-[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim,
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-footprint-contact {
   display: none;
 }
 

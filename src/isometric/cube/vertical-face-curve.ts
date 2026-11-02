@@ -5,6 +5,7 @@ import { IsometricPath, PlaneView } from "@elchininet/isometric";
 import type { IsoFaceId, IsometricOrientation } from "../../types/diagram.js";
 import {
   isoCubeBottomFaceCornerAnchors,
+  IC_ISO_CUBE_FRONT_LIGHT_CLASS,
   isoCubeFaceClassName,
   isoCubeFaceRectLayoutForPlaneTopLeft,
   ISO_CUBE_FOOTPRINT_CURVE_BULGE_RATIO,
@@ -160,5 +161,24 @@ export function createIsoCubeCurvedVerticalFace(
     ...ISO_CUBE_FACE_NO_STROKE,
   });
   paintIsoCubeCurvedVerticalFacePath(path, face, width, depth, height, orientation);
+  return path;
+}
+
+/** Same geometry as the front face; paint is driven by {@link IC_ISO_CUBE_FRONT_LIGHT_CLASS} in CSS. */
+export function createIsoCubeFrontLightOverlay(
+  width: number,
+  depth: number,
+  height: number,
+  orientation: IsometricOrientation,
+): IsometricPath {
+  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("front", width, depth, height, orientation);
+  const path = new IsometricPath({
+    planeView: layout.planeView,
+    className: IC_ISO_CUBE_FRONT_LIGHT_CLASS,
+    fillColor: "#000",
+    autoclose: true,
+    ...ISO_CUBE_FACE_NO_STROKE,
+  });
+  paintIsoCubeCurvedVerticalFacePath(path, "front", width, depth, height, orientation);
   return path;
 }
