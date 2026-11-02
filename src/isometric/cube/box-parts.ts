@@ -175,8 +175,6 @@ export function mountIsoBoxOnStageShell(
       volumeGroup.addChild(topGloss);
     }
   }
-  volumeGroup.addChild(bottomRimFront);
-  volumeGroup.addChild(bottomRimSide);
   const node = new IsometricGroup({
     id: spec.id,
     left: 0,
@@ -196,6 +194,8 @@ export function mountIsoBoxOnStageShell(
     node.addChild(label);
   }
   volumeGroup.addChild(node);
+  volumeGroup.addChild(bottomRimFront);
+  volumeGroup.addChild(bottomRimSide);
   cubeShell.addChild(volumeGroup);
   boxShell.addChild(cubeShell);
   shell.addChild(boxShell);

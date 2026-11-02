@@ -104,7 +104,9 @@
   --ic-iso-cube-top-gloss-opacity: 0.02;
   --ic-iso-cube-top-gloss-color: #000;
   --ic-iso-cube-top-gloss-blend: multiply;
-  --ic-iso-cube-pressed-bottom-edge-stroke-darken: 32%;
+  --ic-iso-cube-pressed-bottom-edge-stroke-darken: 14%;
+  --ic-iso-cube-lift-bottom-edge-stroke-darken: 5%;
+  --ic-iso-cube-lift-bottom-rim-stroke-width: 1.25px;
 
   /* Iso cube top labels — paint in diagram-surfaces; JS reads for measure/fit/truncate */
   --ic-iso-cube-label-font-size-px: 52;

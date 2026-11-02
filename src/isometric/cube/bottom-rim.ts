@@ -4,6 +4,7 @@
 import { IsometricPath } from "@elchininet/isometric";
 import type { IsometricOrientation } from "../../types/diagram.js";
 import {
+  IC_ISO_CUBE_BOTTOM_RIM_CLASS,
   IC_ISO_CUBE_BOTTOM_RIM_FRONT_CLASS,
   IC_ISO_CUBE_BOTTOM_RIM_SIDE_CLASS,
   isoCubeFrontBottomRimAnchors,
@@ -11,12 +12,12 @@ import {
 } from "./cube-faces.js";
 
 function bottomRimLine(
-  className: string,
+  modifierClass: string,
   from: { right: number; left: number; top: number },
   to: { right: number; left: number; top: number },
 ): IsometricPath {
   const path = new IsometricPath({
-    className,
+    className: `${IC_ISO_CUBE_BOTTOM_RIM_CLASS} ${modifierClass}`,
     fillColor: "transparent",
     strokeColor: "transparent",
     strokeWidth: 1,
