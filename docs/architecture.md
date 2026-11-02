@@ -7,7 +7,7 @@ Layered stack for portable `DiagramScene` data plus canvas/viewport infrastructu
 | Path | Role |
 | --- | --- |
 | `index.ts` | Public API: canvas, diagram, camera, grid, theme (no Loro persistence — use **`@westlane/isocanvas/persistence`**) |
-| `stage/` | **Map-style stage** — `createIsoCanvasStage` owns viewport + artboard registry + camera |
+| `stage/` | **Map-style stage** — {@link Stage} + {@link Artboard} over `createIsoCanvasStage` (viewport, artboard registry, grid slots, camera) |
 | `viewport/` | Outer frame: world-camera DOM layers |
 | `layout/` | **Artboard**, spacing, box align; **`layout/snap/`** point/axis/diagram/drag snap & smart guides |
 | `grid/` | Dot grid surface, projection, SVG pattern, world-camera sync |

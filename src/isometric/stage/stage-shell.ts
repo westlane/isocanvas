@@ -48,6 +48,11 @@ import {
 import { isoStageGroundLayout } from "./ground-local.js";
 import type { IsoGroundAnchor } from "../../types/diagram.js";
 import type { PlaneRowColumnSpec, PlaneRowMountPlan } from "../../stage/plane-row-mount.js";
+import type { PlaneGridMountPlan } from "../../stage/plane-grid-mount.js";
+import {
+  planeGridCellExtent,
+  planeGridCellOrigin,
+} from "../../stage/stage-plane-grid-scene.js";
 
 function mountArtboardSlabFace(
   shell: IsometricGroup,
@@ -214,12 +219,23 @@ export const IC_ARTBOARD_COLLECTION_LABEL_TEXT_CLASS = "ic-artboard-collection-l
 const COLLECTION_BADGE_PAD_X_PX = 36;
 const COLLECTION_BADGE_PAD_Y_PX = 22;
 /** Gap south of the artboard SW lattice pin before the badge footprint. */
-const COLLECTION_LABEL_FLOAT_OFF_PX = 28;
+const COLLECTION_LABEL_FLOAT_OFF_PX = 40;
 /** Dot lattice inset from the artboard west/south edges (SW pin). */
 export const ARTBOARD_COLLECTION_LABEL_MARGIN_DOTS = 0;
 /** Fine plane nudge after SW pin (+y south, −x west). */
 const COLLECTION_LABEL_NUDGE_PLANE_X_PX = -18;
 const COLLECTION_LABEL_NUDGE_PLANE_Y_PX = 10;
+
+/** Reserve +y plane space below each artboard row so collection badges clear the next row. */
+export function artboardCollectionLabelBandPx(): number {
+  return (
+    COLLECTION_LABEL_FLOAT_OFF_PX +
+    COLLECTION_LABEL_NUDGE_PLANE_Y_PX +
+    ARTBOARD_COLLECTION_LABEL_FONT_SIZE_PX +
+    COLLECTION_BADGE_PAD_Y_PX * 2 +
+    20
+  );
+}
 
 function collectionBadgeSideFill(topFill: string): string {
   return topFill === "#3b0764" ? "#2e0654" : topFill;
@@ -423,6 +439,51 @@ export function mountArtboardPlaneRowShellsOnCanvas(
       orientation,
       shellChrome,
       columns[column],
+    );
+  }
+  const stageGround = artboardPlaneToIsoGround(
+    stripStage.x,
+    stripStage.y,
+    orientation,
+    stripStage,
+  );
+  const anchor = new IsometricGroup({
+    left: stageGround.left,
+    right: stageGround.right,
+    top: 0,
+  });
+  canvas.addChild(anchor);
+  return anchor;
+}
+
+/** Merged grid: one iso ground shell per cell; returns cube mount anchor. */
+export function mountArtboardPlaneGridShellsOnCanvas(
+  canvas: IsometricCanvas,
+  stripStage: ArtboardPlaneStage,
+  plan: PlaneGridMountPlan,
+  orientation: IsometricOrientation,
+  shellChrome: ArtboardStageShellChrome,
+): IsometricGroup {
+  const { cellWidth, cellHeight, gapPx, layout, cells } = plan;
+  const divisions = stripStage.divisions;
+  const cellUserSize = { width: cellWidth, height: cellHeight };
+  const labelBandPx = layout.labelBandPx;
+  for (const cell of cells) {
+    const origin = planeGridCellOrigin(cell, cellUserSize, gapPx, labelBandPx);
+    const extent = planeGridCellExtent(cell, cellUserSize, gapPx);
+    const columnStage: ArtboardPlaneStage = {
+      x: stripStage.x + origin.x,
+      y: stripStage.y + origin.y,
+      width: extent.width,
+      height: extent.height,
+      ...(divisions !== undefined ? { divisions } : {}),
+    };
+    mountArtboardShellOnCanvas(
+      canvas,
+      columnStage,
+      orientation,
+      shellChrome,
+      cell,
     );
   }
   const stageGround = artboardPlaneToIsoGround(

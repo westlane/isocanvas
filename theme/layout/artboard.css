@@ -95,6 +95,30 @@
   transform-style: flat;
 }
 
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row {
+  grid-template-columns: repeat(var(--ic-grid-column-count, 2), minmax(0, 1fr));
+  grid-template-rows: auto repeat(var(--ic-grid-row-count, 1), minmax(0, 1fr));
+  row-gap: calc(var(--ic-stage-row-gap, 6px) + var(--ic-grid-label-band-px, 0px));
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row
+  > .ic-artboard:not([data-ic-plane-row-host]) {
+  grid-row: calc(var(--ic-grid-cell-row, 0) + 1) / span var(--ic-grid-cell-row-span, 1);
+  grid-column: calc(var(--ic-grid-cell-column, 0) + 1) / span var(--ic-grid-cell-column-span, 1);
+  height: auto;
+  max-height: none;
+  aspect-ratio: unset;
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host] {
+  grid-row: calc(var(--ic-grid-row-count, 1) + 1);
+}
+
 .ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
   > .ic-canvas-stage-row
   > .ic-artboard:not([data-ic-plane-row-host]) {

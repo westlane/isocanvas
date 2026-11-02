@@ -17,6 +17,9 @@ import {
 /** Hash suffix token: `#…&view=zoom/cx/cy` (shareable deep link to pan/zoom). */
 export const VIEWPORT_URL_VIEW_TOKEN = "&view=";
 
+/** View-only hash when there is no route segment (`#view=zoom/cx/cy`). */
+export const VIEWPORT_URL_VIEW_ONLY_PREFIX = "view=";
+
 /** Fired on the diagram host when the URL hash should commit immediately. */
 export const VIEWPORT_URL_PUSH_EVENT = "ic-viewport-url-push";
 
@@ -42,17 +45,14 @@ const defaultLocation = (): ViewportUrlLocation =>
 
 export function stripViewFromHashFragment(raw: string): string {
   const withoutHash = raw.replace(/^#/, "");
+  if (withoutHash.startsWith(VIEWPORT_URL_VIEW_ONLY_PREFIX)) {
+    return "";
+  }
   const idx = withoutHash.indexOf(VIEWPORT_URL_VIEW_TOKEN);
   return idx < 0 ? withoutHash : withoutHash.slice(0, idx);
 }
 
-export function parseViewportUrlFrame(raw: string): ViewportUrlFrame | null {
-  const withoutHash = raw.replace(/^#/, "");
-  const idx = withoutHash.indexOf(VIEWPORT_URL_VIEW_TOKEN);
-  if (idx < 0) {
-    return null;
-  }
-  const segment = withoutHash.slice(idx + VIEWPORT_URL_VIEW_TOKEN.length).split("&")[0] ?? "";
+function parseViewUrlSegment(segment: string): ViewportUrlFrame | null {
   if (!segment) {
     return null;
   }
@@ -69,6 +69,19 @@ export function parseViewportUrlFrame(raw: string): ViewportUrlFrame | null {
   return { zoom, cx, cy };
 }
 
+export function parseViewportUrlFrame(raw: string): ViewportUrlFrame | null {
+  const withoutHash = raw.replace(/^#/, "");
+  if (withoutHash.startsWith(VIEWPORT_URL_VIEW_ONLY_PREFIX)) {
+    return parseViewUrlSegment(withoutHash.slice(VIEWPORT_URL_VIEW_ONLY_PREFIX.length).split("&")[0] ?? "");
+  }
+  const idx = withoutHash.indexOf(VIEWPORT_URL_VIEW_TOKEN);
+  if (idx < 0) {
+    return null;
+  }
+  const segment = withoutHash.slice(idx + VIEWPORT_URL_VIEW_TOKEN.length).split("&")[0] ?? "";
+  return parseViewUrlSegment(segment);
+}
+
 export function buildViewHashSuffixFromCameras(
   cameras: ViewportCameras,
   baselineWidth: number,
@@ -80,11 +93,22 @@ export function buildViewHashSuffixFromCameras(
   return `${VIEWPORT_URL_VIEW_TOKEN}${roundedZoom}/${roundedCx}/${roundedCy}`;
 }
 
+function viewOnlyLocationHash(cameras: ViewportCameras, baselineWidth: number): string {
+  const frame = urlFrameFromViewportCameras(cameras, baselineWidth);
+  const roundedZoom = Math.round(frame.zoom * 100) / 100;
+  const roundedCx = Math.round(frame.cx * 100) / 100;
+  const roundedCy = Math.round(frame.cy * 100) / 100;
+  return `#${VIEWPORT_URL_VIEW_ONLY_PREFIX}${roundedZoom}/${roundedCx}/${roundedCy}`;
+}
+
 export function mergeLocationHashWithViewport(
   baseHash: string,
   cameras: ViewportCameras,
   baselineWidth: number,
 ): string {
+  if (baseHash === "#") {
+    return viewOnlyLocationHash(cameras, baselineWidth);
+  }
   return `${baseHash}${buildViewHashSuffixFromCameras(cameras, baselineWidth)}`;
 }
 
@@ -101,7 +125,9 @@ export function syncBaseHashPreservingViewport(options: {
   const viewInHash = parseViewportUrlFrame(raw);
   const matches =
     options.hashMatchesBase?.(raw, options.baseHash) ??
-    (raw === options.baseHash || raw.startsWith(`${options.baseHash}${VIEWPORT_URL_VIEW_TOKEN}`));
+    (options.baseHash === "#"
+      ? raw === "#" || raw.startsWith(`#${VIEWPORT_URL_VIEW_ONLY_PREFIX}`)
+      : raw === options.baseHash || raw.startsWith(`${options.baseHash}${VIEWPORT_URL_VIEW_TOKEN}`));
   if (matches && viewInHash) {
     return;
   }

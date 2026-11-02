@@ -21,8 +21,17 @@ import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
 import { uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
-import { addArtboardStageShell, createArtboardStageShell, DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME, mountArtboardPlaneRowShellsOnCanvas, mountArtboardShellOnCanvas, type ArtboardStageShellChrome } from "./stage/stage-shell.js";
+import {
+  addArtboardStageShell,
+  createArtboardStageShell,
+  DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
+  mountArtboardPlaneGridShellsOnCanvas,
+  mountArtboardPlaneRowShellsOnCanvas,
+  mountArtboardShellOnCanvas,
+  type ArtboardStageShellChrome,
+} from "./stage/stage-shell.js";
 import type { PlaneRowColumnSpec, PlaneRowMountPlan } from "../stage/plane-row-mount.js";
+import type { PlaneGridMountPlan } from "../stage/plane-grid-mount.js";
 
 /** One deferred paint step on a cube canvas, ordered by `depth` then `layer`. */
 export type IsoCanvasMountEntry = {
@@ -181,6 +190,7 @@ export function mountPlaneBoxesOnCanvas(
     omitArtboardShell?: boolean;
     artboardShellChrome?: ArtboardStageShellChrome;
     planeRowMount?: PlaneRowMountPlan;
+    planeGridMount?: PlaneGridMountPlan;
     artboardCollection?: PlaneRowColumnSpec;
   },
 ): void {
@@ -200,6 +210,7 @@ export function mountPlaneBoxesOnCanvas(
     options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
   const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation });
   const planeRowMount = options.planeRowMount;
+  const planeGridMount = options.planeGridMount;
   const mountTarget = options.omitArtboardShell
     ? (() => {
         const anchor = new IsometricGroup({
@@ -210,7 +221,15 @@ export function mountPlaneBoxesOnCanvas(
         canvas.addChild(anchor);
         return anchor;
       })()
-    : planeRowMount && planeRowMount.columns.length > 0
+    : planeGridMount && planeGridMount.cells.length > 0
+      ? mountArtboardPlaneGridShellsOnCanvas(
+          canvas,
+          stage,
+          planeGridMount,
+          orientation,
+          shellChrome,
+        )
+      : planeRowMount && planeRowMount.columns.length > 0
       ? mountArtboardPlaneRowShellsOnCanvas(
           canvas,
           stage,

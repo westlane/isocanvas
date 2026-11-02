@@ -18,6 +18,11 @@ describe("viewport url sync", () => {
       cx: 260,
       cy: 160,
     });
+    expect(parseViewportUrlFrame("#view=1.25/260/160")).toEqual({
+      zoom: 1.25,
+      cx: 260,
+      cy: 160,
+    });
     expect(parseViewportUrlFrame("#showcase/card-stack&view=1.25/260/160/30/45")).toBeNull();
   });
 
@@ -35,17 +40,16 @@ describe("viewport url sync", () => {
     expect(stripViewFromHashFragment("#showcase/card-grid&view=2/100/50")).toBe(
       "showcase/card-grid",
     );
+    expect(stripViewFromHashFragment("#view=2/100/50")).toBe("");
   });
 
   it("mergeLocationHashWithViewport appends view suffix", () => {
-    const hash = mergeLocationHashWithViewport(
-      "#showcase/card-stack",
-      {
-        canvas: { viewBox: { x: 50, y: 30, w: 260, h: 160 } },
-      },
-      520,
-    );
+    const cameras = {
+      canvas: { viewBox: { x: 50, y: 30, w: 260, h: 160 } },
+    };
+    const hash = mergeLocationHashWithViewport("#showcase/card-stack", cameras, 520);
     expect(hash).toBe("#showcase/card-stack&view=2/180/110");
+    expect(mergeLocationHashWithViewport("#", cameras, 520)).toBe("#view=2/180/110");
   });
 
   it("syncBaseHashPreservingViewport keeps view suffix on reload", () => {
@@ -56,5 +60,11 @@ describe("viewport url sync", () => {
         raw === base || raw.startsWith(`${base}&view=`),
     });
     expect(window.location.hash).toBe("#showcase/card-stack&view=1.25/260/160");
+  });
+
+  it("syncBaseHashPreservingViewport keeps view-only hash on reload", () => {
+    window.location.hash = "#view=1.25/260/160";
+    syncBaseHashPreservingViewport({ baseHash: "#" });
+    expect(window.location.hash).toBe("#view=1.25/260/160");
   });
 });

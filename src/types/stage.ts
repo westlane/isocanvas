@@ -20,6 +20,14 @@ export type IsoCanvasArtboardEntry = {
 
 export type IsoCanvasStageLayout = "single" | "row" | "stack";
 
+/** Placement of one artboard on a continuous stage grid (`row.grid` + `row.continuous`). */
+export type PlaneGridCellSlot = {
+  col: number;
+  row: number;
+  colSpan?: number;
+  rowSpan?: number;
+};
+
 export type IsoCanvasStageRowLayoutOptions = {
   /** Gap between artboards in the row/stack (px). */
   gapPx?: number;
@@ -36,12 +44,16 @@ export type IsoCanvasStageRowLayoutOptions = {
    * (three slabs read as one continuous ground row).
    */
   continuous?: boolean;
+  /** Row + continuous: merge artboards on a 2D slot grid (`gridSlot` on each artboard). */
+  grid?: boolean;
 };
 
 export type IsoCanvasStageAddArtboardOptions = CreateArtboardOptions & {
   id: IsoCanvasArtboardId;
   /** Optional caption rendered above the artboard in row layout. */
   label?: string;
+  /** Stage grid cell when `row.grid` + `row.continuous` are enabled. */
+  gridSlot?: PlaneGridCellSlot;
 };
 
 export type CreateIsoCanvasStageOptions = {

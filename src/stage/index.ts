@@ -24,7 +24,19 @@ export {
   mergeDiagramScenesAlongPlaneRow,
   planeRowStripUserSize,
 } from "./stage-plane-row-scene.js";
-export type { MergeDiagramScenesAlongPlaneRowOptions, PlaneRowColumnLayout } from "./stage-plane-row-scene.js";
+export {
+  mergeDiagramScenesOnPlaneGrid,
+  planeGridStripUserSize,
+} from "./stage-plane-grid-scene.js";
+export type {
+  MergeDiagramScenesAlongPlaneRowOptions,
+  PlaneRowColumnLayout,
+} from "./stage-plane-row-scene.js";
+export type { MergeDiagramScenesOnPlaneGridEntry, PlaneGridLayout } from "./stage-plane-grid-scene.js";
+export { Artboard } from "./artboard-handle.js";
+export type { ArtboardInit } from "./artboard-handle.js";
+export { Stage } from "./stage-handle.js";
+export type { StageMountOptions } from "./stage-handle.js";
 export {
   mountDiagramScenesOnIsoCanvasStage,
   renderDiagramScenesOnIsoCanvasStage,
@@ -44,6 +56,16 @@ export {
   readContinuousStageRowGapPx,
 } from "./plane-row-mount.js";
 export type { PlaneRowColumnSpec, PlaneRowMountPlan } from "./plane-row-mount.js";
+export {
+  buildPlaneGridMountPlan,
+  planeGridMountPlanHasCollectionLabels,
+  renderDiagramSceneOptionsForPlaneGridMount,
+} from "./plane-grid-mount.js";
+export type { PlaneGridCellSpec, PlaneGridMountPlan } from "./plane-grid-mount.js";
+export {
+  isStageRowGrid,
+  IC_STAGE_ROW_GRID_ATTR,
+} from "./stage-row-layout.js";
 export { attachIsoCanvasStageNodeSelection } from "./iso-canvas-stage-selection.js";
 export {
   createIsoCanvasStage,

@@ -47,6 +47,8 @@ import {
   artboardLatticeStageForPlaneBoxInRow,
   type PlaneRowColumnLayout,
 } from "../stage/stage-plane-row-scene.js";
+import { artboardLatticeStageForPlaneBoxInGrid } from "../stage/stage-plane-grid-scene.js";
+import type { PlaneGridMountPlan } from "../stage/plane-grid-mount.js";
 import {
   planeRowColumnLayoutFromMountPlan,
   planeRowMountPlanWithCollectionContentExtents,
@@ -199,6 +201,8 @@ export type RenderDiagramSceneOptions = {
   viewportMeetAlign?: "min" | "mid";
   /** Merged iso strip (Organization + Project columns, etc.). */
   planeRowMount?: PlaneRowMountPlan;
+  /** Merged iso grid (Resource above Organization + Project, etc.). */
+  planeGridMount?: PlaneGridMountPlan;
   /** Collection title on a single artboard shell (non plane-row). */
   artboardCollection?: import("../stage/plane-row-mount.js").PlaneRowColumnSpec;
   /** Extra +plane y shift for domain cubes (fine dots; default when a collection label is set). */
@@ -239,7 +243,16 @@ function latticeStageForPlaneBox(
   box: PlaneBoxSpec,
   stage: ArtboardPlaneStage,
   planeRow?: PlaneRowColumnLayout,
+  planeGrid?: PlaneGridMountPlan,
 ): ArtboardPlaneStage {
+  if (planeGrid) {
+    return artboardLatticeStageForPlaneBoxInGrid(
+      box,
+      stage,
+      planeGrid.layout,
+      planeGrid.cells,
+    );
+  }
   if (planeRow) {
     return artboardLatticeStageForPlaneBoxInRow(box, stage, planeRow);
   }
@@ -275,6 +288,7 @@ export function renderDiagramScene(
     rowSpan: stage.divisions ?? rowCount,
     gridCols: DIAGRAM_SCENE_ROW_GRID_COLS,
     ...(planeRowColumns ? { planeRowColumns } : {}),
+    ...(options.planeGridMount ? { planeGridMount: options.planeGridMount } : {}),
   });
   const downDots = options.contentPlaneDownDots ?? 0;
   layoutNodes = shiftDiagramSceneNodesDownDots(layoutNodes, stage, downDots);
@@ -333,7 +347,7 @@ export function renderDiagramScene(
       planeBoxesForSceneNode(node).map((box) =>
         enforcePlaneBoxOnArtboardLattice(
           box,
-          latticeStageForPlaneBox(box, stage, planeRowColumns),
+          latticeStageForPlaneBox(box, stage, planeRowColumns, options.planeGridMount),
         ),
       ),
     ),
@@ -341,6 +355,7 @@ export function renderDiagramScene(
     {
       stage,
       ...(planeRowMount ? { planeRowMount } : {}),
+      ...(options.planeGridMount ? { planeGridMount: options.planeGridMount } : {}),
       ...(options.omitArtboardShell
         ? { omitArtboardShell: true }
         : {

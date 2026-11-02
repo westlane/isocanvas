@@ -16,9 +16,17 @@ import {
   normalizeRowArtboardUserHeights,
   normalizeRowArtboardUserSizes,
   isStageRowContinuous,
+  isStageRowGrid,
   IC_ROW_COLUMN_ATTR,
   IC_ROW_COLUMN_INDEX_VAR,
   IC_PLANE_ROW_HOST_ATTR,
+  IC_GRID_CELL_COLUMN_ATTR,
+  IC_GRID_CELL_ROW_ATTR,
+  IC_GRID_CELL_COLUMN_SPAN_ATTR,
+  IC_GRID_CELL_ROW_SPAN_ATTR,
+  IC_GRID_COLUMN_COUNT_VAR,
+  IC_GRID_ROW_COUNT_VAR,
+  IC_GRID_LABEL_BAND_VAR,
 } from "./stage-row-layout.js";
 import {
   mergeDiagramScenesAlongPlaneRow,
@@ -33,6 +41,17 @@ import {
   renderDiagramSceneOptionsForPlaneRowMount,
   type PlaneRowColumnSpec,
 } from "./plane-row-mount.js";
+import type { PlaneGridCellSlot } from "../types/stage.js";
+import {
+  mergeDiagramScenesOnPlaneGrid,
+  planeGridStripUserSize,
+  type PlaneGridLayout,
+} from "./stage-plane-grid-scene.js";
+import {
+  buildPlaneGridMountPlan,
+  planeGridMountPlanHasCollectionLabels,
+  renderDiagramSceneOptionsForPlaneGridMount,
+} from "./plane-grid-mount.js";
 
 export type IsoCanvasStageArtboardSpec = {
   id: IsoCanvasArtboardId;
@@ -40,6 +59,8 @@ export type IsoCanvasStageArtboardSpec = {
   label?: string;
   collectionLabel?: string;
   collectionLabelFill?: string;
+  /** Placement on a continuous stage grid (when {@link isStageRowGrid} is active). */
+  gridSlot?: PlaneGridCellSlot;
   scene?: DiagramScene;
 } & Partial<CreateArtboardOptions>;
 
@@ -148,6 +169,53 @@ function markPlaneRowHosts(stage: IsoCanvasStage, hostId: IsoCanvasArtboardId | 
   stage.container.style.setProperty("--ic-row-column-count", String(ids.length));
 }
 
+function markPlaneGridHosts(
+  stage: IsoCanvasStage,
+  hostId: IsoCanvasArtboardId | null,
+  items: ReadonlyArray<IsoCanvasStageDiagramMountItem>,
+  layout: PlaneGridLayout,
+): void {
+  const slotById = new Map(items.map((item) => [item.id, item.gridSlot]));
+  const ids = stage.artboardIds();
+  ids.forEach((id, index) => {
+    const entry = stage.getArtboard(id);
+    if (!entry) {
+      return;
+    }
+    if (hostId !== null && id === hostId) {
+      entry.artboard.root.setAttribute(IC_PLANE_ROW_HOST_ATTR, "true");
+    } else {
+      entry.artboard.root.removeAttribute(IC_PLANE_ROW_HOST_ATTR);
+    }
+    const slot = slotById.get(id) ?? { col: index, row: 0 };
+    entry.artboard.root.setAttribute(IC_GRID_CELL_COLUMN_ATTR, String(slot.col));
+    entry.artboard.root.setAttribute(IC_GRID_CELL_ROW_ATTR, String(slot.row));
+    entry.artboard.root.style.setProperty("--ic-grid-cell-column", String(slot.col));
+    entry.artboard.root.style.setProperty("--ic-grid-cell-row", String(slot.row));
+    entry.artboard.root.style.setProperty(
+      "--ic-grid-cell-column-span",
+      String(slot.colSpan ?? 1),
+    );
+    entry.artboard.root.style.setProperty("--ic-grid-cell-row-span", String(slot.rowSpan ?? 1));
+    if (slot.colSpan !== undefined && slot.colSpan > 1) {
+      entry.artboard.root.setAttribute(IC_GRID_CELL_COLUMN_SPAN_ATTR, String(slot.colSpan));
+    } else {
+      entry.artboard.root.removeAttribute(IC_GRID_CELL_COLUMN_SPAN_ATTR);
+    }
+    if (slot.rowSpan !== undefined && slot.rowSpan > 1) {
+      entry.artboard.root.setAttribute(IC_GRID_CELL_ROW_SPAN_ATTR, String(slot.rowSpan));
+    } else {
+      entry.artboard.root.removeAttribute(IC_GRID_CELL_ROW_SPAN_ATTR);
+    }
+    entry.artboard.root.setAttribute(IC_ROW_COLUMN_ATTR, String(slot.col));
+    entry.artboard.root.style.setProperty(IC_ROW_COLUMN_INDEX_VAR, String(slot.col));
+  });
+  stage.container.style.setProperty(IC_GRID_COLUMN_COUNT_VAR, String(layout.columnCount));
+  stage.container.style.setProperty(IC_GRID_ROW_COUNT_VAR, String(layout.rowCount));
+  stage.container.style.setProperty(IC_GRID_LABEL_BAND_VAR, `${layout.labelBandPx}px`);
+  stage.container.style.setProperty("--ic-row-column-count", String(layout.columnCount));
+}
+
 export type RenderDiagramScenesOnIsoCanvasStageOptions = {
   colors: IsoCanvasColors;
   emptyHtml?: string;
@@ -157,6 +225,7 @@ export type IsoCanvasStageDiagramMountItem = {
   id: IsoCanvasArtboardId;
   scene: DiagramScene;
   column: PlaneRowColumnSpec;
+  gridSlot?: PlaneGridCellSlot;
 };
 
 function diagramMountItemsFromSpecs(
@@ -168,6 +237,7 @@ function diagramMountItemsFromSpecs(
       id: spec.id,
       scene: spec.scene,
       column: planeRowColumnSpecFromFields(spec),
+      ...(spec.gridSlot !== undefined ? { gridSlot: spec.gridSlot } : {}),
     }));
 }
 
@@ -249,6 +319,85 @@ function renderContinuousPlaneRow(
   }
 }
 
+function renderContinuousPlaneGrid(
+  stage: IsoCanvasStage,
+  items: ReadonlyArray<IsoCanvasStageDiagramMountItem>,
+  options: RenderDiagramScenesOnIsoCanvasStageOptions,
+): void {
+  const cellUserSize = continuousRowColumnUserSize(stage);
+  const gapPx = readContinuousStageRowGapPx(stage);
+  const ordered = stage
+    .artboardIds()
+    .map((id) => items.find((item) => item.id === id))
+    .filter((item): item is IsoCanvasStageDiagramMountItem => item !== undefined);
+
+  if (!cellUserSize || ordered.length === 0) {
+    return;
+  }
+
+  const hostId = ordered[0]!.id;
+  const hostEntry = stage.getArtboard(hostId);
+  if (!hostEntry) {
+    return;
+  }
+
+  const visibleItems = ordered.filter((item) => stage.isArtboardVisible(item.id));
+  const gridCells = visibleItems.map((item, index) => ({
+    ...(item.gridSlot ?? { col: index, row: 0 }),
+    ...item.column,
+  }));
+  const mountPlan = buildPlaneGridMountPlan(cellUserSize, gapPx, gridCells);
+  markPlaneGridHosts(stage, hostId, ordered, mountPlan.layout);
+
+  const mergeEntries = visibleItems.map((item, index) => ({
+    scene: item.scene,
+    slot: item.gridSlot ?? { col: index, row: 0 },
+  }));
+  const merged = mergeDiagramScenesOnPlaneGrid(mergeEntries, {
+    cellUserSize,
+    gapPx,
+  });
+  const stripSize = planeGridStripUserSize(mountPlan.layout);
+  applyArtboardUserSize(hostEntry.artboard.root, stripSize);
+
+  const emptyHtml = options.emptyHtml ?? DEFAULT_EMPTY_HTML;
+  for (const { id } of ordered) {
+    const entry = stage.getArtboard(id);
+    if (!entry) {
+      continue;
+    }
+    entry.host.replaceChildren();
+    if (id !== hostId) {
+      continue;
+    }
+    if (!merged.nodes.length && !planeGridMountPlanHasCollectionLabels(mountPlan)) {
+      entry.host.innerHTML = emptyHtml;
+      continue;
+    }
+    const sceneToRender =
+      merged.nodes.length > 0
+        ? merged
+        : {
+            nodes: [],
+            viewBox: merged.viewBox ?? {
+              x: 0,
+              y: 0,
+              w: stripSize.width,
+              h: stripSize.height,
+            },
+          };
+    renderDiagramScene(
+      entry.host,
+      sceneToRender,
+      options.colors,
+      renderDiagramSceneOptionsForPlaneGridMount(mountPlan, {
+        artboardUserSize: stripSize,
+        viewportMeetAlign: "min",
+      }),
+    );
+  }
+}
+
 /** Mount or refresh diagram SVG on every registered artboard. */
 export function renderDiagramScenesOnIsoCanvasStage(
   stage: IsoCanvasStage,
@@ -262,7 +411,11 @@ export function renderDiagramScenesOnIsoCanvasStage(
   stage.relayoutArtboards();
 
   if (isStageRowContinuous(stage)) {
-    renderContinuousPlaneRow(stage, items, options);
+    if (isStageRowGrid(stage)) {
+      renderContinuousPlaneGrid(stage, items, options);
+    } else {
+      renderContinuousPlaneRow(stage, items, options);
+    }
     return;
   }
 

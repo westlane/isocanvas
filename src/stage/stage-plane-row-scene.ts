@@ -11,7 +11,7 @@ export type MergeDiagramScenesAlongPlaneRowOptions = {
 };
 
 /** Column-local plane coords: keep layout dot inset from scene viewBox origin (not tight node bounds). */
-function nodesInColumnCell(scene: DiagramScene): DiagramSceneNode[] {
+export function nodesInColumnCell(scene: DiagramScene): DiagramSceneNode[] {
   const originX = scene.viewBox?.x ?? 0;
   const originY = scene.viewBox?.y ?? 0;
   return scene.nodes.map((node) => ({

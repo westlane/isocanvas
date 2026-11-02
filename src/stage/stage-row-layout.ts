@@ -38,6 +38,22 @@ export const DEFAULT_ISO_CANVAS_STAGE_ROW_CONTINUOUS_GAP_PX = 56;
 
 export const IC_STAGE_ROW_CONTINUOUS_ATTR = "data-ic-stage-row-continuous";
 
+export const IC_STAGE_ROW_GRID_ATTR = "data-ic-stage-row-grid";
+
+export const IC_GRID_CELL_COLUMN_ATTR = "data-ic-grid-cell-column";
+
+export const IC_GRID_CELL_ROW_ATTR = "data-ic-grid-cell-row";
+
+export const IC_GRID_CELL_COLUMN_SPAN_ATTR = "data-ic-grid-cell-column-span";
+
+export const IC_GRID_CELL_ROW_SPAN_ATTR = "data-ic-grid-cell-row-span";
+
+export const IC_GRID_COLUMN_COUNT_VAR = "--ic-grid-column-count";
+
+export const IC_GRID_ROW_COUNT_VAR = "--ic-grid-row-count";
+
+export const IC_GRID_LABEL_BAND_VAR = "--ic-grid-label-band-px";
+
 export const IC_ROW_COLUMN_ATTR = "data-ic-row-column";
 
 export const IC_ROW_COLUMN_INDEX_VAR = "--ic-row-column-index";
@@ -49,6 +65,10 @@ export function isStageRowContinuous(stage: Pick<IsoCanvasStage, "layout" | "con
     stage.layout === "row" &&
     stage.container.getAttribute(IC_STAGE_ROW_CONTINUOUS_ATTR) === "true"
   );
+}
+
+export function isStageRowGrid(stage: Pick<IsoCanvasStage, "layout" | "container">): boolean {
+  return isStageRowContinuous(stage) && stage.container.getAttribute(IC_STAGE_ROW_GRID_ATTR) === "true";
 }
 
 /** Pin each artboard on one horizontal plane: index × (user width + gap), no flex overlap. */

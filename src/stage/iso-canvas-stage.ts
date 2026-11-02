@@ -32,6 +32,7 @@ import {
   IC_CANVAS_STAGE_LAYOUT_STACK_CLASS,
   IC_CANVAS_STAGE_ROW_WRAPPER_CLASS,
   IC_STAGE_ROW_CONTINUOUS_ATTR,
+  IC_STAGE_ROW_GRID_ATTR,
   IC_PLANE_ROW_HOST_ATTR,
   IC_ROW_COLUMN_ATTR,
   IC_ROW_COLUMN_INDEX_VAR,
@@ -79,6 +80,7 @@ export function createIsoCanvasStage(options: CreateIsoCanvasStageOptions = {}):
   const rowSyncCamera = options.row?.syncCamera !== false;
   const rowAlignUserHeights = options.row?.alignUserHeights !== false;
   const rowContinuous = options.row?.continuous === true && layout === "row";
+  const rowGrid = options.row?.grid === true && rowContinuous;
 
   const container = document.createElement("div");
   container.className = [IC_CANVAS_STAGE_CLASS, options.className].filter(Boolean).join(" ");
@@ -109,6 +111,11 @@ export function createIsoCanvasStage(options: CreateIsoCanvasStageOptions = {}):
       container.setAttribute(IC_STAGE_ROW_CONTINUOUS_ATTR, "true");
     } else {
       container.removeAttribute(IC_STAGE_ROW_CONTINUOUS_ATTR);
+    }
+    if (rowGrid) {
+      container.setAttribute(IC_STAGE_ROW_GRID_ATTR, "true");
+    } else {
+      container.removeAttribute(IC_STAGE_ROW_GRID_ATTR);
     }
   };
   applyRowLayoutVars();

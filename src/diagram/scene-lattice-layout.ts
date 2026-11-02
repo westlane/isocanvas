@@ -19,6 +19,11 @@ import type { ArtboardPlaneStage, PlaneBoxSpec } from "../types/artboard.js";
 import type { DiagramSceneNode } from "../types/diagram.js";
 import type { PlaneRowColumnLayout } from "../stage/stage-plane-row-scene.js";
 import { planeRowColumnIndexForBox } from "../stage/stage-plane-row-scene.js";
+import type { PlaneGridMountPlan } from "../stage/plane-grid-mount.js";
+import {
+  planeGridCellBounds,
+  planeGridCellIndexForPoint,
+} from "../stage/stage-plane-grid-scene.js";
 
 /** Guide-step margin on the leading artboard edges (min X / min Y) of the layout band. */
 export const DEFAULT_ARTBOARD_LAYOUT_DOT_INSET = 2;
@@ -516,6 +521,8 @@ export type DiagramSceneRowRelayoutOptions = ArtboardRowSpaceBetweenOptions & {
   footprintUser: { widthPx: number; depthPx: number };
   /** When set, repack within each plane-row artboard column (merged strip). */
   planeRowColumns?: PlaneRowColumnLayout;
+  /** When set, repack within each plane-grid artboard cell (merged grid). */
+  planeGridMount?: PlaneGridMountPlan;
 };
 
 const ROW_Y_CLUSTER_EPSILON_PX = 2;
@@ -547,6 +554,14 @@ export function relayoutDiagramSceneNodesInPackedRows(
 ): DiagramSceneNode[] {
   if (nodes.length === 0) {
     return [];
+  }
+  if (options.planeGridMount) {
+    return relayoutDiagramSceneNodesInPackedPlaneGridCells(
+      nodes,
+      stage,
+      options.planeGridMount,
+      options,
+    );
   }
   if (options.planeRowColumns) {
     return relayoutDiagramSceneNodesInPackedPlaneRowColumns(
@@ -591,6 +606,49 @@ function relayoutDiagramSceneNodesInPackedPlaneRowColumns(
       byId.set(node.id, {
         ...node,
         x: node.x + colStart,
+      });
+    }
+  }
+
+  return nodes.map((node) => byId.get(node.id) ?? node);
+}
+
+function relayoutDiagramSceneNodesInPackedPlaneGridCells(
+  nodes: readonly DiagramSceneNode[],
+  stripStage: ArtboardPlaneStage,
+  gridMount: PlaneGridMountPlan,
+  options: DiagramSceneRowRelayoutOptions,
+): DiagramSceneNode[] {
+  const { layout, cells } = gridMount;
+  const byId = new Map<string, DiagramSceneNode>();
+
+  for (let cellIndex = 0; cellIndex < cells.length; cellIndex += 1) {
+    const slot = cells[cellIndex]!;
+    const bounds = planeGridCellBounds(slot, layout);
+    const cellNodes = nodes.filter(
+      (node) => planeGridCellIndexForPoint(node.x, node.y, layout, cells) === cellIndex,
+    );
+    if (cellNodes.length === 0) {
+      continue;
+    }
+    const cellStage: ArtboardPlaneStage = {
+      x: 0,
+      y: 0,
+      width: bounds.maxX - bounds.minX,
+      height: bounds.maxY - bounds.minY,
+      ...(stripStage.divisions !== undefined ? { divisions: stripStage.divisions } : {}),
+    };
+    const cellLocal = cellNodes.map((node) => ({
+      ...node,
+      x: node.x - bounds.minX,
+      y: node.y - bounds.minY,
+    }));
+    const relaid = relayoutDiagramSceneNodesOnSingleArtboard(cellLocal, cellStage, options);
+    for (const node of relaid) {
+      byId.set(node.id, {
+        ...node,
+        x: node.x + bounds.minX,
+        y: node.y + bounds.minY,
       });
     }
   }
