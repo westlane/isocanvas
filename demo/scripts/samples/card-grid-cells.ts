@@ -2,15 +2,27 @@
 // Copyright (c) 2026 West Lane
 
 import type { ArtboardLatticeDotPinOffset } from "@westlane/isocanvas";
-import { userPxToIsoUnits, type IsometricOrientation } from "@westlane/isocanvas";
+import {
+  DIAGRAM_NODE_FOOTPRINT,
+  DIAGRAM_NODE_FOOTPRINT_DEPTH_PX,
+  DIAGRAM_NODE_FOOTPRINT_WIDTH_DOT_SPAN,
+  DIAGRAM_NODE_FOOTPRINT_WIDTH_PX,
+  userPxToIsoUnits,
+  type IsometricOrientation,
+} from "@westlane/isocanvas";
 import type { CardGridCell } from "./types.js";
 
 /** One dot step of margin inside each macro cell when centering grid cards. */
 export const DEMO_CARD_GRID_DOT_INSET = 1;
 
-/** Standard demo card footprint in diagram/user pixels. */
-export const DEMO_CARD_USER_WIDTH_PX = 168;
-export const DEMO_CARD_USER_DEPTH_PX = 105;
+/** @deprecated Use {@link DIAGRAM_NODE_FOOTPRINT_WIDTH_DOT_SPAN} */
+export const DEMO_CARD_FOOTPRINT_WIDTH_DOT_SPAN = DIAGRAM_NODE_FOOTPRINT_WIDTH_DOT_SPAN;
+
+/** @deprecated Use {@link DIAGRAM_NODE_FOOTPRINT_WIDTH_PX} */
+export const DEMO_CARD_USER_WIDTH_PX = DIAGRAM_NODE_FOOTPRINT_WIDTH_PX;
+
+/** @deprecated Use {@link DIAGRAM_NODE_FOOTPRINT_DEPTH_PX} */
+export const DEMO_CARD_USER_DEPTH_PX = DIAGRAM_NODE_FOOTPRINT_DEPTH_PX;
 
 /** Default extrusion for grid cards without an explicit height (diagram user px). */
 export const DEMO_CARD_DEFAULT_HEIGHT_USER_PX = 72;
@@ -47,7 +59,7 @@ export function demoCardPlaneDotOffset(
 
 export function demoCardFootprintIso(): { width: number; depth: number } {
   return {
-    width: userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX),
-    depth: userPxToIsoUnits(DEMO_CARD_USER_DEPTH_PX),
+    width: userPxToIsoUnits(DIAGRAM_NODE_FOOTPRINT.widthPx),
+    depth: userPxToIsoUnits(DIAGRAM_NODE_FOOTPRINT.depthPx),
   };
 }

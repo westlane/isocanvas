@@ -422,3 +422,32 @@ svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-dot {
   fill: var(--ic-dot-grid-dot);
 }
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge,
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge-side {
+  stroke: none;
+  vector-effect: non-scaling-stroke;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge-side {
+  filter: var(--ic-artboard-slab-filter);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-collection-label {
+  --ic-label-fill: var(--ic-artboard-collection-badge-fg, #ffffff);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-collection-label tspan {
+  fill: var(--ic-artboard-collection-badge-fg, #ffffff);
+  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  stroke: none;
+  paint-order: fill;
+  text-anchor: middle;
+  dominant-baseline: central;
+}

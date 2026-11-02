@@ -18,6 +18,19 @@ export type DiagramSceneNode = {
     fill: string;
     stroke: string;
   };
+  /** Per-node iso face fills (continuous row / merged artboards). */
+  cubeFaceColors?: DiagramCubeFaceColors;
+};
+
+/** Lit face paint for one domain cube (overrides theme {@link IsoCanvasColors} at mount). */
+export type DiagramCubeFaceColors = {
+  top: string;
+  front: string;
+  right: string;
+  left: string;
+  bottom: string;
+  labelFill?: string;
+  edgeStroke?: string;
 };
 
 export type DiagramSceneEdge = {
@@ -48,6 +61,7 @@ export type IsoBoxSpec = {
   elevation?: number;
   /** Uniform face fill (e.g. companion slab). */
   monoFaceFill?: string;
+  cubeFaceColors?: DiagramCubeFaceColors;
   compactLabel?: boolean;
   planeBoxRole?: "domain" | "foundationSlab";
   omitCubeLabel?: boolean;

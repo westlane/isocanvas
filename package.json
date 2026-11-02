@@ -28,6 +28,11 @@
       "import": "./dist/layout-entry.js",
       "default": "./dist/layout-entry.js"
     },
+    "./theme/color-math": {
+      "types": "./dist/theme/color-math.d.ts",
+      "import": "./dist/theme/color-math.js",
+      "default": "./dist/theme/color-math.js"
+    },
     "./dot-grid.css": "./theme/layout/dot-grid.css",
     "./layout.css": "./theme/layout/layout.css",
     "./camera.css": "./theme/camera/camera.css",

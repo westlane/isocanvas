@@ -5,7 +5,7 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import {
   defaultIsoArtboardStage,
-  fitIsoCubeTopLabelFontSizePx,
+  ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS,
   ISO_CUBE_LABEL_FONT_SIZE_PX,
   mountIsometricCanvasOnHost,
   mountPlaneBoxesOnCanvas,
@@ -42,23 +42,24 @@ function labelFontSizePx(host: HTMLElement, objectId: string): number {
   return Number.parseFloat(tspan?.getAttribute("font-size") ?? "0");
 }
 
+function labelTextContent(host: HTMLElement, objectId: string): string {
+  const tspan = host.querySelector(
+    `g.node[data-object-id="${objectId}"] g.ic-iso-cube-label tspan`,
+  );
+  return tspan?.textContent ?? "";
+}
+
 describe("iso cube top label fit", () => {
   beforeEach(() => {
     initDemoTheme(document.documentElement);
   });
 
-  it("uniform size is the tightest per-cube fit in the batch", () => {
+  it("lowers uniform font size when a title would overflow the top face width", () => {
     const specs = [
       { label: "A", width: 2, depth: 1.25 },
       { label: "Internationalization", width: 2, depth: 1.25 },
     ];
-    const longOnly = fitIsoCubeTopLabelFontSizePx({
-      label: "Internationalization",
-      widthIso: 2,
-      depthIso: 1.25,
-    });
-    expect(uniformIsoCubeTopLabelFontSizePx(specs)).toBe(longOnly);
-    expect(longOnly).toBeLessThan(ISO_CUBE_LABEL_FONT_SIZE_PX);
+    expect(uniformIsoCubeTopLabelFontSizePx(specs)).toBeLessThan(ISO_CUBE_LABEL_FONT_SIZE_PX);
   });
 
   it("keeps mounted labels inside the top face (default and rotated)", () => {
@@ -116,6 +117,7 @@ describe("iso cube top label fit", () => {
     expect(shortSize).toBeGreaterThan(0);
     expect(longSize).toBe(shortSize);
     expect(labelBBoxContainedInTopFace(host, "long")).toBe(true);
+    expect(labelTextContent(host, "long")).toContain(ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS);
     host.remove();
   });
 

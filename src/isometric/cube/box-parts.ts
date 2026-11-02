@@ -22,7 +22,7 @@ import {
 import { themedCubeFaceColors } from "./cube.js";
 import {
   CANVAS_TEXT_NO_STROKE,
-  formatIsoCanvasLabelText,
+  displayIsoCubeTopLabelText,
   IC_ISO_CUBE_LABEL_CLASS,
   ISO_CUBE_FACE_NO_STROKE,
   isoBoxTopFaceLabelLayout,
@@ -33,6 +33,7 @@ import {
 import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
 import type { StackLayerPresentation } from "../../types/diagram.js";
 import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../../types/diagram-interaction.js";
+import { applyCategoryCubeThemeToShell } from "./category-cube-theme.js";
 
 function faceRect(
   face: IsoFaceId,
@@ -97,11 +98,14 @@ export function mountIsoBoxOnStageShell(
     top: 0,
   });
   cubeShell.getElement().classList.add(IC_ISO_CUBE_SHELL_CLASS);
+  if (spec.cubeFaceColors) {
+    applyCategoryCubeThemeToShell(cubeShell.getElement(), spec.cubeFaceColors);
+  }
   if (spec.planeBoxRole === "foundationSlab") {
     cubeShell.getElement().setAttribute(DIAGRAM_OBJECT_SELECTABLE_ATTR, "false");
   }
   const { faces, label } = createLocalIsoBoxParts(spec, colors, orientation, labelFontSizePx);
-  const fills = themedCubeFaceColors(colors);
+  const fills = faceFillsForBox(spec, colors);
   if (options?.stackLayer) {
     applyStackLayerPresentation({ faces, label }, options.stackLayer);
     paintStackLayerDataset(boxShell.getElement(), options.stackLayer);
@@ -162,7 +166,13 @@ function createIsoBoxLabel(
   const layout = isoBoxTopFaceLabelLayout(w, d, h, orientation);
   return new IsometricText({
     planeView: PlaneView.TOP,
-    text: formatIsoCanvasLabelText(spec.label),
+    text: displayIsoCubeTopLabelText({
+      label: spec.label,
+      widthIso: w,
+      depthIso: d,
+      fontSizePx: labelFontSizePx,
+      orientation,
+    }),
     left: layout.left,
     right: layout.right,
     top: layout.top,
@@ -179,6 +189,36 @@ function createIsoBoxLabel(
   });
 }
 
+function faceFillsForBox(
+  spec: Pick<IsoBoxSpec, "monoFaceFill" | "cubeFaceColors">,
+  colors: IsoCanvasColors,
+): Record<IsoFaceId, string> {
+  const themed = themedCubeFaceColors(colors);
+  if (spec.monoFaceFill) {
+    const mono = spec.monoFaceFill;
+    return {
+      bottom: mono,
+      back: mono,
+      left: mono,
+      side: mono,
+      front: mono,
+      top: mono,
+    };
+  }
+  const custom = spec.cubeFaceColors;
+  if (!custom) {
+    return themed;
+  }
+  return {
+    top: custom.top,
+    front: custom.front,
+    side: custom.right,
+    left: custom.left,
+    bottom: custom.bottom,
+    back: custom.left,
+  };
+}
+
 export function createLocalIsoBoxParts(
   spec: IsoBoxSpec,
   colors: IsoCanvasColors,
@@ -186,20 +226,23 @@ export function createLocalIsoBoxParts(
   labelFontSizePx: number = ISO_CUBE_LABEL_FONT_SIZE_PX,
 ): { faces: Record<IsoFaceId, IsometricRectangle>; label: IsometricText } {
   const { width: w, depth: d, height: h } = spec;
-  const fills = themedCubeFaceColors(colors);
-  const mono = spec.monoFaceFill;
+  const fills = faceFillsForBox(spec, colors);
   const faces = {} as Record<IsoFaceId, IsometricRectangle>;
 
   for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
     faces[id] = faceRect(
       id,
-      mono ?? fills[id],
+      fills[id],
       isoCubeFaceRectLayoutForPlaneTopLeft(id, w, d, h, orientation),
     );
   }
 
   const labelSize = spec.compactLabel ? labelFontSizePx * 0.72 : labelFontSizePx;
-  return { faces, label: createIsoBoxLabel(spec, colors, orientation, labelSize) };
+  const labelColors =
+    spec.cubeFaceColors?.labelFill !== undefined
+      ? { ...colors, isoLabelFill: spec.cubeFaceColors.labelFill }
+      : colors;
+  return { faces, label: createIsoBoxLabel(spec, labelColors, orientation, labelSize) };
 }
 
 export function mountAnchoredFace(

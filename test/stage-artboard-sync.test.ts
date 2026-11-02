@@ -30,7 +30,29 @@ describe("IsoCanvasStage multi-artboard sync", () => {
       { id: "c", label: "C", embedDotGrid: false },
     ]);
     expect(stage.artboardIds()).toEqual(["b", "c"]);
-    expect(stage.getArtboard("b")?.artboard.root.getAttribute("data-ic-artboard-label")).toBe("Beta");
+
+    stage.destroy();
+  });
+
+  it("syncIsoCanvasStageArtboardRegistry reorders existing artboards to match specs", () => {
+    const stage = createIsoCanvasStage({ layout: "row" });
+    document.body.appendChild(stage.container);
+
+    syncIsoCanvasStageArtboardRegistry(stage, [
+      { id: "worker", embedDotGrid: false },
+      { id: "organization", embedDotGrid: false },
+      { id: "project", embedDotGrid: false },
+      { id: "agent", embedDotGrid: false },
+    ]);
+    expect(stage.artboardIds()).toEqual(["worker", "organization", "project", "agent"]);
+
+    syncIsoCanvasStageArtboardRegistry(stage, [
+      { id: "worker", embedDotGrid: false },
+      { id: "agent", embedDotGrid: false },
+      { id: "organization", embedDotGrid: false },
+      { id: "project", embedDotGrid: false },
+    ]);
+    expect(stage.artboardIds()).toEqual(["worker", "agent", "organization", "project"]);
 
     stage.destroy();
   });

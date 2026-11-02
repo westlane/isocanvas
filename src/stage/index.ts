@@ -33,9 +33,17 @@ export {
 } from "./stage-artboard-sync.js";
 export type {
   IsoCanvasStageArtboardSpec,
+  IsoCanvasStageDiagramMountItem,
   RenderDiagramScenesOnIsoCanvasStageOptions,
   SyncIsoCanvasStageArtboardRegistryOptions,
 } from "./stage-artboard-sync.js";
+export {
+  buildPlaneRowMountPlan,
+  planeRowColumnLayoutFromMountPlan,
+  planeRowColumnSpecFromFields,
+  readContinuousStageRowGapPx,
+} from "./plane-row-mount.js";
+export type { PlaneRowColumnSpec, PlaneRowMountPlan } from "./plane-row-mount.js";
 export { attachIsoCanvasStageNodeSelection } from "./iso-canvas-stage-selection.js";
 export {
   createIsoCanvasStage,

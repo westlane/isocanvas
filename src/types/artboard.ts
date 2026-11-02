@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-/** Logical artboard size in user units (+x right, +y up; origin bottom-left). */
+import type { DiagramCubeFaceColors } from "./diagram.js";
+
+/** Logical artboard size in user units (+x right, +y down; origin bottom-left). */
 export type ArtboardUserSize = {
   width: number;
   height: number;
@@ -48,6 +50,8 @@ export type PlaneBoxSpec = {
   planeBoxRole?: "domain" | "foundationSlab";
   /** Uniform lit fill for all faces (companion slabs). */
   monoFaceFill?: string;
+  /** Domain cube face overrides (from {@link DiagramSceneNode.cubeFaceColors}). */
+  cubeFaceColors?: DiagramCubeFaceColors;
   /** Smaller top label on companion slabs. */
   compactLabel?: boolean;
   /** When true, mount faces only (caption may be placed elsewhere). */

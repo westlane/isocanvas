@@ -17,9 +17,29 @@ import {
 } from "../layout/lattice-plane.js";
 import type { ArtboardPlaneStage, PlaneBoxSpec } from "../types/artboard.js";
 import type { DiagramSceneNode } from "../types/diagram.js";
+import type { PlaneRowColumnLayout } from "../stage/stage-plane-row-scene.js";
+import { planeRowColumnIndexForBox } from "../stage/stage-plane-row-scene.js";
 
 /** Guide-step margin on the leading artboard edges (min X / min Y) of the layout band. */
 export const DEFAULT_ARTBOARD_LAYOUT_DOT_INSET = 2;
+
+/** Nudge diagram cubes toward +plane y after collection label layout (fine dots). */
+export const DEFAULT_DIAGRAM_CONTENT_DOWN_DOTS = 1;
+
+export function shiftDiagramSceneNodesDownDots(
+  nodes: readonly DiagramSceneNode[],
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions">,
+  downDots: number,
+): DiagramSceneNode[] {
+  if (downDots <= 0 || nodes.length === 0) {
+    return [...nodes];
+  }
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const deltaY = downDots * artboardDotStep(pitch).yPx;
+  return nodes.map((node) => ({ ...node, y: node.y + deltaY }));
+}
+
 /**
  * Trailing edge inset (max X / max Y). One line wider than {@link DEFAULT_ARTBOARD_LAYOUT_DOT_INSET}
  * so cell-center stud rims match the leading side (3 visible dots vs 2).
@@ -47,6 +67,8 @@ export type ArtboardRowSpaceBetweenOptions = MacroGridCellLayoutOptions & {
   gridCols?: number;
   /** Target minimum clear gap between columns in fine guide lines (default {@link DEFAULT_ROW_INTER_COLUMN_GAP_LINES}). */
   minInterColumnGapLines?: number;
+  /** Per-item footprints (same length as `itemCount`); skips uniform row shrink-to-fit. */
+  itemFootprints?: ReadonlyArray<{ widthPx: number; depthPx: number }>;
 };
 
 function artboardInnerBandOnGrid(
@@ -114,6 +136,87 @@ function spaceBetweenStartsOnGridLines(
   const starts = [line];
   for (let i = 1; i < itemCount; i += 1) {
     line += sizeLines + gaps[i - 1]!;
+    starts.push(line);
+  }
+  return starts;
+}
+
+/** Shrink line spans so content + fixed gaps fits the row band (never overlaps). */
+function fitPackedRowSizeLinesToBand(
+  sizeLines: readonly number[],
+  innerLineSpan: number,
+  minGapLines: number,
+): { sizeLines: number[]; gapLines: number } {
+  if (sizeLines.length === 0) {
+    return { sizeLines: [], gapLines: minGapLines };
+  }
+  const gapCount = Math.max(0, sizeLines.length - 1);
+  const sumLines = (lines: readonly number[]) => lines.reduce((sum, line) => sum + line, 0);
+  const required = sizeLines.map((line) => Math.max(1, line));
+  let lines = [...required];
+  let gap = minGapLines;
+
+  const fits = (lineSpans: readonly number[], gapLines: number) =>
+    sumLines(lineSpans) + gapCount * gapLines <= innerLineSpan;
+
+  while (!fits(lines, gap) && gap > 1) {
+    gap -= 1;
+  }
+
+  if (fits(lines, gap)) {
+    return { sizeLines: lines, gapLines: gap };
+  }
+
+  while (!fits(lines, gap)) {
+    const widest = Math.max(...lines);
+    const index = lines.indexOf(widest);
+    if (index < 0 || lines[index]! <= required[index]!) {
+      break;
+    }
+    lines = lines.map((line, i) => (i === index ? line - 1 : line));
+  }
+
+  if (fits(lines, gap)) {
+    return { sizeLines: lines, gapLines: gap };
+  }
+
+  const maxContentLines = innerLineSpan - gapCount * gap;
+  if (maxContentLines < lines.length) {
+    return {
+      sizeLines: required.map((line) => Math.max(1, Math.min(line, maxContentLines))),
+      gapLines: gap,
+    };
+  }
+
+  lines = [...required];
+  while (sumLines(lines) > maxContentLines) {
+    const shrinkable = lines
+      .map((line, i) => ({ line, i, headroom: line - required[i]! }))
+      .filter((entry) => entry.headroom > 0);
+    if (shrinkable.length === 0) {
+      break;
+    }
+    const target = shrinkable.reduce((best, entry) => (entry.line > best.line ? entry : best));
+    lines = lines.map((line, i) => (i === target.i ? line - 1 : line));
+  }
+  return {
+    sizeLines: lines.map((line, i) => Math.max(required[i]!, line)),
+    gapLines: gap,
+  };
+}
+
+function packedRowStartsOnGridLines(
+  sizeLines: readonly number[],
+  bandMinLine: number,
+  minGapLines: number,
+): number[] {
+  if (sizeLines.length === 0) {
+    return [];
+  }
+  let line = bandMinLine;
+  const starts = [line];
+  for (let i = 1; i < sizeLines.length; i += 1) {
+    line += sizeLines[i - 1]! + minGapLines;
     starts.push(line);
   }
   return starts;
@@ -290,21 +393,13 @@ export function planeRectsSpaceBetweenInRow(
   const columnSlots = gridCols ?? itemCount;
   const layoutColumnCount = columnSlots;
 
+  const perItemFootprints =
+    options.itemFootprints && options.itemFootprints.length >= itemCount
+      ? options.itemFootprints.slice(0, itemCount)
+      : undefined;
+
   let footprint = artboardSnapFootprintToGridLines(footprintUser, lineStep);
-  footprint = shrinkFootprintWidthForMinRowGap(
-    footprint,
-    lineStep,
-    innerLineSpan,
-    layoutColumnCount,
-    minGapLines,
-  );
-  const maxRowWidth = columnSlots * footprint.widthPx;
-  if (maxRowWidth > innerWidth) {
-    const scale = innerWidth / maxRowWidth;
-    footprint = artboardSnapFootprintToGridLines(
-      { widthPx: footprint.widthPx * scale, depthPx: footprint.depthPx * scale },
-      lineStep,
-    );
+  if (!perItemFootprints) {
     footprint = shrinkFootprintWidthForMinRowGap(
       footprint,
       lineStep,
@@ -312,14 +407,37 @@ export function planeRectsSpaceBetweenInRow(
       layoutColumnCount,
       minGapLines,
     );
+    const maxRowWidth = columnSlots * footprint.widthPx;
+    if (maxRowWidth > innerWidth) {
+      const scale = innerWidth / maxRowWidth;
+      footprint = artboardSnapFootprintToGridLines(
+        { widthPx: footprint.widthPx * scale, depthPx: footprint.depthPx * scale },
+        lineStep,
+      );
+      footprint = shrinkFootprintWidthForMinRowGap(
+        footprint,
+        lineStep,
+        innerLineSpan,
+        layoutColumnCount,
+        minGapLines,
+      );
+    }
   }
+
+  const rowDepthPx = perItemFootprints
+    ? Math.max(
+        ...perItemFootprints.map((item) =>
+          artboardSnapFootprintToGridLines(item, lineStep, "ceil").depthPx,
+        ),
+      )
+    : footprint.depthPx;
 
   const useDiagramBand = options.rowCount !== undefined;
   const planeY = useDiagramBand
     ? planeYForSpaceBetweenRowBand(
         row,
         rowCount,
-        footprint.depthPx,
+        rowDepthPx,
         band.minY,
         band.maxY,
         lineStep.yPx,
@@ -328,7 +446,7 @@ export function planeRectsSpaceBetweenInRow(
         0,
         row,
         pitch,
-        footprint,
+        { widthPx: footprint.widthPx, depthPx: rowDepthPx },
         marginLeading,
         dotsPerCell,
       ).y;
@@ -336,25 +454,47 @@ export function planeRectsSpaceBetweenInRow(
   const originX = stage.x ?? 0;
   const originY = stage.y ?? 0;
 
-  const columnXs = planeAxisSpaceBetweenPositions(
-    columnSlots,
-    columnBand.minX,
-    columnBand.maxX,
-    footprint.widthPx,
-    lineStep.xPx,
-  );
-  const xs =
-    gridCols !== undefined ? columnXs.slice(0, itemCount) : columnXs;
+  let xs: number[];
+  let itemSizes: { widthPx: number; depthPx: number }[];
 
-  return xs.map((x) => {
+  if (perItemFootprints) {
+    itemSizes = perItemFootprints.map((item) =>
+      artboardSnapFootprintToGridLines(item, lineStep, "ceil"),
+    );
+    itemSizes = itemSizes.map((item) => ({ ...item, depthPx: rowDepthPx }));
+    let sizeLines = itemSizes.map((item) =>
+      Math.max(1, Math.ceil(item.widthPx / lineStep.xPx)),
+    );
+    const packed = fitPackedRowSizeLinesToBand(sizeLines, innerLineSpan, minGapLines);
+    sizeLines = packed.sizeLines;
+    itemSizes = itemSizes.map((item, index) => ({
+      widthPx: sizeLines[index]! * lineStep.xPx,
+      depthPx: item.depthPx,
+    }));
+    const startLines = packedRowStartsOnGridLines(sizeLines, bandMinLine, packed.gapLines);
+    xs = startLines.map((line) => line * lineStep.xPx);
+  } else {
+    const columnXs = planeAxisSpaceBetweenPositions(
+      columnSlots,
+      columnBand.minX,
+      columnBand.maxX,
+      footprint.widthPx,
+      lineStep.xPx,
+    );
+    xs = gridCols !== undefined ? columnXs.slice(0, itemCount) : columnXs;
+    itemSizes = xs.map(() => footprint);
+  }
+
+  return xs.map((x, index) => {
+    const size = itemSizes[index] ?? footprint;
     const enforced = enforcePlaneBoxOnArtboardLattice(
       {
         id: "_",
         label: "_",
         x: x + originX,
         y: planeY + originY,
-        width: footprint.widthPx,
-        depth: footprint.depthPx,
+        width: size.widthPx,
+        depth: size.depthPx,
         footprintAnchor: "back-left",
       },
       stage,
@@ -367,6 +507,146 @@ export function planeRectsSpaceBetweenInRow(
       h: enforced.depth,
     };
   });
+}
+
+/** Default class-diagram column slots when repacking label-sized rows on an artboard. */
+export const DIAGRAM_SCENE_ROW_GRID_COLS = 3;
+
+export type DiagramSceneRowRelayoutOptions = ArtboardRowSpaceBetweenOptions & {
+  footprintUser: { widthPx: number; depthPx: number };
+  /** When set, repack within each plane-row artboard column (merged strip). */
+  planeRowColumns?: PlaneRowColumnLayout;
+};
+
+const ROW_Y_CLUSTER_EPSILON_PX = 2;
+
+function clusterDiagramSceneNodesByRow(
+  nodes: readonly DiagramSceneNode[],
+): DiagramSceneNode[][] {
+  const sorted = [...nodes].sort((a, b) => a.y - b.y || a.x - b.x);
+  const rows: DiagramSceneNode[][] = [];
+  for (const node of sorted) {
+    const last = rows[rows.length - 1];
+    if (!last || Math.abs(node.y - last[0]!.y) > ROW_Y_CLUSTER_EPSILON_PX) {
+      rows.push([node]);
+      continue;
+    }
+    last.push(node);
+  }
+  for (const row of rows) {
+    row.sort((a, b) => a.x - b.x);
+  }
+  return rows;
+}
+
+/** Repack each row left-to-right on the grid after footprints change (no horizontal overlap). */
+export function relayoutDiagramSceneNodesInPackedRows(
+  nodes: readonly DiagramSceneNode[],
+  stage: ArtboardPlaneStage,
+  options: DiagramSceneRowRelayoutOptions,
+): DiagramSceneNode[] {
+  if (nodes.length === 0) {
+    return [];
+  }
+  if (options.planeRowColumns) {
+    return relayoutDiagramSceneNodesInPackedPlaneRowColumns(
+      nodes,
+      stage,
+      options.planeRowColumns,
+      options,
+    );
+  }
+  return relayoutDiagramSceneNodesOnSingleArtboard(nodes, stage, options);
+}
+
+function relayoutDiagramSceneNodesInPackedPlaneRowColumns(
+  nodes: readonly DiagramSceneNode[],
+  stripStage: ArtboardPlaneStage,
+  planeRow: PlaneRowColumnLayout,
+  options: DiagramSceneRowRelayoutOptions,
+): DiagramSceneNode[] {
+  const pitch = planeRow.cellWidth + planeRow.gapPx;
+  const stripX = stripStage.x ?? 0;
+  const byId = new Map<string, DiagramSceneNode>();
+
+  for (let col = 0; col < planeRow.columnCount; col += 1) {
+    const colStart = stripX + col * pitch;
+    const columnNodes = nodes.filter((node) => planeRowColumnIndexForBox(node.x, planeRow) === col);
+    if (columnNodes.length === 0) {
+      continue;
+    }
+    const columnStage: ArtboardPlaneStage = {
+      x: 0,
+      y: stripStage.y ?? 0,
+      width: planeRow.cellWidth,
+      height: planeRow.cellHeight,
+      ...(stripStage.divisions !== undefined ? { divisions: stripStage.divisions } : {}),
+    };
+    const columnLocal = columnNodes.map((node) => ({
+      ...node,
+      x: node.x - colStart,
+    }));
+    const relaid = relayoutDiagramSceneNodesOnSingleArtboard(columnLocal, columnStage, options);
+    for (const node of relaid) {
+      byId.set(node.id, {
+        ...node,
+        x: node.x + colStart,
+      });
+    }
+  }
+
+  return nodes.map((node) => byId.get(node.id) ?? node);
+}
+
+function relayoutDiagramSceneNodesOnSingleArtboard(
+  nodes: readonly DiagramSceneNode[],
+  stage: ArtboardPlaneStage,
+  options: DiagramSceneRowRelayoutOptions,
+): DiagramSceneNode[] {
+  if (nodes.length === 0) {
+    return [];
+  }
+  const rows = clusterDiagramSceneNodesByRow(nodes);
+  const rowCount = options.rowCount ?? rows.length;
+  const rowSpan = options.rowSpan ?? stage.divisions ?? rowCount;
+  const gridCols = options.gridCols ?? DIAGRAM_SCENE_ROW_GRID_COLS;
+  const byId = new Map<string, DiagramSceneNode>();
+
+  rows.forEach((rowNodes, rowIndex) => {
+    const itemFootprints = rowNodes.map((node) => ({
+      widthPx: node.w,
+      depthPx: node.h,
+    }));
+    const rects = planeRectsSpaceBetweenInRow(rowIndex, rowNodes.length, options.footprintUser, {
+      stage,
+      dotInset: options.dotInset ?? DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
+      dotInsetTrailing: options.dotInsetTrailing ?? DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
+      rowCount,
+      rowSpan,
+      gridCols,
+      itemFootprints,
+      ...(options.dotsPerCell !== undefined ? { dotsPerCell: options.dotsPerCell } : {}),
+      ...(options.minInterColumnGapLines !== undefined
+        ? { minInterColumnGapLines: options.minInterColumnGapLines }
+        : {}),
+    });
+    rowNodes.forEach((node, index) => {
+      const rect = rects[index];
+      if (!rect) {
+        byId.set(node.id, node);
+        return;
+      }
+      byId.set(node.id, {
+        ...node,
+        x: rect.x,
+        y: rect.y,
+        w: rect.w,
+        h: rect.h,
+      });
+    });
+  });
+
+  return nodes.map((node) => byId.get(node.id) ?? node);
 }
 
 export function defaultLatticeStage(

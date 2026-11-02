@@ -66,6 +66,7 @@ export function isoBoxSpecFromPlaneBox(
     height,
     ...(box.elevation !== undefined ? { elevation: box.elevation } : {}),
     ...(box.monoFaceFill !== undefined ? { monoFaceFill: box.monoFaceFill } : {}),
+    ...(box.cubeFaceColors !== undefined ? { cubeFaceColors: box.cubeFaceColors } : {}),
     ...(box.compactLabel ? { compactLabel: true } : {}),
     ...(box.planeBoxRole !== undefined ? { planeBoxRole: box.planeBoxRole } : {}),
     ...(box.omitCubeLabel ? { omitCubeLabel: true } : {}),

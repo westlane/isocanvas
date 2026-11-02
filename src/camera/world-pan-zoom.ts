@@ -4,6 +4,20 @@
 import type { ViewBox } from "../types/core.js";
 import { isValidViewBox, clamp } from "./view-box/clamp.js";
 import { readViewBoxFromSvg, viewBoxAlignFromSvg } from "./view-box/attributes.js";
+import {
+  applyWorldCameraToHost,
+  readWorldCameraFromHost,
+  readWorldCameraViewport,
+} from "./world/apply-world-camera.js";
+import { applyWorldCameraViewBoxToHost } from "./world/view-box-host.js";
+import {
+  normalizedWheelDelta,
+  viewBoxPanByWorldViewport,
+  viewBoxUserFromClientInWorldViewport,
+  viewBoxUserFromClientOnSvg,
+  viewBoxZoomAtPoint,
+  wheelZoomFactor,
+} from "./interaction.js";
 import type { WorldCameraLayerOptions } from "../types/camera.js";
 
 /** Options for {@link attachWorldCameraPanZoom}. */

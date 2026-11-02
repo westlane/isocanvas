@@ -26,6 +26,9 @@ export type PlaneRowColumnLayout = {
   cellHeight: number;
   gapPx: number;
   columnCount: number;
+  /** Iso top-face titles per column (catalog artboard collections). */
+  columnLabels?: readonly (string | undefined)[];
+  columnLabelFills?: readonly (string | undefined)[];
 };
 
 /** One artboard plane: columns laid out along +plane x with a fixed cell and gap (iso ground row). */
@@ -90,7 +93,8 @@ export function planeRowStripUserSize(
   };
 }
 
-function planeRowColumnIndexForBox(
+/** Which plane-row artboard column owns `planeX` on the merged strip. */
+export function planeRowColumnIndexForBox(
   planeX: number,
   planeRow: PlaneRowColumnLayout,
 ): number {
@@ -107,6 +111,35 @@ function planeRowColumnIndexForBox(
   }
   const col = Math.floor(planeX / pitch);
   return Math.min(columnCount - 1, Math.max(0, col));
+}
+
+/** South edge (+y) of the lowest cube in a plane-row column (merged scene plane coords). */
+export function collectionLabelContentMaxPlaneY(
+  nodes: readonly { x: number; y: number; h: number }[],
+  planeRow: PlaneRowColumnLayout,
+  columnIndex: number,
+): number | undefined {
+  let maxBottom = -Infinity;
+  for (const node of nodes) {
+    if (planeRowColumnIndexForBox(node.x, planeRow) !== columnIndex) {
+      continue;
+    }
+    maxBottom = Math.max(maxBottom, node.y + node.h);
+  }
+  return maxBottom > -Infinity ? maxBottom : undefined;
+}
+
+export function collectionLabelContentMaxPlaneYForScene(
+  nodes: readonly { x: number; y: number; h: number }[],
+): number | undefined {
+  if (nodes.length === 0) {
+    return undefined;
+  }
+  let maxBottom = -Infinity;
+  for (const node of nodes) {
+    maxBottom = Math.max(maxBottom, node.y + node.h);
+  }
+  return maxBottom > -Infinity ? maxBottom : undefined;
 }
 
 /** Lattice snap stage for a box on a merged plane row (per-column stage, not full strip). */

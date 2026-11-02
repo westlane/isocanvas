@@ -10,6 +10,7 @@ import {
   readViewBoxBaselineFromSvg,
   readWorldCameraFromHost,
   toggleIsometricOrientation,
+  VIEWPORT_CAMERA_CHANGE_EVENT,
   type CanvasCamera,
   type IsometricOrientation,
   type ViewBoxBaseline,
@@ -145,6 +146,7 @@ export function applyDemoViewportCamerasToStore(cameras: ViewportCameras): void 
 
 export function notifyDemoCanvasCameraChanged(host: HTMLElement): void {
   captureDemoCanvasCameraFromDom(host);
+  host.dispatchEvent(new CustomEvent(VIEWPORT_CAMERA_CHANGE_EVENT, { bubbles: true }));
   host.dispatchEvent(new CustomEvent("viewport-debug-tick", { bubbles: true }));
 }
 

@@ -22,8 +22,10 @@ import {
   persistDemoSession,
   canvasRouteKey,
   captureDemoCanvasCameraFromDom,
+  getDemoCanvasCamera,
   resetDemoBaseline,
   setArtboardSlice,
+  setDemoCanvasCamera,
   toggleDemoIsometricOrientation,
 } from "./session.js";
 import {
@@ -45,12 +47,11 @@ import {
   type DemoToolRoute,
 } from "./tools.js";
 import {
-  applyDemoHomeView,
   applyViewportFromHash,
-  applyViewportFromUrlFrame,
   attachDemoIsoStageViewport,
   bindViewportUrlSync,
   parseViewportUrlFrame,
+  restoreDemoViewportAfterToolMount,
   syncRouteHashForTool,
 } from "./viewport.js";
 import {
@@ -94,6 +95,9 @@ initDemoTheme(document.documentElement);
 applyGridLinesMode(hostEl, currentDemoGridLines());
 applyGridLinesMode(hostEl.closest(".ic-artboard") ?? hostEl, currentDemoGridLines());
 installDemoSessionPersistence();
+if (import.meta.hot?.data.demoCanvasCamera) {
+  setDemoCanvasCamera(import.meta.hot.data.demoCanvasCamera);
+}
 hydrateDemoSession();
 applyDemoIsometricOrientationToHost(hostEl);
 log.info("Demo shell ready", {
@@ -143,15 +147,15 @@ bindDemoKeyboardShortcuts({
 });
 
 const viewportDebug = attachViewportDebug(hostEl);
-attachDemoIsoStageViewport({
-  stage: isoStage,
-  surface: frameEl,
-  notifyHost: hostEl,
-});
 bindViewportUrlSync({
   host: hostEl,
   viewport: viewportEl,
   routeHash: () => toolRouteHash(activeRoute),
+});
+attachDemoIsoStageViewport({
+  stage: isoStage,
+  surface: frameEl,
+  notifyHost: hostEl,
 });
 
 function routesEqual(a: DemoToolRoute, b: DemoToolRoute): boolean {
@@ -214,6 +218,7 @@ async function selectToolRoute(route: DemoToolRoute): Promise<void> {
     departing: departingKey,
   });
   const pendingView = parseViewportUrlFrame(window.location.hash);
+  const sameRouteRemount = routesEqual(departingRoute, route);
   syncRouteHashForTool(route);
   renderToolNav();
   document.title = `isocanvas — ${tool.label}`;
@@ -237,11 +242,7 @@ async function selectToolRoute(route: DemoToolRoute): Promise<void> {
       return;
     }
     viewportDebug.refresh();
-    if (pendingView) {
-      applyViewportFromUrlFrame(hostEl, pendingView);
-    } else {
-      applyDemoHomeView(hostEl);
-    }
+    restoreDemoViewportAfterToolMount(hostEl, { pendingView, sameRouteRemount });
     hostEl.dispatchEvent(new CustomEvent("viewport-debug-tick", { bubbles: true }));
     persistDemoSession();
     getDemoLogger("demo").info("Tool mounted", { route: canvasKey, toolId: tool.id });
@@ -302,6 +303,13 @@ void selectToolRoute(activeRoute).catch((error: unknown) => {
 });
 
 if (import.meta.hot) {
+  import.meta.hot.dispose((data) => {
+    captureDemoCanvasCameraFromDom(hostEl);
+    const camera = getDemoCanvasCamera();
+    if (camera) {
+      data.demoCanvasCamera = camera;
+    }
+  });
   import.meta.hot.accept(
     [
       "./tools.js",

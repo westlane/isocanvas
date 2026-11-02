@@ -34,7 +34,7 @@ export const IC_ARTBOARD_LABEL_ATTR = "data-ic-artboard-label";
 
 export const DEFAULT_ISO_CANVAS_STAGE_ROW_GAP_PX = 20;
 
-export const DEFAULT_ISO_CANVAS_STAGE_ROW_CONTINUOUS_GAP_PX = 20;
+export const DEFAULT_ISO_CANVAS_STAGE_ROW_CONTINUOUS_GAP_PX = 56;
 
 export const IC_STAGE_ROW_CONTINUOUS_ATTR = "data-ic-stage-row-continuous";
 

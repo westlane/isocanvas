@@ -5,11 +5,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildViewHashSuffixFromCameras,
-  mergeRouteHash,
+  mergeLocationHashWithViewport,
   parseViewportUrlFrame,
   stripViewFromHashFragment,
-  syncRouteHashForTool,
-} from "../demo/scripts/viewport.js";
+  syncBaseHashPreservingViewport,
+} from "../src/camera/viewport-url-sync.js";
 
 describe("viewport url sync", () => {
   it("parseViewportUrlFrame reads zoom/center and rejects extra segments", () => {
@@ -37,8 +37,8 @@ describe("viewport url sync", () => {
     );
   });
 
-  it("mergeRouteHash appends view suffix", () => {
-    const hash = mergeRouteHash(
+  it("mergeLocationHashWithViewport appends view suffix", () => {
+    const hash = mergeLocationHashWithViewport(
       "#showcase/card-stack",
       {
         canvas: { viewBox: { x: 50, y: 30, w: 260, h: 160 } },
@@ -48,10 +48,13 @@ describe("viewport url sync", () => {
     expect(hash).toBe("#showcase/card-stack&view=2/180/110");
   });
 
-  it("syncRouteHashForTool keeps view suffix on reload", () => {
-    window.location.hash =
-      "#showcase/card-stack&view=1.25/260/160";
-    syncRouteHashForTool({ groupId: "showcase", itemId: "card-stack" });
+  it("syncBaseHashPreservingViewport keeps view suffix on reload", () => {
+    window.location.hash = "#showcase/card-stack&view=1.25/260/160";
+    syncBaseHashPreservingViewport({
+      baseHash: "#showcase/card-stack",
+      hashMatchesBase: (raw, base) =>
+        raw === base || raw.startsWith(`${base}&view=`),
+    });
     expect(window.location.hash).toBe("#showcase/card-stack&view=1.25/260/160");
   });
 });

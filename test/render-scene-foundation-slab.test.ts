@@ -3,6 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import { renderDiagramScene } from "../src/diagram/render-scene.js";
+import { DIAGRAM_NODE_FOOTPRINT } from "../src/layout/diagram-node-footprint.js";
 import { DEFAULT_ISO_CANVAS_COLORS } from "../src/theme/defaults.js";
 
 describe("renderDiagramScene foundation slab", () => {
@@ -17,8 +18,8 @@ describe("renderDiagramScene foundation slab", () => {
             label: "Map",
             x: 0,
             y: 0,
-            w: 168,
-            h: 56,
+            w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+            h: DIAGRAM_NODE_FOOTPRINT.depthPx,
             foundationSlab: {
               label: "Map",
               fill: "#d1fae5",

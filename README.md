@@ -189,6 +189,8 @@ Demo-only: **`@westlane/pino-blanc`** is a dev **portal** on [`../pino-blanc`](.
 | Need | Import | Also install |
 | --- | --- | --- |
 | Canvas, grid, snap, iso mount | `@westlane/isocanvas` | (includes `@elchininet/isometric`) |
+| ViewBox in `localStorage` | `saveDiagramViewportToStorage` / `restoreDiagramViewportFromStorage` | — |
+| Shareable pan/zoom in URL hash (`&view=zoom/cx/cy`) | `bindViewportUrlSync`, `parseViewportUrlFrame` | — |
 | Artboard lattice layout only | `@westlane/isocanvas/layout` | — |
 | Session / Loro adapters | `@westlane/isocanvas/persistence` | `loro.js` (peer; optional at install) |
 | Full demo chrome CSS | `@westlane/isocanvas/canvas-chrome.css` | — |

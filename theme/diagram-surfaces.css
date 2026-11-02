@@ -30,6 +30,36 @@ svg[data-diagram-renderer="ic-cube-canvas"] {
   );
 }
 
+/* Category columns set `--zui-iso-*` on the shell; re-derive pressed fills from those tokens. */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-category-theme] {
+  --ic-iso-cube-selected-pressed-tint: var(
+    --zui-iso-selected-front-fill,
+    var(--zui-iso-front-fill, #c4b5fd)
+  );
+  --ic-iso-cube-selected-left-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-left-tint-percent, 14%),
+    white
+  );
+  --ic-iso-cube-selected-front-pressed-fill: color-mix(
+    in oklch,
+    var(--zui-iso-front-fill, #ddd6fe)
+      calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
+    in oklch,
+    var(--zui-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-side-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-side-tint-percent, 40%),
+    white
+  );
+}
+
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
   --ic-label-fill: var(--zui-iso-label-fill, #212121);
   text-anchor: middle;
@@ -40,7 +70,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
   font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
   font-style: normal;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   fill: var(--ic-label-fill);
   stroke: none;
   paint-order: fill;

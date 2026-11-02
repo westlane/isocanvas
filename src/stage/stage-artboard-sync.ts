@@ -16,7 +16,6 @@ import {
   normalizeRowArtboardUserHeights,
   normalizeRowArtboardUserSizes,
   isStageRowContinuous,
-  IC_ARTBOARD_LABEL_ATTR,
   IC_ROW_COLUMN_ATTR,
   IC_ROW_COLUMN_INDEX_VAR,
   IC_PLANE_ROW_HOST_ATTR,
@@ -26,10 +25,21 @@ import {
   planeRowStripUserSize,
 } from "./stage-plane-row-scene.js";
 import type { ArtboardUserSize } from "../types/artboard.js";
+import {
+  buildPlaneRowMountPlan,
+  planeRowColumnSpecFromFields,
+  planeRowMountPlanHasCollectionLabels,
+  readContinuousStageRowGapPx,
+  renderDiagramSceneOptionsForPlaneRowMount,
+  type PlaneRowColumnSpec,
+} from "./plane-row-mount.js";
 
 export type IsoCanvasStageArtboardSpec = {
   id: IsoCanvasArtboardId;
+  /** Collection title rendered as iso badge on the artboard SVG (alias: {@link collectionLabel}). */
   label?: string;
+  collectionLabel?: string;
+  collectionLabelFill?: string;
   scene?: DiagramScene;
 } & Partial<CreateArtboardOptions>;
 
@@ -38,38 +48,38 @@ export type SyncIsoCanvasStageArtboardRegistryOptions = {
   createDefaults?: CreateArtboardOptions;
 };
 
-function readStageRowGapPx(stage: IsoCanvasStage): number {
-  const raw = stage.container.style.getPropertyValue("--ic-stage-row-gap").trim();
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : 6;
-}
-
 /** Add, remove, and relabel artboards to match `specs` (order preserved). */
 export function syncIsoCanvasStageArtboardRegistry(
   stage: IsoCanvasStage,
   specs: readonly IsoCanvasStageArtboardSpec[],
   options: SyncIsoCanvasStageArtboardRegistryOptions = {},
 ): void {
-  const nextIds = new Set(specs.map((spec) => spec.id));
+  const specIds = specs.map((spec) => spec.id);
   for (const id of stage.artboardIds()) {
-    if (!nextIds.has(id)) {
+    if (!specIds.includes(id)) {
+      stage.removeArtboard(id);
+    }
+  }
+  const currentIds = stage.artboardIds();
+  const orderMatches =
+    currentIds.length === specIds.length &&
+    specIds.every((id, index) => currentIds[index] === id);
+  if (!orderMatches) {
+    for (const id of [...stage.artboardIds()]) {
       stage.removeArtboard(id);
     }
   }
   const defaults = options.createDefaults ?? {};
   for (const spec of specs) {
-    const { id, label, scene: _scene, ...createPartial } = spec;
+    const { id, label: _label, collectionLabel: _cl, scene: _scene, ...createPartial } = spec;
     if (!stage.hasArtboard(id)) {
       const addOptions: IsoCanvasStageAddArtboardOptions = {
         id,
         embedDotGrid: false,
         ...defaults,
         ...createPartial,
-        ...(label !== undefined ? { label } : {}),
       };
       stage.addArtboard(addOptions);
-    } else if (label !== undefined) {
-      stage.getArtboard(id)?.artboard.root.setAttribute(IC_ARTBOARD_LABEL_ATTR, label);
     }
   }
   stage.relayoutArtboards();
@@ -143,19 +153,37 @@ export type RenderDiagramScenesOnIsoCanvasStageOptions = {
   emptyHtml?: string;
 };
 
+export type IsoCanvasStageDiagramMountItem = {
+  id: IsoCanvasArtboardId;
+  scene: DiagramScene;
+  column: PlaneRowColumnSpec;
+};
+
+function diagramMountItemsFromSpecs(
+  specs: readonly IsoCanvasStageArtboardSpec[],
+): IsoCanvasStageDiagramMountItem[] {
+  return specs
+    .filter((spec): spec is IsoCanvasStageArtboardSpec & { scene: DiagramScene } => spec.scene !== undefined)
+    .map((spec) => ({
+      id: spec.id,
+      scene: spec.scene,
+      column: planeRowColumnSpecFromFields(spec),
+    }));
+}
+
 const DEFAULT_EMPTY_HTML = '<p class="ic-artboard-empty">No objects on this artboard</p>';
 
 function renderContinuousPlaneRow(
   stage: IsoCanvasStage,
-  items: ReadonlyArray<{ id: IsoCanvasArtboardId; scene: DiagramScene }>,
+  items: ReadonlyArray<IsoCanvasStageDiagramMountItem>,
   options: RenderDiagramScenesOnIsoCanvasStageOptions,
 ): void {
   const columnUserSize = continuousRowColumnUserSize(stage);
-  const gapPx = readStageRowGapPx(stage);
+  const gapPx = readContinuousStageRowGapPx(stage);
   const ordered = stage
     .artboardIds()
     .map((id) => items.find((item) => item.id === id))
-    .filter((item): item is { id: IsoCanvasArtboardId; scene: DiagramScene } => item !== undefined);
+    .filter((item): item is IsoCanvasStageDiagramMountItem => item !== undefined);
 
   if (!columnUserSize || ordered.length === 0) {
     return;
@@ -171,15 +199,16 @@ function renderContinuousPlaneRow(
 
   const visibleItems = ordered.filter((item) => stage.isArtboardVisible(item.id));
   const visibleScenes = visibleItems.map((item) => item.scene);
+  const mountPlan = buildPlaneRowMountPlan(
+    columnUserSize,
+    gapPx,
+    visibleItems.map((item) => item.column),
+  );
   const merged = mergeDiagramScenesAlongPlaneRow(visibleScenes, {
     columnUserSize,
     gapPx,
   });
-  const stripSize = planeRowStripUserSize(
-    Math.max(visibleScenes.length, 1),
-    columnUserSize,
-    gapPx,
-  );
+  const stripSize = planeRowStripUserSize(mountPlan.columns.length, columnUserSize, gapPx);
   applyArtboardUserSize(hostEntry.artboard.root, stripSize);
 
   const emptyHtml = options.emptyHtml ?? DEFAULT_EMPTY_HTML;
@@ -192,30 +221,44 @@ function renderContinuousPlaneRow(
     if (id !== hostId) {
       continue;
     }
-    if (!merged.nodes.length) {
+    if (!merged.nodes.length && !planeRowMountPlanHasCollectionLabels(mountPlan)) {
       entry.host.innerHTML = emptyHtml;
       continue;
     }
-    renderDiagramScene(entry.host, merged, options.colors, {
-      artboardUserSize: stripSize,
-      viewportMeetAlign: "min",
-      planeRowColumns: {
-        cellWidth: columnUserSize.width,
-        cellHeight: columnUserSize.height,
-        gapPx,
-        columnCount: Math.max(visibleScenes.length, 1),
-      },
-    });
+    const sceneToRender =
+      merged.nodes.length > 0
+        ? merged
+        : {
+            nodes: [],
+            viewBox: merged.viewBox ?? {
+              x: 0,
+              y: 0,
+              w: stripSize.width,
+              h: stripSize.height,
+            },
+          };
+    renderDiagramScene(
+      entry.host,
+      sceneToRender,
+      options.colors,
+      renderDiagramSceneOptionsForPlaneRowMount(mountPlan, {
+        artboardUserSize: stripSize,
+        viewportMeetAlign: "min",
+      }),
+    );
   }
 }
 
 /** Mount or refresh diagram SVG on every registered artboard. */
 export function renderDiagramScenesOnIsoCanvasStage(
   stage: IsoCanvasStage,
-  items: ReadonlyArray<{ id: IsoCanvasArtboardId; scene: DiagramScene }>,
+  items: ReadonlyArray<IsoCanvasStageDiagramMountItem>,
   options: RenderDiagramScenesOnIsoCanvasStageOptions,
 ): void {
-  syncDiagramArtboardSizesOnStage(stage, items);
+  syncDiagramArtboardSizesOnStage(
+    stage,
+    items.map(({ id, scene }) => ({ id, scene })),
+  );
   stage.relayoutArtboards();
 
   if (isStageRowContinuous(stage)) {
@@ -224,18 +267,22 @@ export function renderDiagramScenesOnIsoCanvasStage(
   }
 
   const emptyHtml = options.emptyHtml ?? DEFAULT_EMPTY_HTML;
-  for (const { id, scene } of items) {
-    const entry = stage.getArtboard(id);
+  for (const item of items) {
+    const entry = stage.getArtboard(item.id);
     if (!entry) {
       continue;
     }
     const { host } = entry;
+    const { scene } = item;
     host.replaceChildren();
-    if (!scene.nodes?.length) {
+    const hasLabel = Boolean(item.column.collectionLabel?.trim());
+    if (!scene.nodes?.length && !hasLabel) {
       host.innerHTML = emptyHtml;
       continue;
     }
-    renderDiagramScene(host, scene, options.colors);
+    renderDiagramScene(host, scene, options.colors, {
+      artboardCollection: item.column,
+    });
   }
 }
 
@@ -247,10 +294,8 @@ export function mountDiagramScenesOnIsoCanvasStage(
   registryOptions?: SyncIsoCanvasStageArtboardRegistryOptions,
 ): void {
   syncIsoCanvasStageArtboardRegistry(stage, specs, registryOptions);
-  const scenes = specs
-    .filter((spec): spec is IsoCanvasStageArtboardSpec & { scene: DiagramScene } => spec.scene !== undefined)
-    .map((spec) => ({ id: spec.id, scene: spec.scene }));
-  if (scenes.length > 0) {
-    renderDiagramScenesOnIsoCanvasStage(stage, scenes, renderOptions);
+  const items = diagramMountItemsFromSpecs(specs);
+  if (items.length > 0) {
+    renderDiagramScenesOnIsoCanvasStage(stage, items, renderOptions);
   }
 }

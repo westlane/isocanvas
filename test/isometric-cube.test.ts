@@ -30,6 +30,9 @@ import {
   themedCubeFaceColors,
   userPxToIsoUnits,
   renderDiagramScene,
+  DIAGRAM_NODE_FOOTPRINT,
+  DIAGRAM_NODE_FOOTPRINT_DEPTH_PX,
+  DIAGRAM_NODE_FOOTPRINT_WIDTH_PX,
   type DiagramScene,
   type IsoBoxSpec,
 } from "@westlane/isocanvas";
@@ -45,9 +48,30 @@ import { initDemoTheme, demoThemeManager } from "../demo/scripts/theme.js";
 const DIAGRAM_SCENE_FIXTURE: DiagramScene = {
   viewBox: { x: 0, y: 0, w: 232, h: 280 },
   nodes: [
-    { id: "library", label: "Library", x: 32, y: 32, w: 168, h: 56 },
-    { id: "book", label: "Book", x: 32, y: 112, w: 168, h: 56 },
-    { id: "author", label: "Author", x: 32, y: 192, w: 168, h: 56 },
+    {
+      id: "library",
+      label: "Library",
+      x: 32,
+      y: 32,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
+    {
+      id: "book",
+      label: "Book",
+      x: 32,
+      y: 112,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
+    {
+      id: "author",
+      label: "Author",
+      x: 32,
+      y: 192,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
   ],
   edges: [
     { id: "library->book", from: "library", to: "book", label: "contains" },
@@ -74,21 +98,21 @@ describe("isometric cube (library shape)", () => {
     return demoThemeManager().getTheme().colors;
   }
 
-  it("maps 168px diagram width to 2 iso units", () => {
-    expect(userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX)).toBe(2);
-    expect(userPxToIsoUnits(DEMO_CARD_USER_DEPTH_PX)).toBe(1.25);
-    expect(demoCardFootprintIso()).toEqual({ width: 2, depth: 1.25 });
+  it("maps demo card diagram footprint to iso units", () => {
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    const depthIso = userPxToIsoUnits(DEMO_CARD_USER_DEPTH_PX);
+    expect(widthIso).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / ISO_DIAGRAM_PX_PER_UNIT, 9);
+    expect(depthIso).toBe(2.25);
+    expect(demoCardFootprintIso()).toEqual({ width: widthIso, depth: 2.25 });
     expect(ISO_DIAGRAM_PX_PER_UNIT).toBe(84);
   });
 
   it("scale projects front face width to diagram pixels", () => {
-    const scale = scaleForFootprintWidth(DEMO_CARD_USER_WIDTH_PX, 2);
-    expect(scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / (2 * ISO_GRID_AXIS_X), 5);
-    expect(DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(scale, 5);
-    expect(2 * ISO_GRID_AXIS_X * DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(
-      DEMO_CARD_USER_WIDTH_PX,
-      4,
-    );
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    const scale = scaleForFootprintWidth(DEMO_CARD_USER_WIDTH_PX, widthIso);
+    expect(scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / (widthIso * ISO_GRID_AXIS_X), 5);
+    expect(DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(scaleForFootprintWidth(ISO_DIAGRAM_PX_PER_UNIT, 1), 5);
+    expect(widthIso * ISO_GRID_AXIS_X * scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX, 4);
   });
 
   it("orders faces bottom through top at the same anchor", () => {
@@ -126,7 +150,8 @@ describe("isometric cube (library shape)", () => {
   });
 
   it("extrusion scales with footprint", () => {
-    expect(extrusionHeightForFootprint(2, 1.25)).toBeCloseTo(0.9, 5);
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    expect(extrusionHeightForFootprint(widthIso, 2.25)).toBeCloseTo(1.62, 5);
   });
 
   it("themed faces map all six sides to theme tokens", () => {

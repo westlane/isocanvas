@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
   artboardDivisionPitch,
   artboardLatticeCellIsoGround,
+  artboardPlaneBottomLeftInsetPoint,
+  artboardPlaneCollectionLabelBottomLeftFloatAnchor,
   artboardDotStep,
   artboardPlaneCellFirstDot,
   artboardPlaneCellFootprintAtTopLeftDot,
@@ -87,8 +89,8 @@ describe("artboard lattice layout", () => {
       { widthPx: DEMO_CARD_USER_WIDTH_PX, depthPx: DEMO_CARD_USER_DEPTH_PX },
       macroPitch,
     );
-    expect(snapped.widthPx).toBeCloseTo(5 * step.xPx, 9);
-    expect(snapped.depthPx).toBeCloseTo(3 * step.yPx, 9);
+    expect(snapped.widthPx).toBeCloseTo(7 * step.xPx, 9);
+    expect(snapped.depthPx).toBeCloseTo(5 * step.yPx, 9);
     expect(artboardSnapFootprintToDots({ widthPx: 1, depthPx: 1 }, macroPitch).widthPx).toBeCloseTo(
       step.xPx,
       9,
@@ -116,6 +118,18 @@ describe("artboard lattice layout", () => {
     expect(artboardPlaneCellOrigin(0, 0, pitch, { origin: "bottom-left", artboardHeight: h })).toEqual(
       artboardUserToPlane(0, 0, h),
     );
+  });
+
+  it("collection label anchor uses each artboard column SW pin", () => {
+    const stage = { x: 500, y: 0, width: 400, height: 300, divisions: 3 };
+    const inset = artboardPlaneBottomLeftInsetPoint(stage, 2);
+    const anchor = artboardPlaneCollectionLabelBottomLeftFloatAnchor(stage, {
+      marginDots: 2,
+      floatBelowPx: 16,
+    });
+    expect(anchor.x).toBeCloseTo(500 + inset.x, 6);
+    expect(anchor.y).toBeCloseTo(inset.y + 16, 6);
+    expect(inset.x).toBeLessThan(stage.width * 0.1);
   });
 
   it("orders back row before front row for iso paint", () => {

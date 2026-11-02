@@ -67,6 +67,112 @@ export function artboardPlaneCellOrigin(
   return artboardUserToPlane(col * pitch.xPx, row * pitch.yPx, h);
 }
 
+/** Bottom-left layout pin on the artboard dot lattice (plane coords, no stage translate). */
+export function artboardPlaneBottomLeftInsetPoint(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions">,
+  marginDots = 2,
+): { x: number; y: number } {
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const lineStep = artboardDotStep(pitch);
+  const topLeft = artboardPlaneCellOrigin(0, 0, pitch);
+  const bottomRight = artboardPlaneCellOrigin(divisions - 1, divisions - 1, pitch);
+  return {
+    x: topLeft.x + marginDots * lineStep.xPx,
+    y: bottomRight.y + pitch.yPx - marginDots * lineStep.yPx,
+  };
+}
+
+/**
+ * SW footprint pin for a collection badge: inset from the artboard bottom-left,
+ * then floated south on the same iso ground (badge grows +plane x / +plane y from the pin).
+ */
+export function artboardPlaneCollectionLabelBottomLeftFloatAnchor(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions" | "x" | "y">,
+  options?: {
+    marginDots?: number;
+    floatBelowPx?: number;
+    /** Extra plane-space shift (+x east, +y south). */
+    nudgePlaneXPx?: number;
+    nudgePlaneYPx?: number;
+  },
+): { x: number; y: number } {
+  const marginDots = options?.marginDots ?? 2;
+  const floatBelowPx = options?.floatBelowPx ?? 16;
+  const nudgePlaneXPx = options?.nudgePlaneXPx ?? 0;
+  const nudgePlaneYPx = options?.nudgePlaneYPx ?? 0;
+  const inset = artboardPlaneBottomLeftInsetPoint(stage, marginDots);
+  return {
+    x: (stage.x ?? 0) + inset.x + nudgePlaneXPx,
+    y: (stage.y ?? 0) + inset.y + floatBelowPx + nudgePlaneYPx,
+  };
+}
+
+function artboardPlaneCollectionLabelTopEdgeY(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions" | "x" | "y">,
+  fromTopDots: number,
+): number {
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const lineStep = artboardDotStep(pitch);
+  const topLeft = artboardPlaneCellOrigin(0, 0, pitch);
+  return (stage.y ?? 0) + topLeft.y + fromTopDots * lineStep.yPx;
+}
+
+/** Top-left pin floated above the artboard top edge (same iso panel, not on the slab). */
+export function artboardPlaneCollectionLabelTopLeftFloatAnchor(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions" | "x" | "y">,
+  options?: { fromLeftDots?: number; fromTopDots?: number; floatAbovePx?: number },
+): { x: number; y: number } {
+  const fromLeftDots = options?.fromLeftDots ?? 4;
+  const fromTopDots = options?.fromTopDots ?? 4;
+  const floatAbovePx = options?.floatAbovePx ?? 40;
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const lineStep = artboardDotStep(pitch);
+  const topLeft = artboardPlaneCellOrigin(0, 0, pitch);
+  return {
+    x: (stage.x ?? 0) + topLeft.x + fromLeftDots * lineStep.xPx,
+    y: artboardPlaneCollectionLabelTopEdgeY(stage, fromTopDots) - floatAbovePx,
+  };
+}
+
+/** Top-right pin floated above the artboard top edge (same iso panel, not on the slab). */
+export function artboardPlaneCollectionLabelTopRightFloatAnchor(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions" | "x" | "y">,
+  options?: { fromRightDots?: number; fromTopDots?: number; floatAbovePx?: number },
+): { x: number; y: number } {
+  const fromRightDots = options?.fromRightDots ?? 4;
+  const fromTopDots = options?.fromTopDots ?? 4;
+  const floatAbovePx = options?.floatAbovePx ?? 40;
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const lineStep = artboardDotStep(pitch);
+  const topLeft = artboardPlaneCellOrigin(0, 0, pitch);
+  return {
+    x: (stage.x ?? 0) + topLeft.x + stage.width - fromRightDots * lineStep.xPx,
+    y: artboardPlaneCollectionLabelTopEdgeY(stage, fromTopDots) - floatAbovePx,
+  };
+}
+
+/** @deprecated Use {@link artboardPlaneCollectionLabelTopRightFloatAnchor}. */
+export function artboardPlaneCollectionLabelAnchor(
+  stage: Pick<ArtboardPlaneStage, "width" | "height" | "divisions">,
+  options?: { fromLeftDots?: number; fromBottomDots?: number },
+): { x: number; y: number } {
+  const fromLeftDots = options?.fromLeftDots ?? 10;
+  const fromBottomDots = options?.fromBottomDots ?? 4;
+  const divisions = stage.divisions ?? DEFAULT_ARTBOARD_GRID_DIVISIONS;
+  const pitch = artboardDivisionPitch({ width: stage.width, height: stage.height }, divisions);
+  const lineStep = artboardDotStep(pitch);
+  const topLeft = artboardPlaneCellOrigin(0, 0, pitch);
+  const bottomRight = artboardPlaneCellOrigin(divisions - 1, divisions - 1, pitch);
+  return {
+    x: topLeft.x + fromLeftDots * lineStep.xPx,
+    y: bottomRight.y + pitch.yPx - fromBottomDots * lineStep.yPx,
+  };
+}
+
 /** Spacing between dots inside a macro cell. */
 export function artboardDotStep(
   pitch: ArtboardLatticePitch,
@@ -124,14 +230,27 @@ export function artboardPlaneCellFirstDot(
   return { x: corner.x + originInCell.xPx, y: corner.y + originInCell.yPx };
 }
 
-/** Round a footprint to whole grid-line spans (far edges on division guides, not dot centers). */
+export type ArtboardFootprintSnapMode = "nearest" | "ceil";
+
+function snapFootprintAxisToGridLines(
+  valuePx: number,
+  stepPx: number,
+  mode: ArtboardFootprintSnapMode,
+): number {
+  const spans = valuePx / stepPx;
+  const wholeSpans = mode === "ceil" ? Math.ceil(spans) : Math.round(spans);
+  return Math.max(stepPx, wholeSpans * stepPx);
+}
+
+/** Quantize a footprint to whole grid-line spans (far edges on division guides, not dot centers). */
 export function artboardSnapFootprintToGridLines(
   footprint: ArtboardLatticeFootprintUser,
   lineStep: ArtboardLatticePitch,
+  mode: ArtboardFootprintSnapMode = "nearest",
 ): ArtboardLatticeFootprintUser {
   return {
-    widthPx: Math.max(lineStep.xPx, Math.round(footprint.widthPx / lineStep.xPx) * lineStep.xPx),
-    depthPx: Math.max(lineStep.yPx, Math.round(footprint.depthPx / lineStep.yPx) * lineStep.yPx),
+    widthPx: snapFootprintAxisToGridLines(footprint.widthPx, lineStep.xPx, mode),
+    depthPx: snapFootprintAxisToGridLines(footprint.depthPx, lineStep.yPx, mode),
   };
 }
 
@@ -329,6 +448,7 @@ export function enforcePlaneBoxOnArtboardLattice(
   const footprint = artboardSnapFootprintToGridLines(
     { widthPx: box.width, depthPx: box.depth },
     lineStep,
+    "ceil",
   );
   return {
     ...box,

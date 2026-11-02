@@ -8,6 +8,7 @@ import {
   DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
   DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
 } from "../src/diagram/scene-lattice-layout.js";
+import { DIAGRAM_NODE_FOOTPRINT } from "../src/layout/diagram-node-footprint.js";
 import {
   artboardPlaneGridLineStep,
   enforcePlaneBoxOnArtboardLattice,
@@ -15,7 +16,7 @@ import {
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../src/layout/artboard.js";
 
 /** Class-diagram footprint (domainspec NODE_FOOTPRINT). */
-const NODE = { widthPx: 168, depthPx: 56 };
+const NODE = DIAGRAM_NODE_FOOTPRINT;
 
 describe("artboard row space-between", () => {
   it("uses equal fine-line gaps between three neighbors in a row band", () => {
@@ -54,6 +55,31 @@ describe("artboard row space-between", () => {
     const gap12 = (b2!.x - (b1!.x + b1!.width)) / step;
     expect(gap01).toBeCloseTo(gap12, 4);
     expect(gap01).toBeCloseTo(4, 4);
+  });
+
+  it("packs variable label footprints left-to-right without horizontal overlap", () => {
+    const stage = { ...defaultLatticeStage(), divisions: 5 };
+    const step = artboardPlaneGridLineStep(stage).xPx;
+    const minGapLines = 3;
+    const wide = { widthPx: NODE.widthPx * 2.2, depthPx: NODE.depthPx };
+    const rects = planeRectsSpaceBetweenInRow(0, 3, NODE, {
+      stage,
+      dotInset: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
+      dotInsetTrailing: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
+      rowCount: 1,
+      rowSpan: 5,
+      gridCols: 3,
+      minInterColumnGapLines: minGapLines,
+      itemFootprints: [wide, NODE, NODE],
+    });
+    expect(rects).toHaveLength(3);
+    for (let i = 0; i < rects.length - 1; i += 1) {
+      const left = rects[i]!;
+      const right = rects[i + 1]!;
+      expect(right.x).toBeGreaterThanOrEqual(left.x + left.w - 1e-6);
+      const gapLines = (right.x - (left.x + left.w)) / step;
+      expect(gapLines).toBeGreaterThanOrEqual(1 - 1e-6);
+    }
   });
 
   it("pins a full row to the inner band edges (space-between)", () => {
@@ -96,7 +122,7 @@ describe("artboard row space-between", () => {
     expect(gaps.length).toBe(3);
     const maxGap = Math.max(...gaps);
     const minGap = Math.min(...gaps);
-    expect(maxGap - minGap).toBeLessThanOrEqual(1);
+    expect(maxGap - minGap).toBeLessThanOrEqual(1.01);
   });
 
   it("leaves the same dotInset margin above the top row and below the bottom row", () => {

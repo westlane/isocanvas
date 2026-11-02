@@ -6,6 +6,8 @@ import type { DiagramScene, DiagramSceneNode } from "../types/diagram.js";
 import {
   CANVAS_TEXT_NO_STROKE,
   formatIsoCanvasLabelText,
+  truncateIsoCanvasLabelText,
+  isoCubeTopFaceLabelMaxWidthPx,
   IC_ISO_CUBE_LABEL_CLASS,
   ISO_CANVAS_LABEL_FONT_FAMILY,
   ISO_CANVAS_LABEL_FONT_WEIGHT,
@@ -32,31 +34,68 @@ import type { PlaneBoxSpec } from "../types/artboard.js";
 import type { ArtboardPlaneStage } from "../types/artboard.js";
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../layout/artboard.js";
 import { enforcePlaneBoxOnArtboardLattice } from "../layout/lattice.js";
+import {
+  DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
+  DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
+  DIAGRAM_SCENE_ROW_GRID_COLS,
+  relayoutDiagramSceneNodesInPackedRows,
+  shiftDiagramSceneNodesDownDots,
+} from "./scene-lattice-layout.js";
+import { DIAGRAM_NODE_FOOTPRINT } from "../layout/diagram-node-footprint.js";
 import { defaultIsoArtboardStage, mountIsometricCanvasOnHost } from "../isometric/stage/stage.js";
 import {
   artboardLatticeStageForPlaneBoxInRow,
   type PlaneRowColumnLayout,
 } from "../stage/stage-plane-row-scene.js";
+import {
+  planeRowColumnLayoutFromMountPlan,
+  planeRowMountPlanWithCollectionContentExtents,
+  type PlaneRowMountPlan,
+} from "../stage/plane-row-mount.js";
 import { setViewportLeftBottomMeet } from "../camera/view-box/attributes.js";
 import { frameDiagramSceneCamera } from "./diagram-document.js";
+import { diagramSceneNodesSizedForCubeLabels } from "./scene-node-cube-sizing.js";
+import { readIsometricOrientationFromCanvas } from "../isometric/orientation.js";
 
-const MIN_EXTRUSION = 0.35;
-const MAX_EXTRUSION = 1.1;
+const MIN_DOMAIN_EXTRUSION = 0.55;
+const MAX_DOMAIN_EXTRUSION = 1.45;
+const DOMAIN_EXTRUSION_FOOTPRINT_RATIO = 0.88;
 /** Pedestal extrusion under the domain cube (iso units). */
 const FOUNDATION_SLAB_HEIGHT_ISO = userPxToIsoUnits(20);
 /** Extra footprint depth (+y on artboard) so tier color reads below the cube. */
 const FOUNDATION_SLAB_DEPTH_EXTENSION_PX = 40;
 const FOUNDATION_SLAB_VIEWBOX_PAD_PX = FOUNDATION_SLAB_DEPTH_EXTENSION_PX + 8;
 
+const ROW_Y_CLUSTER_EPSILON_PX = 2;
+
 function nodeCenter(node: DiagramSceneNode): { x: number; y: number } {
   return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+}
+
+function clusterRowCountFromNodes(nodes: readonly DiagramSceneNode[]): number {
+  if (nodes.length === 0) {
+    return 1;
+  }
+  const sorted = [...nodes].sort((a, b) => a.y - b.y);
+  let count = 1;
+  let rowY = sorted[0]!.y;
+  for (const node of sorted.slice(1)) {
+    if (Math.abs(node.y - rowY) > ROW_Y_CLUSTER_EPSILON_PX) {
+      count += 1;
+      rowY = node.y;
+    }
+  }
+  return count;
 }
 
 function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSpec>): PlaneBoxSpec {
   const { width, depth } = isoSizeFromDiagramUser(node.w, node.h);
   const height = Math.min(
-    MAX_EXTRUSION,
-    Math.max(MIN_EXTRUSION, extrusionHeightForFootprint(width, depth, 0.65)),
+    MAX_DOMAIN_EXTRUSION,
+    Math.max(
+      MIN_DOMAIN_EXTRUSION,
+      extrusionHeightForFootprint(width, depth, DOMAIN_EXTRUSION_FOOTPRINT_RATIO),
+    ),
   );
   return {
     id: node.id,
@@ -67,6 +106,7 @@ function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSp
     depth: node.h,
     height,
     planeBoxRole: "domain",
+    ...(node.cubeFaceColors !== undefined ? { cubeFaceColors: node.cubeFaceColors } : {}),
     ...overrides,
   };
 }
@@ -110,10 +150,16 @@ function mountFoundationSlabCaptions(
       node.y + node.h + FOUNDATION_SLAB_DEPTH_EXTENSION_PX / 2;
     const captionPlaneX = node.x + node.w / 2;
     const ground = artboardPlaneToIsoGround(captionPlaneX, captionPlaneY, undefined, stage);
+    const { width: widthIso, depth: depthIso } = isoSizeFromDiagramUser(node.w, node.h);
+    const captionText = truncateIsoCanvasLabelText(
+      formatIsoCanvasLabelText(slab.label),
+      isoCubeTopFaceLabelMaxWidthPx(widthIso, depthIso),
+      FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
+    );
     canvas.addChild(
       new IsometricText({
         planeView: PlaneView.TOP,
-        text: formatIsoCanvasLabelText(slab.label),
+        text: captionText,
         left: ground.left,
         right: ground.right,
         top: 0.06,
@@ -151,8 +197,12 @@ export type RenderDiagramSceneOptions = {
   artboardUserSize?: ArtboardUserSize;
   /** Meet alignment for SVG in host (`min` = left/top in host, one plane row). */
   viewportMeetAlign?: "min" | "mid";
-  /** Three (or N) iso ground slabs with plane-x gaps on one strip. */
-  planeRowColumns?: PlaneRowColumnLayout;
+  /** Merged iso strip (Organization + Project columns, etc.). */
+  planeRowMount?: PlaneRowMountPlan;
+  /** Collection title on a single artboard shell (non plane-row). */
+  artboardCollection?: import("../stage/plane-row-mount.js").PlaneRowColumnSpec;
+  /** Extra +plane y shift for domain cubes (fine dots; default when a collection label is set). */
+  contentPlaneDownDots?: number;
 };
 
 function artboardStageFromScene(
@@ -206,9 +256,32 @@ export function renderDiagramScene(
   const stage = artboardStageFromScene(scene, options.artboardUserSize);
   const canvas = mountIsometricCanvasOnHost(host, stage);
 
+  const orientation = readIsometricOrientationFromCanvas(canvas);
+  const labelSizedNodes = diagramSceneNodesSizedForCubeLabels(scene.nodes, orientation, (node) =>
+    planeBoxFromNode(node),
+  );
+  const rowCount = Math.max(
+    1,
+    clusterRowCountFromNodes(labelSizedNodes),
+  );
+  const planeRowColumns = options.planeRowMount
+    ? planeRowColumnLayoutFromMountPlan(options.planeRowMount)
+    : undefined;
+  let layoutNodes = relayoutDiagramSceneNodesInPackedRows(labelSizedNodes, stage, {
+    footprintUser: DIAGRAM_NODE_FOOTPRINT,
+    dotInset: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
+    dotInsetTrailing: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
+    rowCount,
+    rowSpan: stage.divisions ?? rowCount,
+    gridCols: DIAGRAM_SCENE_ROW_GRID_COLS,
+    ...(planeRowColumns ? { planeRowColumns } : {}),
+  });
+  const downDots = options.contentPlaneDownDots ?? 0;
+  layoutNodes = shiftDiagramSceneNodesDownDots(layoutNodes, stage, downDots);
+
   for (const edge of scene.edges ?? []) {
-    const fromNode = scene.nodes.find((node) => node.id === edge.from);
-    const toNode = scene.nodes.find((node) => node.id === edge.to);
+    const fromNode = layoutNodes.find((node) => node.id === edge.from);
+    const toNode = layoutNodes.find((node) => node.id === edge.to);
     if (!fromNode || !toNode) {
       continue;
     }
@@ -244,29 +317,41 @@ export function renderDiagramScene(
     }
   }
 
+  let planeRowMount = options.planeRowMount;
+  if (planeRowMount && planeRowColumns) {
+    planeRowMount = planeRowMountPlanWithCollectionContentExtents(
+      planeRowMount,
+      layoutNodes,
+      planeRowColumns,
+    );
+  }
+  const artboardCollection = options.artboardCollection;
+
   mountPlaneBoxesOnCanvas(
     canvas,
-    scene.nodes.flatMap((node) =>
+    layoutNodes.flatMap((node) =>
       planeBoxesForSceneNode(node).map((box) =>
         enforcePlaneBoxOnArtboardLattice(
           box,
-          latticeStageForPlaneBox(box, stage, options.planeRowColumns),
+          latticeStageForPlaneBox(box, stage, planeRowColumns),
         ),
       ),
     ),
     colors,
     {
-    stage,
-    ...(options.planeRowColumns ? { planeRowColumns: options.planeRowColumns } : {}),
-    ...(options.omitArtboardShell
-      ? { omitArtboardShell: true }
-      : {
-          artboardShellChrome:
-            options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
-        }),
-  });
+      stage,
+      ...(planeRowMount ? { planeRowMount } : {}),
+      ...(options.omitArtboardShell
+        ? { omitArtboardShell: true }
+        : {
+            artboardShellChrome:
+              options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
+          }),
+      ...(artboardCollection ? { artboardCollection } : {}),
+    },
+  );
 
-  mountFoundationSlabCaptions(canvas, scene, stage);
+  mountFoundationSlabCaptions(canvas, { ...scene, nodes: layoutNodes }, stage);
 
   const svg = decorateCubeCanvas(canvas);
   if (options.viewportMeetAlign === "min") {
