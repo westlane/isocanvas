@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import { IsometricPath, PlaneView } from "@elchininet/isometric";
+import { IsometricPath } from "@elchininet/isometric";
 import type { IsometricOrientation } from "../../types/diagram.js";
 import { isoCubeFaceClassName } from "../cube/cube-faces.js";
 import { IC_ISO_HEX_INTERIOR_CAP_CLASS } from "./hex.js";
@@ -54,7 +54,6 @@ function createHexFootprintFace(
   paint: (path: IsometricPath) => void,
 ): IsometricPath {
   const path = new IsometricPath({
-    planeView: PlaneView.TOP,
     className,
     fillColor: fill,
     autoclose: true,

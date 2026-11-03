@@ -152,9 +152,7 @@ export function createIsoCubeCurvedVerticalFace(
   height: number,
   orientation: IsometricOrientation,
 ): IsometricPath {
-  const layout = isoCubeFaceRectLayoutForPlaneTopLeft(face, width, depth, height, orientation);
   const path = new IsometricPath({
-    planeView: layout.planeView,
     className: isoCubeFaceClassName(face),
     fillColor: fill,
     autoclose: true,
@@ -171,9 +169,7 @@ export function createIsoCubeFrontLightOverlay(
   height: number,
   orientation: IsometricOrientation,
 ): IsometricPath {
-  const layout = isoCubeFaceRectLayoutForPlaneTopLeft("front", width, depth, height, orientation);
   const path = new IsometricPath({
-    planeView: layout.planeView,
     className: IC_ISO_CUBE_FRONT_LIGHT_CLASS,
     fillColor: "#000",
     autoclose: true,

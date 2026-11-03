@@ -24,10 +24,7 @@ import {
   ISO_CUBE_GROUND_SHADOW_MARGIN_ISO,
 } from "./cube-faces.js";
 import { faceFillsForBox, createIsoBoxLabel } from "./prism-shared.js";
-import {
-  ISO_CUBE_FACE_NO_STROKE,
-  ISO_CUBE_LABEL_FONT_SIZE_PX,
-} from "./canvas-text-style.js";
+import { ISO_CUBE_LABEL_FONT_SIZE_PX } from "./canvas-text-style.js";
 import { stackFaceOpacity, stackLabelOpacity } from "./stack-opacity.js";
 import type { StackLayerPresentation } from "../../types/diagram.js";
 import { DIAGRAM_OBJECT_SELECTABLE_ATTR } from "../../types/diagram-interaction.js";

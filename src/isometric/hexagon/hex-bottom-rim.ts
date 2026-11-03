@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import { IsometricPath, PlaneView } from "@elchininet/isometric";
+import { IsometricPath } from "@elchininet/isometric";
 import type { IsometricOrientation } from "../../types/diagram.js";
 import {
   IC_ISO_CUBE_BOTTOM_RIM_CLASS,
@@ -23,7 +23,6 @@ function groundRimCurve(
   orientation: IsometricOrientation,
 ): IsometricPath {
   const path = new IsometricPath({
-    planeView: PlaneView.TOP,
     className: `${IC_ISO_CUBE_BOTTOM_RIM_CLASS} ${className}`,
     fillColor: "transparent",
     strokeColor: "transparent",

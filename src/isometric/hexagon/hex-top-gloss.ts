@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 West Lane
 
-import { IsometricPath, PlaneView } from "@elchininet/isometric";
+import { IsometricPath } from "@elchininet/isometric";
 import type { IsometricOrientation } from "../../types/diagram.js";
 import {
   IC_ISO_CUBE_TOP_GLOSS_CLASS,
@@ -72,7 +72,6 @@ export function createIsoHexTopGlossHalf(
   orientation: IsometricOrientation,
 ): IsometricPath {
   const path = new IsometricPath({
-    planeView: PlaneView.TOP,
     className: IC_ISO_CUBE_TOP_GLOSS_CLASS,
     fillColor: "#000000",
     autoclose: true,

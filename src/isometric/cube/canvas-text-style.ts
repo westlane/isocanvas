@@ -12,7 +12,6 @@ import {
 import {
   formatIsoCanvasLabelText,
   ISO_CANVAS_LABEL_LETTER_SPACING_EM,
-  ISO_CUBE_LABEL_FONT_SIZE_PX,
   measureIsoCanvasLabelTextWidthPx,
   readIsoCubeLabelTheme,
   truncateIsoCanvasLabelText,
@@ -196,7 +195,7 @@ export function uniformIsoCubeTopLabelFontSizePx(
       ...(options?.orientation !== undefined ? { orientation: options.orientation } : {}),
       baseFontSizePx,
       ...(options?.canvasScale !== undefined ? { canvasScale: options.canvasScale } : {}),
-      themeScope: options?.themeScope,
+      ...(options?.themeScope !== undefined ? { themeScope: options.themeScope } : {}),
     });
     uniform = Math.min(uniform, fit);
   }

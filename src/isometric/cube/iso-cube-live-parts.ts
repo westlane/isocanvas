@@ -7,10 +7,7 @@ import { isIsoHexagonPrism } from "../hexagon/hex.js";
 import { paintIsoHexCurvedTopFacePath, paintIsoHexCurvedBottomFacePath } from "../hexagon/hex-footprint-curve.js";
 import { paintIsoHexCurvedVerticalFacePath, paintIsoHexVerticalEdgeIndices, paintIsoHexVerticalEdgeQuads } from "../hexagon/hex-vertical-face.js";
 import { paintIsoHexBottomRimPaths, type IsoHexBottomRimPaths } from "../hexagon/hex-bottom-rim.js";
-import {
-  ISO_CUBE_MOUNT_FACE_ORDER,
-  isoCubeFaceRectLayoutForPlaneTopLeft,
-} from "./cube-faces.js";
+import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube-faces.js";
 import {
   displayIsoCubeTopLabelText,
   isoBoxTopFaceLabelLayout,
@@ -56,23 +53,6 @@ export function registerIsoCubeShellLiveParts(
 
 export function getIsoCubeShellLiveParts(shell: Element): IsoCubeShellLiveParts | undefined {
   return livePartsByShell.get(shell);
-}
-
-type FaceRectLayout = ReturnType<typeof isoCubeFaceRectLayoutForPlaneTopLeft>;
-
-function applyFaceRectLayout(rect: IsometricRectangle, layout: FaceRectLayout): void {
-  rect.width = layout.width;
-  rect.height = layout.height;
-  if (layout.left !== undefined) {
-    rect.left = layout.left;
-  }
-  if (layout.right !== undefined) {
-    rect.right = layout.right;
-  }
-  if (layout.top !== undefined) {
-    rect.top = layout.top;
-  }
-  rect.update();
 }
 
 /** Shorten extrusion in iso units; footprint (width × depth) stays fixed. */
