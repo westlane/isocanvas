@@ -25,7 +25,7 @@ import {
 } from "./prism-parts.js";
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
-import { fitIsoCubeTopLabelFontSizePx, readIsoCubeLabelTheme, uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
+import { readIsoCubeLabelTheme, uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
 import {
   addArtboardStageShell,
@@ -291,17 +291,14 @@ export function mountPlaneBoxesOnCanvas(
             shellChrome,
             options.artboardCollection,
           );
+  const uniformLabelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, {
+    orientation,
+    themeScope,
+  });
+  const themeLabelFontSizePx = readIsoCubeLabelTheme(themeScope).fontSizePx;
   for (const spec of specs) {
     const stackLayer = stackLayers.get(spec.id);
-    const labelFontSizePx = spec.omitCubeLabel
-      ? readIsoCubeLabelTheme(themeScope).fontSizePx
-      : fitIsoCubeTopLabelFontSizePx({
-          label: spec.label,
-          widthIso: spec.width,
-          depthIso: spec.depth,
-          orientation,
-          themeScope,
-        });
+    const labelFontSizePx = spec.omitCubeLabel ? themeLabelFontSizePx : uniformLabelFontSizePx;
     mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {
       omitBottomFace: true,
       orientation,

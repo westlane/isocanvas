@@ -229,7 +229,8 @@ export function attachWorldCameraPanZoom(
       return;
     }
     event.preventDefault();
-    const vb = readViewBoxFromSvg(svg);
+    const fromHost = readWorldCameraFromHost(options.host);
+    const vb = fromHost ?? readLogicalViewBoxFromHost(options.host, svg);
     const align = viewBoxAlignFromSvg(svg);
     const fromSvg = viewBoxUserFromClientOnSvg(svg, event.clientX, event.clientY);
     const { x: userX, y: userY } =
@@ -248,12 +249,13 @@ export function attachWorldCameraPanZoom(
     if (event.shiftKey) {
       applyCamera(
         viewBoxPanByWorldViewport(vb, event.deltaX, event.deltaY, width, height, align),
+        false,
       );
       return;
     }
     const deltaY = normalizedWheelDelta(event.deltaY, event.deltaMode, height);
     const factor = wheelZoomFactor(deltaY);
-    applyCamera(viewBoxZoomAtPoint(vb, userX, userY, factor));
+    applyCamera(viewBoxZoomAtPoint(vb, userX, userY, factor), false);
   };
 
   const capture = { capture: true };

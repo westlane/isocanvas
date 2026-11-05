@@ -212,6 +212,8 @@ export function centeredArtboardHomeView(
     return null;
   }
   if (findArtboardAncestor(host)) {
+    delete svg.dataset.icViewportMeet;
+    svg.removeAttribute("data-ic-viewport-meet");
     setViewportCenteredMeet(svg);
   }
   return (

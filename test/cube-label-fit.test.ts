@@ -115,8 +115,7 @@ describe("iso cube top label fit", () => {
     const shortSize = labelFontSizePx(host, "short");
     const longSize = labelFontSizePx(host, "long");
     expect(shortSize).toBeGreaterThan(0);
-    expect(longSize).toBeGreaterThan(0);
-    expect(shortSize).toBeGreaterThan(longSize);
+    expect(longSize).toBe(shortSize);
     expect(labelBBoxContainedInTopFace(host, "short")).toBe(true);
     expect(labelBBoxContainedInTopFace(host, "long")).toBe(true);
     expect(labelTextContent(host, "long")).toContain(ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS);
@@ -156,7 +155,7 @@ describe("iso cube top label fit", () => {
     const canvas = mountIsometricCanvasOnHost(host, stage);
     mountPlaneBoxesOnCanvas(canvas, boxes, colors, { stage, artboardShellChrome: "full" });
     const sizes = new Set(["stack-a", "stack-b", "stack-c"].map((id) => labelFontSizePx(host, id)));
-    expect(sizes.size).toBeGreaterThanOrEqual(1);
+    expect(sizes.size).toBe(1);
     for (const id of ["stack-a", "stack-b", "stack-c"]) {
       expect(labelBBoxContainedInTopFace(host, id)).toBe(true);
     }

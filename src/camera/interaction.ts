@@ -21,8 +21,8 @@ export function normalizedWheelDelta(
 }
 
 export function wheelZoomFactor(deltaY: number): number {
-  const clamped = clamp(deltaY, -100, 100);
-  return Math.exp(clamped * 0.001);
+  const clamped = clamp(deltaY, -120, 120);
+  return Math.exp(clamped * 0.002);
 }
 
 export function viewBoxZoomAtPoint(

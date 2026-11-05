@@ -374,6 +374,7 @@ export function renderDiagramScene(
     svg.dataset.icViewportMeet = "min";
     setViewportLeftBottomMeet(svg);
   } else {
+    delete svg.dataset.icViewportMeet;
     svg.removeAttribute("data-ic-viewport-meet");
   }
   frameDiagramSceneCamera(host);
