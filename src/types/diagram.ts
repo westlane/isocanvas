@@ -30,6 +30,14 @@ export type DiagramSceneNode = {
   cubeFaceColors?: DiagramCubeFaceColors;
   /** Extrusion footprint shape (default {@link ISO_PRISM_CUBE}). */
   isoPrism?: IsoPrismKind;
+  /** Iso-canvas ground `top` offset (stacked layers at the same footprint). */
+  elevation?: number;
+  /** Optional extrusion height in iso units (default from footprint). */
+  extrusionHeight?: number;
+  /** When set, row relayout moves one node per group; peers share its x/y. */
+  stackGroupId?: string;
+  /** Hide top-face label (stack layers below the top). */
+  omitCubeLabel?: boolean;
 };
 
 /** Lit face paint for one domain cube (overrides theme {@link IsoCanvasColors} at mount). */
@@ -54,6 +62,10 @@ export type DiagramScene = {
   viewBox?: ViewBox;
   /** Macro grid divisions used when placing nodes (must match render artboard stage). */
   divisions?: number;
+  /** Fixed row bands for lattice row layout (defaults to clustered node rows). */
+  gridRows?: number;
+  /** Fixed columns per row for space-between layout (defaults to {@link DIAGRAM_SCENE_ROW_GRID_COLS}). */
+  gridCols?: number;
   nodes: DiagramSceneNode[];
   edges?: DiagramSceneEdge[];
 };

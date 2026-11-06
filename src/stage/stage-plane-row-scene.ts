@@ -41,6 +41,8 @@ export function mergeDiagramScenesAlongPlaneRow(
   const mergedNodes: DiagramSceneNode[] = [];
   const mergedEdges: DiagramSceneEdge[] = [];
   let maxDivisions = 0;
+  let maxGridRows = 0;
+  let maxGridCols = 0;
   let column = 0;
 
   for (const scene of scenes) {
@@ -61,6 +63,12 @@ export function mergeDiagramScenesAlongPlaneRow(
     if (scene.divisions !== undefined) {
       maxDivisions = Math.max(maxDivisions, scene.divisions);
     }
+    if (scene.gridRows !== undefined) {
+      maxGridRows = Math.max(maxGridRows, scene.gridRows);
+    }
+    if (scene.gridCols !== undefined) {
+      maxGridCols = Math.max(maxGridCols, scene.gridCols);
+    }
     column += 1;
   }
 
@@ -75,6 +83,8 @@ export function mergeDiagramScenesAlongPlaneRow(
   return {
     viewBox,
     ...(maxDivisions > 0 ? { divisions: maxDivisions } : {}),
+    ...(maxGridRows > 0 ? { gridRows: maxGridRows } : {}),
+    ...(maxGridCols > 0 ? { gridCols: maxGridCols } : {}),
     nodes: mergedNodes,
     ...(mergedEdges.length > 0 ? { edges: mergedEdges } : {}),
   };

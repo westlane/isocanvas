@@ -43,4 +43,33 @@ describe("mergeDiagramScenesOnPlaneGrid", () => {
     expect(merged.nodes.find((node) => node.id === "o")!.y).toBe(294);
     expect(merged.nodes.find((node) => node.id === "p")!.x).toBe(208);
   });
+
+  it("preserves gridRows, gridCols, and divisions from cell scenes", () => {
+    const merged = mergeDiagramScenesOnPlaneGrid(
+      [
+        {
+          slot: { col: 0, row: 0 },
+          scene: {
+            divisions: 4,
+            gridRows: 4,
+            gridCols: 4,
+            nodes: [{ id: "a", label: "A", x: 0, y: 0, w: 10, h: 10 }],
+          },
+        },
+        {
+          slot: { col: 1, row: 0 },
+          scene: {
+            divisions: 3,
+            gridRows: 4,
+            gridCols: 4,
+            nodes: [{ id: "b", label: "B", x: 0, y: 0, w: 10, h: 10 }],
+          },
+        },
+      ],
+      { cellUserSize: { width: 100, height: 80 }, gapPx: 0 },
+    );
+    expect(merged.divisions).toBe(4);
+    expect(merged.gridRows).toBe(4);
+    expect(merged.gridCols).toBe(4);
+  });
 });

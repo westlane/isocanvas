@@ -14,6 +14,7 @@ import {
   ISO_EDGE_LABEL_FONT_SIZE_PX,
   IC_FOUNDATION_SLAB_CAPTION_CLASS,
   FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
+  preserveSvgTextWhitespace,
 } from "../isometric/cube/canvas-text-style.js";
 import { artboardPlaneToIsoGround, isoSizeFromDiagramUser } from "../isometric/diagram-user.js";
 import { extrusionHeightForFootprint, userPxToIsoUnits } from "../isometric/cube/cube.js";
@@ -92,13 +93,15 @@ function clusterRowCountFromNodes(nodes: readonly DiagramSceneNode[]): number {
 
 function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSpec>): PlaneBoxSpec {
   const { width, depth } = isoSizeFromDiagramUser(node.w, node.h);
-  const height = Math.min(
-    MAX_DOMAIN_EXTRUSION,
-    Math.max(
-      MIN_DOMAIN_EXTRUSION,
-      extrusionHeightForFootprint(width, depth, DOMAIN_EXTRUSION_FOOTPRINT_RATIO),
-    ),
-  );
+  const height =
+    node.extrusionHeight ??
+    Math.min(
+      MAX_DOMAIN_EXTRUSION,
+      Math.max(
+        MIN_DOMAIN_EXTRUSION,
+        extrusionHeightForFootprint(width, depth, DOMAIN_EXTRUSION_FOOTPRINT_RATIO),
+      ),
+    );
   return {
     id: node.id,
     label: node.label,
@@ -110,6 +113,8 @@ function planeBoxFromNode(node: DiagramSceneNode, overrides?: Partial<PlaneBoxSp
     planeBoxRole: "domain",
     ...(node.cubeFaceColors !== undefined ? { cubeFaceColors: node.cubeFaceColors } : {}),
     ...(node.isoPrism !== undefined ? { isoPrism: node.isoPrism } : {}),
+    ...(node.elevation !== undefined ? { elevation: node.elevation } : {}),
+    ...(node.omitCubeLabel ? { omitCubeLabel: true } : {}),
     ...overrides,
   };
 }
@@ -159,24 +164,24 @@ function mountFoundationSlabCaptions(
       isoCubeTopFaceLabelMaxWidthPx(widthIso, depthIso),
       FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
     );
-    canvas.addChild(
-      new IsometricText({
-        planeView: PlaneView.TOP,
-        text: captionText,
-        left: ground.left,
-        right: ground.right,
-        top: 0.06,
-        fontSize: FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
-        fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
-        fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
-        fontStyle: "normal",
-        fillColor: slab.stroke,
-        ...CANVAS_TEXT_NO_STROKE,
-        className: `${IC_FOUNDATION_SLAB_CAPTION_CLASS} ${IC_ISO_CUBE_LABEL_CLASS}`,
-        origin: ["center", "center"],
-        selectable: false,
-      }),
-    );
+    const foundationCaption = new IsometricText({
+      planeView: PlaneView.TOP,
+      text: captionText,
+      left: ground.left,
+      right: ground.right,
+      top: 0.06,
+      fontSize: FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX,
+      fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
+      fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
+      fontStyle: "normal",
+      fillColor: slab.stroke,
+      ...CANVAS_TEXT_NO_STROKE,
+      className: `${IC_FOUNDATION_SLAB_CAPTION_CLASS} ${IC_ISO_CUBE_LABEL_CLASS}`,
+      origin: ["center", "center"],
+      selectable: false,
+    });
+    preserveSvgTextWhitespace(foundationCaption);
+    canvas.addChild(foundationCaption);
   }
 }
 
@@ -274,10 +279,10 @@ export function renderDiagramScene(
   const labelSizedNodes = diagramSceneNodesSizedForCubeLabels(scene.nodes, orientation, (node) =>
     planeBoxFromNode(node),
   );
-  const rowCount = Math.max(
-    1,
-    clusterRowCountFromNodes(labelSizedNodes),
-  );
+  const clusteredRows = Math.max(1, clusterRowCountFromNodes(labelSizedNodes));
+  const latticeRows = scene.gridRows ?? clusteredRows;
+  const latticeCols = scene.gridCols ?? DIAGRAM_SCENE_ROW_GRID_COLS;
+  const rowSpan = stage.divisions ?? Math.max(latticeRows, latticeCols);
   const planeRowColumns = options.planeRowMount
     ? planeRowColumnLayoutFromMountPlan(options.planeRowMount)
     : undefined;
@@ -285,9 +290,9 @@ export function renderDiagramScene(
     footprintUser: DIAGRAM_NODE_FOOTPRINT,
     dotInset: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET,
     dotInsetTrailing: DEFAULT_ARTBOARD_LAYOUT_DOT_INSET_TRAILING,
-    rowCount,
-    rowSpan: stage.divisions ?? rowCount,
-    gridCols: DIAGRAM_SCENE_ROW_GRID_COLS,
+    rowCount: latticeRows,
+    rowSpan,
+    gridCols: latticeCols,
     ...(planeRowColumns ? { planeRowColumns } : {}),
     ...(options.planeGridMount ? { planeGridMount: options.planeGridMount } : {}),
   });
@@ -311,24 +316,24 @@ export function renderDiagramScene(
         y: (fromCenter.y + toCenter.y) / 2,
       };
       const mid = artboardPlaneToIsoGround(midPlane.x, midPlane.y);
-      canvas.addChild(
-        new IsometricText({
-          planeView: PlaneView.TOP,
-          text: formatIsoCanvasLabelText(edge.label),
-          left: mid.left,
-          right: mid.right,
-          top: 0.12,
-          fontSize: ISO_EDGE_LABEL_FONT_SIZE_PX,
-          fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
-          fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
-          fontStyle: "normal",
-          fillColor: colors.edgeLabel,
-          ...CANVAS_TEXT_NO_STROKE,
-          className: IC_ISO_CUBE_LABEL_CLASS,
-          origin: ["center", "center"],
-          selectable: false,
-        }),
-      );
+      const edgeLabel = new IsometricText({
+        planeView: PlaneView.TOP,
+        text: formatIsoCanvasLabelText(edge.label),
+        left: mid.left,
+        right: mid.right,
+        top: 0.12,
+        fontSize: ISO_EDGE_LABEL_FONT_SIZE_PX,
+        fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
+        fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
+        fontStyle: "normal",
+        fillColor: colors.edgeLabel,
+        ...CANVAS_TEXT_NO_STROKE,
+        className: IC_ISO_CUBE_LABEL_CLASS,
+        origin: ["center", "center"],
+        selectable: false,
+      });
+      preserveSvgTextWhitespace(edgeLabel);
+      canvas.addChild(edgeLabel);
     }
   }
 

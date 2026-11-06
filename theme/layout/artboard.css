@@ -98,7 +98,8 @@
 .ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
   > .ic-canvas-stage-row {
   grid-template-columns: repeat(var(--ic-grid-column-count, 2), minmax(0, 1fr));
-  grid-template-rows: auto repeat(var(--ic-grid-row-count, 1), minmax(0, 1fr));
+  /* label rows (max-content) + one full-height diagram row for the plane-row host */
+  grid-template-rows: repeat(var(--ic-grid-row-count, 1), max-content) minmax(0, 1fr);
   row-gap: calc(var(--ic-stage-row-gap, 6px) + var(--ic-grid-label-band-px, 0px));
 }
 
@@ -116,7 +117,8 @@
 .ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
   > .ic-canvas-stage-row
   > .ic-artboard[data-ic-plane-row-host] {
-  grid-row: calc(var(--ic-grid-row-count, 1) + 1);
+  grid-row: calc(var(--ic-grid-row-count, 1) + 1) / -1;
+  grid-column: 1 / -1;
 }
 
 .ic-canvas-stage--layout-row[data-ic-stage-row-continuous]

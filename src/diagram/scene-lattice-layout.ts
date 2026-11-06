@@ -664,7 +664,26 @@ function relayoutDiagramSceneNodesOnSingleArtboard(
   if (nodes.length === 0) {
     return [];
   }
-  const rows = clusterDiagramSceneNodesByRow(nodes);
+  const stackMembersByGroup = new Map<string, DiagramSceneNode[]>();
+  const layoutNodes: DiagramSceneNode[] = [];
+  for (const node of nodes) {
+    const groupId = node.stackGroupId?.trim();
+    if (groupId) {
+      const list = stackMembersByGroup.get(groupId) ?? [];
+      list.push(node);
+      stackMembersByGroup.set(groupId, list);
+      continue;
+    }
+    layoutNodes.push(node);
+  }
+  for (const members of stackMembersByGroup.values()) {
+    const representative = [...members].sort(
+      (a, b) => (a.elevation ?? 0) - (b.elevation ?? 0),
+    )[0]!;
+    layoutNodes.push(representative);
+  }
+
+  const rows = clusterDiagramSceneNodesByRow(layoutNodes);
   const rowCount = options.rowCount ?? rows.length;
   const rowSpan = options.rowSpan ?? stage.divisions ?? rowCount;
   const gridCols = options.gridCols ?? DIAGRAM_SCENE_ROW_GRID_COLS;
@@ -694,13 +713,34 @@ function relayoutDiagramSceneNodesOnSingleArtboard(
         byId.set(node.id, node);
         return;
       }
-      byId.set(node.id, {
+      const placed = {
         ...node,
         x: rect.x,
         y: rect.y,
         w: rect.w,
         h: rect.h,
-      });
+      };
+      byId.set(node.id, placed);
+      const groupId = node.stackGroupId?.trim();
+      if (!groupId) {
+        return;
+      }
+      const members = stackMembersByGroup.get(groupId);
+      if (!members) {
+        return;
+      }
+      for (const member of members) {
+        if (member.id === node.id) {
+          continue;
+        }
+        byId.set(member.id, {
+          ...member,
+          x: rect.x,
+          y: rect.y,
+          w: rect.w,
+          h: rect.h,
+        });
+      }
     });
   });
 

@@ -112,6 +112,8 @@ export function mergeDiagramScenesOnPlaneGrid(
   const mergedNodes: DiagramSceneNode[] = [];
   const mergedEdges: DiagramSceneEdge[] = [];
   let maxDivisions = 0;
+  let maxGridRows = 0;
+  let maxGridCols = 0;
   let index = 0;
 
   for (const entry of entries) {
@@ -133,6 +135,12 @@ export function mergeDiagramScenesOnPlaneGrid(
     if (entry.scene.divisions !== undefined) {
       maxDivisions = Math.max(maxDivisions, entry.scene.divisions);
     }
+    if (entry.scene.gridRows !== undefined) {
+      maxGridRows = Math.max(maxGridRows, entry.scene.gridRows);
+    }
+    if (entry.scene.gridCols !== undefined) {
+      maxGridCols = Math.max(maxGridCols, entry.scene.gridCols);
+    }
     index += 1;
   }
 
@@ -146,6 +154,8 @@ export function mergeDiagramScenesOnPlaneGrid(
   return {
     viewBox,
     ...(maxDivisions > 0 ? { divisions: maxDivisions } : {}),
+    ...(maxGridRows > 0 ? { gridRows: maxGridRows } : {}),
+    ...(maxGridCols > 0 ? { gridCols: maxGridCols } : {}),
     nodes: mergedNodes,
     ...(mergedEdges.length > 0 ? { edges: mergedEdges } : {}),
   };
