@@ -11,6 +11,7 @@ import {
   isoBoxTopFaceLabelLayout,
   ISO_CANVAS_LABEL_FONT_FAMILY,
   ISO_CANVAS_LABEL_FONT_WEIGHT,
+  preserveSvgTextWhitespace,
 } from "./canvas-text-style.js";
 import { themedCubeFaceColors } from "./cube.js";
 
@@ -52,7 +53,7 @@ export function createIsoBoxLabel(
 ): IsometricText {
   const { width: w, depth: d, height: h } = spec;
   const layout = isoBoxTopFaceLabelLayout(w, d, h, orientation);
-  return new IsometricText({
+  const label = new IsometricText({
     planeView: PlaneView.TOP,
     text: displayIsoCubeTopLabelText({
       label: spec.label,
@@ -75,4 +76,6 @@ export function createIsoBoxLabel(
     rotation: layout.rotation,
     selectable: false,
   });
+  preserveSvgTextWhitespace(label);
+  return label;
 }

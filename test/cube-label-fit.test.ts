@@ -14,6 +14,12 @@ import {
   userPxToIsoUnits,
   type PlaneBoxSpec,
 } from "@westlane/isocanvas";
+import {
+  formatIsoCanvasLabelText,
+  measureIsoCanvasLabelBlockHeightPx,
+  measureIsoCanvasLabelTextWidthPx,
+  splitIsoCanvasLabelLines,
+} from "../src/isometric/cube/canvas-text-style.js";
 import { initDemoTheme, demoThemeManager } from "../demo/scripts/theme.js";
 import { mountCardGrid } from "./fixtures/card-grid.js";
 
@@ -47,6 +53,11 @@ function labelTextContent(host: HTMLElement, objectId: string): string {
     `g.node[data-object-id="${objectId}"] g.ic-iso-cube-label tspan`,
   );
   return tspan?.textContent ?? "";
+}
+
+/** `tspan` text may include literal `\n` between lines. */
+function labelNormalizedText(host: HTMLElement, objectId: string): string {
+  return labelTextContent(host, objectId).replace(/\r?\n/g, " ").trim();
 }
 
 describe("iso cube top label fit", () => {
@@ -118,7 +129,50 @@ describe("iso cube top label fit", () => {
     expect(longSize).toBe(shortSize);
     expect(labelBBoxContainedInTopFace(host, "short")).toBe(true);
     expect(labelBBoxContainedInTopFace(host, "long")).toBe(true);
-    expect(labelTextContent(host, "long")).toContain(ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS);
+    expect(labelNormalizedText(host, "long")).toContain(ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS);
+    host.remove();
+  });
+
+  it("measures multi-line labels by max line width and stacked line height", () => {
+    const fontPx = 40;
+    const lineA = "AAAA";
+    const lineB = "AAAAAAAAAAAA";
+    const block = `${lineA}\n${lineB}`;
+    expect(splitIsoCanvasLabelLines(formatIsoCanvasLabelText(block)).length).toBe(2);
+    expect(measureIsoCanvasLabelTextWidthPx(formatIsoCanvasLabelText(block), fontPx)).toBe(
+      measureIsoCanvasLabelTextWidthPx(formatIsoCanvasLabelText(lineB), fontPx),
+    );
+    expect(measureIsoCanvasLabelBlockHeightPx(formatIsoCanvasLabelText(block), fontPx)).toBeGreaterThan(
+      measureIsoCanvasLabelBlockHeightPx(formatIsoCanvasLabelText(lineA), fontPx),
+    );
+  });
+
+  it("preserves newline characters in mounted SVG text (xml:space)", () => {
+    const colors = demoThemeManager().getTheme().colors;
+    const boxes: PlaneBoxSpec[] = [
+      {
+        id: "twoline",
+        label: "TECHNOLOGY\nCONSULTING",
+        x: 40,
+        y: 40,
+        width: 84,
+        depth: 84,
+        height: userPxToIsoUnits(56),
+      },
+    ];
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const stage = defaultIsoArtboardStage();
+    const canvas = mountIsometricCanvasOnHost(host, stage);
+    mountPlaneBoxesOnCanvas(canvas, boxes, colors, { stage, artboardShellChrome: "full" });
+    const labelText = host.querySelector(
+      'g.node[data-object-id="twoline"] g.ic-iso-cube-label text',
+    );
+    expect(labelText?.getAttribute("xml:space")).toBe("preserve");
+    const tspans = [
+      ...host.querySelectorAll('g.node[data-object-id="twoline"] g.ic-iso-cube-label tspan'),
+    ].map((node) => node.textContent);
+    expect(tspans).toEqual(["TECHNOLOGY", "CONSULTING"]);
     host.remove();
   });
 

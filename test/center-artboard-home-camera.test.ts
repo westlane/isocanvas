@@ -14,10 +14,14 @@ describe("applyArtboardHomeCamera", () => {
   it("clears plane-grid min meet so viewBox writes stay centered", () => {
     const artboard = document.createElement("div");
     artboard.className = "ic-artboard";
+    artboard.dataset.icFrameOnly = "true";
+    artboard.dataset.artboardWidth = "800";
+    artboard.dataset.artboardHeight = "600";
     artboard.style.setProperty("--ic-artboard-width", "800");
     artboard.style.setProperty("--ic-artboard-height", "600");
 
     const host = document.createElement("div");
+    /** Inner host must look like the artboard outline so {@link findArtboardAncestor} can clear plane-grid meet. */
     host.className = "ic-artboard-content diagram-host";
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 800 600");
@@ -30,6 +34,10 @@ describe("applyArtboardHomeCamera", () => {
     host.appendChild(svg);
     artboard.appendChild(host);
     document.body.appendChild(artboard);
+
+    const br = { width: 640, height: 480, top: 0, left: 0, bottom: 480, right: 640, x: 0, y: 0 } as DOMRect;
+    host.getBoundingClientRect = () => br;
+    svg.getBoundingClientRect = () => br;
 
     expect(applyArtboardHomeCamera(host, { artboardPaddingPx: 16 })).toBe(true);
     writeViewBoxToSvg(svg, { x: 1, y: 2, w: 400, h: 300 });

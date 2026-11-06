@@ -44,6 +44,7 @@ import {
   ISO_CANVAS_LABEL_FONT_FAMILY,
   ISO_CANVAS_LABEL_FONT_WEIGHT,
   measureIsoCanvasLabelTextWidthPx,
+  preserveSvgTextWhitespace,
 } from "../cube/canvas-text-style.js";
 import { isoStageGroundLayout } from "./ground-local.js";
 import type { IsoGroundAnchor } from "../../types/diagram.js";
@@ -356,25 +357,25 @@ export function mountArtboardCollectionLabelOnShell(
     bg,
     orientation,
   );
-  badge.addChild(
-    new IsometricText({
-      planeView: PlaneView.TOP,
-      text,
-      left: labelLayout.left,
-      right: labelLayout.right,
-      top: labelLayout.top,
-      fontSize,
-      fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
-      fontStyle: "normal",
-      fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
-      fillColor: fg,
-      ...CANVAS_TEXT_NO_STROKE,
-      className: IC_ARTBOARD_COLLECTION_LABEL_TEXT_CLASS,
-      origin: ["center", "center"],
-      rotation: labelLayout.rotation,
-      selectable: false,
-    }),
-  );
+  const collectionTitle = new IsometricText({
+    planeView: PlaneView.TOP,
+    text,
+    left: labelLayout.left,
+    right: labelLayout.right,
+    top: labelLayout.top,
+    fontSize,
+    fontFamily: ISO_CANVAS_LABEL_FONT_FAMILY,
+    fontStyle: "normal",
+    fontWeight: ISO_CANVAS_LABEL_FONT_WEIGHT,
+    fillColor: fg,
+    ...CANVAS_TEXT_NO_STROKE,
+    className: IC_ARTBOARD_COLLECTION_LABEL_TEXT_CLASS,
+    origin: ["center", "center"],
+    rotation: labelLayout.rotation,
+    selectable: false,
+  });
+  preserveSvgTextWhitespace(collectionTitle);
+  badge.addChild(collectionTitle);
   shell.addChild(badge);
 }
 

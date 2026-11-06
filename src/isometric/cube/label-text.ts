@@ -39,6 +39,11 @@ export function formatIsoCanvasLabelText(text: string): string {
   return text.toLocaleUpperCase("en-US");
 }
 
+/** Split user/markup label into lines (`\n` / `\r\n`); empty input yields `[""]`. */
+export function splitIsoCanvasLabelLines(text: string): string[] {
+  return text.split(/\r?\n/);
+}
+
 export function isoCanvasLabelLetterSpacingPx(
   fontSizePx: number,
   theme: IsoCubeLabelTheme = ISO_CUBE_LABEL_THEME_DEFAULTS,
@@ -46,10 +51,44 @@ export function isoCanvasLabelLetterSpacingPx(
   return fontSizePx * theme.letterSpacingEm;
 }
 
+export function isoCanvasLabelLineHeightPx(
+  fontSizePx: number,
+  theme: IsoCubeLabelTheme = ISO_CUBE_LABEL_THEME_DEFAULTS,
+): number {
+  return fontSizePx * theme.lineHeightEm;
+}
+
 function isoCanvasLabelFontCss(fontSizePx: number, theme: IsoCubeLabelTheme): string {
   return `${theme.fontWeight} ${fontSizePx}px ${theme.fontFamily}`;
 }
 
+/** Width of one line (no newline characters). */
+function measureIsoCanvasLabelSingleLineWidthPx(
+  line: string,
+  fontSizePx: number,
+  theme: IsoCubeLabelTheme,
+): number {
+  if (!line) {
+    return 0;
+  }
+  const letterSpacingPx = isoCanvasLabelLetterSpacingPx(fontSizePx, theme);
+  const charCount = [...line].length;
+  const spacingExtra = charCount > 1 ? (charCount - 1) * letterSpacingPx : 0;
+  if (typeof document !== "undefined") {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.font = isoCanvasLabelFontCss(fontSizePx, theme);
+      return ctx.measureText(line).width + spacingExtra;
+    }
+  }
+  return charCount * fontSizePx * 0.7 + spacingExtra;
+}
+
+/**
+ * Max horizontal extent of a possibly multi-line block (manual `\n` breaks only).
+ * Newlines do not add width; empty lines contribute 0 width.
+ */
 export function measureIsoCanvasLabelTextWidthPx(
   text: string,
   fontSizePx: number,
@@ -59,18 +98,63 @@ export function measureIsoCanvasLabelTextWidthPx(
   if (!text) {
     return 0;
   }
-  const letterSpacingPx = isoCanvasLabelLetterSpacingPx(fontSizePx, resolved);
-  const charCount = [...text].length;
-  const spacingExtra = charCount > 1 ? (charCount - 1) * letterSpacingPx : 0;
-  if (typeof document !== "undefined") {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.font = isoCanvasLabelFontCss(fontSizePx, resolved);
-      return ctx.measureText(text).width + spacingExtra;
+  const lines = splitIsoCanvasLabelLines(text);
+  let maxW = 0;
+  for (const line of lines) {
+    maxW = Math.max(maxW, measureIsoCanvasLabelSingleLineWidthPx(line, fontSizePx, resolved));
+  }
+  return maxW;
+}
+
+export function measureIsoCanvasLabelBlockHeightPx(
+  text: string,
+  fontSizePx: number,
+  theme?: IsoCubeLabelTheme,
+): number {
+  const resolved = theme ?? readIsoCubeLabelTheme(typeof document !== "undefined" ? document.documentElement : null);
+  if (!text.trim()) {
+    return 0;
+  }
+  const lineCount = splitIsoCanvasLabelLines(text).length;
+  return lineCount * isoCanvasLabelLineHeightPx(fontSizePx, resolved);
+}
+
+function truncateIsoCanvasLabelSingleLine(
+  line: string,
+  maxWidthPx: number,
+  fontSizePx: number,
+  resolved: IsoCubeLabelTheme,
+): string {
+  if (!line || maxWidthPx <= 0) {
+    return line;
+  }
+  if (measureIsoCanvasLabelSingleLineWidthPx(line, fontSizePx, resolved) <= maxWidthPx) {
+    return line;
+  }
+  if ([...line].length <= resolved.truncateAfterChars) {
+    return line;
+  }
+  const ellipsis = ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS;
+  const ellipsisWidth = measureIsoCanvasLabelSingleLineWidthPx(ellipsis, fontSizePx, resolved);
+  if (ellipsisWidth > maxWidthPx) {
+    return ellipsis;
+  }
+  const chars = [...line];
+  let lo = 0;
+  let hi = chars.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const candidate = chars.slice(0, mid).join("") + ellipsis;
+    if (measureIsoCanvasLabelSingleLineWidthPx(candidate, fontSizePx, resolved) <= maxWidthPx) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
     }
   }
-  return charCount * fontSizePx * 0.7 + spacingExtra;
+  if (lo === 0) {
+    return ellipsis;
+  }
+  return chars.slice(0, lo).join("") + ellipsis;
 }
 
 export function truncateIsoCanvasLabelText(
@@ -83,31 +167,6 @@ export function truncateIsoCanvasLabelText(
   if (!text || maxWidthPx <= 0) {
     return text;
   }
-  if (measureIsoCanvasLabelTextWidthPx(text, fontSizePx, resolved) <= maxWidthPx) {
-    return text;
-  }
-  if ([...text].length <= resolved.truncateAfterChars) {
-    return text;
-  }
-  const ellipsis = ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS;
-  const ellipsisWidth = measureIsoCanvasLabelTextWidthPx(ellipsis, fontSizePx, resolved);
-  if (ellipsisWidth > maxWidthPx) {
-    return ellipsis;
-  }
-  const chars = [...text];
-  let lo = 0;
-  let hi = chars.length;
-  while (lo < hi) {
-    const mid = Math.ceil((lo + hi) / 2);
-    const candidate = chars.slice(0, mid).join("") + ellipsis;
-    if (measureIsoCanvasLabelTextWidthPx(candidate, fontSizePx, resolved) <= maxWidthPx) {
-      lo = mid;
-    } else {
-      hi = mid - 1;
-    }
-  }
-  if (lo === 0) {
-    return ellipsis;
-  }
-  return chars.slice(0, lo).join("") + ellipsis;
+  const lines = splitIsoCanvasLabelLines(text);
+  return lines.map((line) => truncateIsoCanvasLabelSingleLine(line, maxWidthPx, fontSizePx, resolved)).join("\n");
 }

@@ -12,8 +12,10 @@ import {
 import {
   formatIsoCanvasLabelText,
   ISO_CANVAS_LABEL_LETTER_SPACING_EM,
+  measureIsoCanvasLabelBlockHeightPx,
   measureIsoCanvasLabelTextWidthPx,
   readIsoCubeLabelTheme,
+  splitIsoCanvasLabelLines,
   truncateIsoCanvasLabelText,
   type IsoCubeLabelTheme,
 } from "./label-text.js";
@@ -37,6 +39,89 @@ export const FOUNDATION_SLAB_CAPTION_FONT_SIZE_PX = 20;
 /** Edge midpoint labels in diagram scenes. */
 export const ISO_EDGE_LABEL_FONT_SIZE_PX = 22;
 
+type IsoCanvasTextGraphic = {
+  getElement(): SVGElement;
+  text: string;
+  update(): unknown;
+};
+
+const multilineLabelHook = new WeakSet<object>();
+
+/**
+ * SVG `<text>` defaults to collapsing whitespace, so embedded `\n` becomes a space.
+ * `@elchininet/isometric` writes one `tspan` and calls `update()` on mount, which would
+ * wipe extra tspans. Hook `update` so each line is its own `tspan`.
+ */
+export function preserveSvgTextWhitespace(textGraphic: IsoCanvasTextGraphic): void {
+  const root = textGraphic.getElement();
+  const text =
+    root instanceof SVGTextElement
+      ? root
+      : (root.querySelector("text") ?? null);
+  if (text) {
+    text.setAttribute("xml:space", "preserve");
+  }
+  if (!multilineLabelHook.has(textGraphic)) {
+    multilineLabelHook.add(textGraphic);
+    const originalUpdate = textGraphic.update.bind(textGraphic);
+    textGraphic.update = () => {
+      const result = originalUpdate();
+      applyIsoCubeLabelMultilineTspans(textGraphic);
+      return result;
+    };
+  }
+}
+
+const TSPAN_POSITION_ATTRS = new Set(["x", "y", "dx", "dy"]);
+
+/**
+ * Browsers do not reliably render `\n` as a line break when there is only one
+ * {@link SVGTextElement} child {@link SVGTSpanElement}. Split into one `tspan` per line
+ * with `dy` in `em` (theme {@link IsoCubeLabelTheme.lineHeightEm}).
+ */
+export function applyIsoCubeLabelMultilineTspans(
+  label: { getElement(): SVGElement; text: string },
+  themeScope?: Element | null,
+): void {
+  const root = label.getElement();
+  const textEl =
+    root instanceof SVGTextElement
+      ? root
+      : (root.querySelector("text") ?? null);
+  if (!textEl) {
+    return;
+  }
+  const lines = splitIsoCanvasLabelLines(label.text);
+  if (lines.length < 2) {
+    return;
+  }
+  const theme = readIsoCubeLabelTheme(
+    themeScope ?? (typeof document !== "undefined" ? document.documentElement : null),
+  );
+  const template = textEl.querySelector("tspan");
+  if (!template) {
+    return;
+  }
+  while (textEl.firstChild) {
+    textEl.removeChild(textEl.firstChild);
+  }
+  const ns = "http://www.w3.org/2000/svg";
+  const leadEm = -((lines.length - 1) / 2) * theme.lineHeightEm;
+  for (let i = 0; i < lines.length; i += 1) {
+    const ts = document.createElementNS(ns, "tspan");
+    ts.textContent = lines[i]!;
+    ts.setAttribute("x", "0");
+    ts.setAttribute("dy", i === 0 ? `${leadEm}em` : `${theme.lineHeightEm}em`);
+    for (const attr of [...template.attributes]) {
+      if (TSPAN_POSITION_ATTRS.has(attr.name)) {
+        continue;
+      }
+      ts.setAttribute(attr.name, attr.value);
+    }
+    textEl.appendChild(ts);
+  }
+}
+
 export {
   formatIsoCanvasLabelText,
   IC_ISO_CUBE_LABEL_THEME_VARS,
@@ -50,8 +135,11 @@ export {
   ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS,
   ISO_CUBE_TOP_LABEL_CROSS_AXIS_INSET,
   ISO_CUBE_TOP_LABEL_EDGE_INSET,
+  isoCanvasLabelLineHeightPx,
+  measureIsoCanvasLabelBlockHeightPx,
   measureIsoCanvasLabelTextWidthPx,
   readIsoCubeLabelTheme,
+  splitIsoCanvasLabelLines,
   truncateIsoCanvasLabelText,
   type IsoCubeLabelTheme,
 } from "./label-text.js";
@@ -68,7 +156,7 @@ export function isoCubeTopFaceLabelAlongEdgeIsoUnits(
   return isIsometricOrientationRotated(orientation) ? depthIso : widthIso;
 }
 
-/** Cross-axis span on the TOP plane (caps font size for one-line titles). */
+/** Cross-axis span on the TOP plane (depth of the visible top face along the tilt). */
 export function isoCubeTopFaceLabelCrossEdgeIsoUnits(
   widthIso: number,
   depthIso: number,
@@ -95,10 +183,13 @@ export function isoCubeTopFaceLabelMaxHeightPx(
   orientation: IsometricOrientation = DEFAULT_ISOMETRIC_ORIENTATION,
   canvasScale: number = DEFAULT_CUBE_CANVAS_SCALE,
   theme?: IsoCubeLabelTheme,
+  options?: { lineCount?: number },
 ): number {
   const t = theme ?? readIsoCubeLabelTheme(typeof document !== "undefined" ? document.documentElement : null);
   const crossIso = isoCubeTopFaceLabelCrossEdgeIsoUnits(widthIso, depthIso, orientation);
-  return crossIso * canvasScale * t.edgeInset * t.crossAxisInset;
+  const rawMax = crossIso * canvasScale * t.edgeInset * t.crossAxisInset;
+  const lines = Math.max(1, options?.lineCount ?? 1);
+  return rawMax / (lines * t.lineHeightEm);
 }
 
 export function displayIsoCubeTopLabelText(options: {
@@ -136,15 +227,9 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
   const canvasScale = options.canvasScale ?? DEFAULT_CUBE_CANVAS_SCALE;
   const orientation = options.orientation ?? DEFAULT_ISOMETRIC_ORIENTATION;
 
-  const maxHeightPx = isoCubeTopFaceLabelMaxHeightPx(
-    options.widthIso,
-    options.depthIso,
-    orientation,
-    canvasScale,
-    theme,
-  );
-
   const formatted = formatIsoCanvasLabelText(options.label);
+  const lineCount = Math.max(1, splitIsoCanvasLabelLines(formatted).length);
+
   const maxWidthPx = isoCubeTopFaceLabelMaxWidthPx(
     options.widthIso,
     options.depthIso,
@@ -153,13 +238,25 @@ export function fitIsoCubeTopLabelFontSizePx(options: {
     theme,
   );
 
+  const crossIso = isoCubeTopFaceLabelCrossEdgeIsoUnits(options.widthIso, options.depthIso, orientation);
+  const rawCrossPx = crossIso * canvasScale * theme.edgeInset * theme.crossAxisInset;
+  /** Extra vertical budget for line gaps and SVG tspan metrics (only when `\n` splits lines). */
+  const crossBudgetPx =
+    rawCrossPx * (lineCount > 1 ? 1 + (lineCount - 1) * 0.18 : 1);
+  const maxHeightPx = crossBudgetPx / (lineCount * theme.lineHeightEm);
+
   let fit = baseFontSizePx;
-  if (fit > maxHeightPx) {
+  if (lineCount === 1) {
+    if (fit > rawCrossPx) {
+      fit = rawCrossPx;
+    }
+  } else if (fit > maxHeightPx) {
     fit = maxHeightPx;
   }
   while (
     fit > theme.fontSizeMinPx &&
-    measureIsoCanvasLabelTextWidthPx(formatted, fit, theme) > maxWidthPx
+    (measureIsoCanvasLabelTextWidthPx(formatted, fit, theme) > maxWidthPx ||
+      measureIsoCanvasLabelBlockHeightPx(formatted, fit, theme) > crossBudgetPx)
   ) {
     fit -= 1;
   }

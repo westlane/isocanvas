@@ -8,6 +8,7 @@ import {
   ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS,
   measureIsoCanvasLabelTextWidthPx,
   readIsoCubeLabelTheme,
+  splitIsoCanvasLabelLines,
   type IsoCubeLabelTheme,
 } from "../isometric/cube/label-text.js";
 import { DEFAULT_CUBE_CANVAS_SCALE, ISO_DIAGRAM_PX_PER_UNIT } from "../isometric/cube/cube.js";
@@ -17,13 +18,16 @@ function labelTextForFootprintSizing(label: string, theme: IsoCubeLabelTheme): s
   if (!formatted) {
     return "";
   }
-  if ([...formatted].length <= theme.truncateAfterChars) {
-    return formatted;
-  }
-  const chars = [...formatted];
-  return (
-    chars.slice(0, theme.truncateAfterChars).join("") + ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS
-  );
+  const lines = splitIsoCanvasLabelLines(formatted);
+  return lines
+    .map((line) => {
+      if ([...line].length <= theme.truncateAfterChars) {
+        return line;
+      }
+      const chars = [...line];
+      return chars.slice(0, theme.truncateAfterChars).join("") + ISO_CUBE_LABEL_TRUNCATION_ELLIPSIS;
+    })
+    .join("\n");
 }
 
 /** Min iso span along the label baseline so `label` fits at `fontSizePx`. */
@@ -48,12 +52,14 @@ export function isoCubeMinAlongEdgeIsoForLabelText(
   return (measuredPx / (canvasScale * theme.edgeInset)) * 1.14;
 }
 
-/** Min iso span on the cross axis so `fontSizePx` fits on the top face. */
+/** Min iso span on the cross axis so a label block fits on the top face (`\n` = extra lines). */
 export function isoCubeMinCrossEdgeIsoForLabelFontSizePx(
   fontSizePx: number,
   options?: {
     canvasScale?: number;
     themeScope?: Element | null;
+    /** When set, height accounts for multiple lines at `fontSizePx`. */
+    label?: string;
   },
 ): number {
   const theme = readIsoCubeLabelTheme(
@@ -61,7 +67,10 @@ export function isoCubeMinCrossEdgeIsoForLabelFontSizePx(
   );
   const canvasScale = options?.canvasScale ?? DEFAULT_CUBE_CANVAS_SCALE;
   const crossInset = theme.edgeInset * theme.crossAxisInset;
-  return (fontSizePx / (canvasScale * crossInset)) * 1.06;
+  const lineCount = Math.max(1, splitIsoCanvasLabelLines(options?.label?.trim() ?? "").length);
+  const crossSlack = lineCount > 1 ? 1 + (lineCount - 1) * 0.18 : 1;
+  const heightPx = lineCount * fontSizePx * theme.lineHeightEm * crossSlack;
+  return (heightPx / (canvasScale * crossInset)) * 1.06;
 }
 
 /** Diagram user px footprint (`w` / `h`) large enough for the cube top label. */
@@ -87,6 +96,7 @@ export function diagramUserFootprintPxForCubeLabel(options: {
   const crossIso = isoCubeMinCrossEdgeIsoForLabelFontSizePx(options.fontSizePx, {
     ...scaleOpts,
     ...scopeOpts,
+    label: options.label,
   });
 
   const alongPx = alongIso * ISO_DIAGRAM_PX_PER_UNIT;

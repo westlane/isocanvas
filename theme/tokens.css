@@ -172,6 +172,7 @@
   --ic-iso-cube-label-edge-inset: 0.86;
   --ic-iso-cube-label-cross-axis-inset: 0.94;
   --ic-iso-cube-label-letter-spacing-em: 0.12;
+  --ic-iso-cube-label-line-height-em: 1.12;
   --ic-iso-cube-label-truncate-after-chars: 20;
   --ic-iso-cube-label-font-weight: 900;
   --ic-iso-cube-label-font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;

@@ -195,6 +195,8 @@ svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
   --ic-label-fill: var(--zui-iso-label-fill, #212121);
   text-anchor: middle;
   dominant-baseline: central;
+  /* @elchininet/isometric uses one tspan; manual `\n` in label needs preserved line breaks */
+  white-space: pre-line;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
@@ -202,11 +204,13 @@ svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
   font-style: normal;
   font-weight: var(--ic-iso-cube-label-font-weight);
   letter-spacing: calc(var(--ic-iso-cube-label-letter-spacing-em) * 1em);
+  line-height: var(--ic-iso-cube-label-line-height-em);
   fill: var(--ic-label-fill);
   stroke: none;
   paint-order: fill;
   text-anchor: middle;
   dominant-baseline: central;
+  white-space: pre-line;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] text:not(.ic-iso-cube-label) {

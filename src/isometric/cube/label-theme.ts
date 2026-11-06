@@ -8,6 +8,7 @@ export const IC_ISO_CUBE_LABEL_THEME_VARS = {
   edgeInset: "--ic-iso-cube-label-edge-inset",
   crossAxisInset: "--ic-iso-cube-label-cross-axis-inset",
   letterSpacingEm: "--ic-iso-cube-label-letter-spacing-em",
+  lineHeightEm: "--ic-iso-cube-label-line-height-em",
   truncateAfterChars: "--ic-iso-cube-label-truncate-after-chars",
   fontWeight: "--ic-iso-cube-label-font-weight",
   fontFamily: "--ic-iso-cube-label-font-family",
@@ -19,6 +20,8 @@ export type IsoCubeLabelTheme = {
   edgeInset: number;
   crossAxisInset: number;
   letterSpacingEm: number;
+  /** Line height as a multiple of `fontSizePx` (used for multi-line top-face labels). */
+  lineHeightEm: number;
   truncateAfterChars: number;
   fontWeight: number;
   fontFamily: string;
@@ -31,6 +34,7 @@ export const ISO_CUBE_LABEL_THEME_DEFAULTS: IsoCubeLabelTheme = {
   edgeInset: 0.86,
   crossAxisInset: 0.94,
   letterSpacingEm: 0.12,
+  lineHeightEm: 1.12,
   truncateAfterChars: 20,
   fontWeight: 900,
   fontFamily: '"Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif',
@@ -77,6 +81,7 @@ export function readIsoCubeLabelTheme(
       style.getPropertyValue(v.letterSpacingEm),
       defaults.letterSpacingEm,
     ),
+    lineHeightEm: parseCssNumber(style.getPropertyValue(v.lineHeightEm), defaults.lineHeightEm),
     truncateAfterChars: parseCssInt(
       style.getPropertyValue(v.truncateAfterChars),
       defaults.truncateAfterChars,
