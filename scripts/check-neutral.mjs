@@ -65,6 +65,7 @@ function checkSpdxHeaders() {
     if (!statSync(dir).isDirectory()) continue;
     for (const file of walk(dir)) {
       if (!/\.(ts|mjs)$/.test(file)) continue;
+      if (relRoot === "src" && /\.d\.ts$/.test(file)) continue;
       const head = readFileSync(file, "utf8").split("\n", 8).join("\n");
       if (!head.includes(spdx)) {
         throw new Error(`${path.relative(repoRoot, file)} missing ${spdx} in header`);
@@ -76,6 +77,10 @@ function checkSpdxHeaders() {
 function checkWorkingTree() {
   for (const file of walk(repoRoot)) {
     if (file.endsWith(".png") || file.endsWith(".lock")) {
+      continue;
+    }
+    const rel = path.relative(repoRoot, file);
+    if (/^src\/.*\.(js|d\.ts)(\.map)?$/.test(rel)) {
       continue;
     }
     checkTokens(file, file);

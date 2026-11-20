@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
+
 import { describe, expect, it } from "vitest";
 import {
   IC_ISO_CUBE_LABEL_THEME_VARS,
