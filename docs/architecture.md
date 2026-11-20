@@ -18,7 +18,7 @@ Scoped **`@westlane`** packages install from GitHub Packages. Copy [`.npmrc.exam
 
 Registry tarballs ship **`dist/` + `theme/`** (`prepack` runs `yarn build`). Git checkouts without `dist/` run `yarn build` after install (`prepare` builds when `dist/index.js` is missing).
 
-**Dev:** `@westlane/pino-blanc` is a Yarn portal on `./pino-blanc` (CI clones it; locally `ln -sfn ../pino-blanc pino-blanc` beside this repo).
+**Dev:** demo/tests use **`@westlane/pino-blanc`** from GitHub Packages (devDependency). Use [`.npmrc.example`](../.npmrc.example) when installing this repo without a consumer monorepo token.
 
 ## Source layout (`src/`)
 

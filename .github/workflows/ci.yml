@@ -18,18 +18,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/checkout@v4
-        with:
-          repository: westlane/pino-blanc
-          path: pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
           corepack prepare yarn@4.9.2 --activate
-      - name: Build portal devDep (pino-blanc)
-        run: |
-          yarn --cwd pino-blanc install --immutable
-          yarn --cwd pino-blanc build
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
