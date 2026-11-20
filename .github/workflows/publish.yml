@@ -8,6 +8,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
       packages: read
@@ -15,6 +17,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: ../pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
@@ -23,21 +29,23 @@ jobs:
         with:
           node-version: "22"
           cache: yarn
-          registry-url: https://npm.pkg.github.com
-          scope: "@westlane"
       - run: yarn install --immutable
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run check
 
   publish:
     needs: check
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: ../pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
@@ -49,14 +57,11 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: "@westlane"
       - run: yarn install --immutable
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Gate publish
         id: gate
         env:
           PUBLISH_REGISTRY: https://npm.pkg.github.com
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF: ${{ github.ref }}
         run: node scripts/publish-gate.mjs --soft
 
@@ -67,5 +72,3 @@ jobs:
       - name: Publish to GitHub Packages
         if: steps.gate.outputs.publish == 'true'
         run: npm publish --registry https://npm.pkg.github.com --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

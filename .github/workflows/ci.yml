@@ -9,6 +9,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
       packages: read
@@ -16,6 +18,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: ../pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
@@ -24,10 +30,6 @@ jobs:
         with:
           node-version: "22"
           cache: yarn
-          registry-url: https://npm.pkg.github.com
-          scope: "@westlane"
       - run: yarn install --immutable
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
       - run: yarn run check

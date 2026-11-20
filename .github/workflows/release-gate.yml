@@ -7,6 +7,8 @@ on:
 jobs:
   version:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
       packages: read
@@ -20,5 +22,4 @@ jobs:
       - name: Version ahead of registry
         env:
           PUBLISH_REGISTRY: https://npm.pkg.github.com
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/check-version-ahead.mjs

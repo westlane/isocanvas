@@ -83,7 +83,7 @@
   "devDependencies": {
     "@types/feather-icons": "^4",
     "@types/node": "^22.15.0",
-    "@westlane/pino-blanc": "^0.1.5",
+    "@westlane/pino-blanc": "portal:../pino-blanc",
     "feather-icons": "^4.29.2",
     "happy-dom": "^20.0.10",
     "loro.js": "^0.4.0",
