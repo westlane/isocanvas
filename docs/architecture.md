@@ -16,7 +16,7 @@ Scoped **`@westlane`** packages install from GitHub Packages. Copy [`.npmrc.exam
 | Full demo chrome CSS | `@westlane/isocanvas/canvas-chrome.css` | — |
 | One palette | `@westlane/isocanvas/theme/schemes/dark/gruvbox.css` (etc.) | third-party palette CSS — not relicensed by isocanvas; prefer single imports over `theme/schemes.css` |
 
-Registry tarballs ship **`dist/` + `theme/`** (`prepack` runs `yarn build`). Git checkouts without `dist/` run `yarn build` after install (`prepare` builds when `dist/index.js` is missing`).
+Registry tarballs ship **`dist/` + `theme/`** (`prepack` runs `yarn build`). Git checkouts without `dist/` run `yarn build` after install (`prepare` builds when `dist/index.js` is missing).
 
 **Dev:** `@westlane/pino-blanc` is a Yarn portal on `./pino-blanc` (CI clones it; locally `ln -sfn ../pino-blanc pino-blanc` beside this repo).
 
