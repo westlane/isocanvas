@@ -26,6 +26,8 @@ jobs:
         with:
           node-version: "22"
           cache: yarn
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
       - run: yarn install --immutable
       # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
       - run: yarn run check
