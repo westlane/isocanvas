@@ -38,8 +38,12 @@ describe("renderDiagramScene cubeFaceColors", () => {
       '[data-object-id="member"]',
     )?.parentElement?.querySelector("path.ic-iso-cube-face--top");
     expect(top?.getAttribute("fill")).toBe("#ede9fe");
-    const shell = host.querySelector('[data-object-id="member"]')?.closest(".ic-iso-cube-shell");
+    const shell = host
+      .querySelector('[data-object-id="member"]')
+      ?.closest(".ic-iso-cube-shell");
     expect(shell?.getAttribute("data-ic-cube-category-theme")).toBe("true");
-    expect(shell?.style.getPropertyValue("--zui-iso-front-fill").trim()).toBe("#ddd6fe");
+    expect((shell as HTMLElement | null)?.style.getPropertyValue("--zui-iso-front-fill").trim()).toBe(
+      "#ddd6fe",
+    );
   });
 });

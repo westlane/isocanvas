@@ -8,6 +8,7 @@ import {
   isoCanvasThemeFromLogTheme,
   isoSolidFaceStrokeCssFromFill,
   ISO_SOLID_FACE_STROKE_DARKEN,
+  ISO_SOLID_FACE_STROKE_OPACITY,
   MIN_ARTBOARD_CANVAS_CONTRAST_RATIO,
   artboardSurfaceFillOnCanvas,
   blendHexWithBlack,
@@ -145,12 +146,13 @@ describe("isoSolidFaceStrokeCssFromFill", () => {
     expect(props["--ic-dot-grid-dot"]).toBeUndefined();
   });
 
-  it("is a slightly darkened face fill at 50% opacity", () => {
+  it("is a slightly darkened face fill at configured stroke opacity", () => {
     const iso = isoCanvasThemeFromLogTheme(BUILT_IN_THEMES["solarized-dark"]!);
     const fill = iso.colors.isoRightFill;
     const tinted = blendHexWithBlack(fill, ISO_SOLID_FACE_STROKE_DARKEN);
+    const pct = Math.round(ISO_SOLID_FACE_STROKE_OPACITY * 100);
     expect(isoSolidFaceStrokeCssFromFill(fill)).toBe(
-      `color-mix(in oklch, ${tinted} 50%, transparent)`,
+      `color-mix(in oklch, ${tinted} ${pct}%, transparent)`,
     );
     expect(relativeLuminanceFromHex(tinted)).toBeLessThan(relativeLuminanceFromHex(fill));
   });

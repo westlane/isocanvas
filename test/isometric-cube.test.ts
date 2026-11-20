@@ -31,8 +31,6 @@ import {
   userPxToIsoUnits,
   renderDiagramScene,
   DIAGRAM_NODE_FOOTPRINT,
-  DIAGRAM_NODE_FOOTPRINT_DEPTH_PX,
-  DIAGRAM_NODE_FOOTPRINT_WIDTH_PX,
   type DiagramScene,
   type IsoBoxSpec,
 } from "@westlane/isocanvas";

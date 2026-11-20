@@ -25,7 +25,6 @@ import {
 } from "@westlane/isocanvas";
 import {
   persistDemoSession,
-  applyDemoCanvasCameraToHost,
   applyDemoViewportCamerasToStore,
   applyDemoWorldCameraToHost,
   demoWorldCameraLayerOptions,
@@ -126,7 +125,10 @@ export function hashRouteMatches(rawHash: string, route: DemoToolRoute): boolean
 export function syncRouteHashForTool(route: DemoToolRoute): void {
   syncBaseHashPreservingViewport({
     baseHash: toolRouteHash(route),
-    hashMatchesBase: (raw, base) => hashRouteMatches(raw, base),
+    hashMatchesBase: (raw, base) => {
+      const route = parseToolRouteHash(base);
+      return route !== null && hashRouteMatches(raw, route);
+    },
   });
 }
 
@@ -136,7 +138,9 @@ export function applyViewportFromUrlFrame(host: HTMLElement, frame: ViewportUrlF
     return false;
   }
   ensureDemoBaseline(svg);
-  const ok = applyViewportUrlFrameToHost(host, frame, demoWorldCameraLayerOptions());
+  const ok = applyViewportUrlFrameToHost(host, frame, {
+    worldCamera: demoWorldCameraLayerOptions(),
+  });
   if (!ok) {
     return false;
   }
@@ -149,7 +153,9 @@ export function applyViewportFromUrlFrame(host: HTMLElement, frame: ViewportUrlF
 }
 
 export function applyViewportFromHash(host: HTMLElement, rawHash: string): boolean {
-  return applyViewportFromLocationHash(host, rawHash, demoWorldCameraLayerOptions())
+  return applyViewportFromLocationHash(host, rawHash, {
+    worldCamera: demoWorldCameraLayerOptions(),
+  })
     ? (notifyDemoCanvasCameraChanged(host), true)
     : false;
 }

@@ -23,5 +23,6 @@ export default defineConfig({
   test: {
     include: [process.env.IC_GENERATE ? "scripts/**/*.gen.ts" : "test/**/*.test.ts"],
     environment: "happy-dom",
+    setupFiles: ["./test/vitest-setup.ts"],
   },
 });

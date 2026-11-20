@@ -45,7 +45,6 @@ describe("view-math", () => {
     const anchor = { x: 40, y: 60 };
     const factor = wheelZoomFactor(-40);
     const next = viewBoxZoomAtPoint(vb, anchor.x, anchor.y, factor);
-    const anchorRect = { left: 0, top: 0, width: 200, height: 200 } as DOMRect;
     const { tx, ty, scale } = worldTransformFromViewBox(vb, 200, 200, "mid");
     const clientX = tx + (anchor.x - vb.x) * scale;
     const clientY = ty + (anchor.y - vb.y) * scale;

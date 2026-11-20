@@ -53,16 +53,17 @@
     "docs/persistence.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepack": "yarn build",
-    "pretest": "yarn build",
+    "build": "rm -rf dist && tsc -p tsconfig.json",
     "demo": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.check.json",
     "test": "vitest run",
     "check": "yarn typecheck && yarn build && yarn test && yarn check:neutral",
     "check:neutral": "node scripts/check-neutral.mjs",
     "build:theme-schemes": "IC_GENERATE=1 vitest run",
-    "publish:github": "yarn build && yarn npm publish --access public"
+    "prepack": "yarn build",
+    "prepublishOnly": "yarn check",
+    "prepare": "node scripts/prepare.mjs",
+    "publish:github": "yarn check && yarn npm publish --access public"
   },
   "sideEffects": false,
   "dependencies": {
