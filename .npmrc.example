@@ -1,4 +1,4 @@
-# @westlane scope on GitHub Packages (copy to .npmrc for yarn/npm install in this repo).
-# Public packages still require a token with read:packages for install (not anonymous).
+# When installing published @westlane/isocanvas from GitHub Packages in another project.
+# This repo’s devDependency pino-blanc comes from public GitHub git (no token).
 @westlane:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+# //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}

@@ -8,11 +8,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,9 +22,8 @@ jobs:
         with:
           node-version: "22"
           cache: yarn
-          registry-url: https://npm.pkg.github.com
-          scope: "@westlane"
       - run: yarn install --immutable
+      - run: node scripts/ensure-pino-blanc-dist.mjs
       - run: yarn run check
 
   publish:

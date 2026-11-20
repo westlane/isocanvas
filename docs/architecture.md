@@ -18,7 +18,7 @@ Scoped **`@westlane`** packages install from GitHub Packages. Copy [`.npmrc.exam
 
 Registry tarballs ship **`dist/` + `theme/`** (`prepack` runs `yarn build`). Git checkouts without `dist/` run `yarn build` after install (`prepare` builds when `dist/index.js` is missing).
 
-**Dev:** demo/tests use **`@westlane/pino-blanc@^0.1.5`** from `https://npm.pkg.github.com` (devDependency). Copy [`.npmrc.example`](../.npmrc.example) and set `NODE_AUTH_TOKEN` (any token with `read:packages`; CI uses `GH_PAT` or `GITHUB_TOKEN`).
+**Dev:** demo/tests use **`github:westlane/pino-blanc#v0.1.5`** (public git tag; no GitHub Packages token). Published **`@westlane/isocanvas`** installs from `npm.pkg.github.com` — see [`.npmrc.example`](../.npmrc.example) for that scope only.
 
 ## Source layout (`src/`)
 

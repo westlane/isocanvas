@@ -12,6 +12,8 @@ function run(cmd, args) {
   if (result.status) process.exit(result.status ?? 1);
 }
 
+run("node", ["scripts/ensure-pino-blanc-dist.mjs"]);
+
 if (!existsSync("dist/index.js")) {
   run("yarn", ["build"]);
 }

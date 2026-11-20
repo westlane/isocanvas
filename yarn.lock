@@ -686,7 +686,7 @@ __metadata:
     "@elchininet/isometric": "npm:^4.0.0"
     "@types/feather-icons": "npm:^4"
     "@types/node": "npm:^22.15.0"
-    "@westlane/pino-blanc": "npm:^0.1.5"
+    "@westlane/pino-blanc": "github:westlane/pino-blanc#v0.1.5"
     feather-icons: "npm:^4.29.2"
     happy-dom: "npm:^20.0.10"
     loro.js: "npm:^0.4.0"
@@ -701,9 +701,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@westlane/pino-blanc@npm:^0.1.5":
+"@westlane/pino-blanc@github:westlane/pino-blanc#v0.1.5":
   version: 0.1.5
-  resolution: "@westlane/pino-blanc@npm:0.1.5::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40westlane%2Fpino-blanc%2F0.1.5%2F71cb912e8bbbdd6bc2e58aca506c86811dff9440"
+  resolution: "@westlane/pino-blanc@https://github.com/westlane/pino-blanc.git#commit=ba0afcbf685e3b2d64e8a61bee887599f3b31abf"
   dependencies:
     js-yaml: "npm:^5.4.3"
     pino: "npm:^9.14.0"
@@ -711,7 +711,14 @@ __metadata:
     react: ">=18"
     svelte: ">=4"
     vue: ">=3.3"
-  checksum: 10c0/286556478379c78882add884320c777ced258896f41ba98177c03a3b3961591d11aa8084cf01bcfbd1003dac41a809afeb0a6cde3b5626d06556629ec042c7f6
+  peerDependenciesMeta:
+    react:
+      optional: true
+    svelte:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/c082a50244e4c60bfcf2e049f2b737d9b5dcce675d3a016e03043f9db5571dbcaff6604ba0d2934e20da97ebf8876324ce4ff562dbd9fa1616c2054d7bca74c2
   languageName: node
   linkType: hard
 
