@@ -1,9 +1,10 @@
-name: CI
+name: ci
 
 on:
-  push:
-    branches: [main, master, dev]
   pull_request:
+    branches: [main, dev]
+  push:
+    branches: [dev, main]
 
 jobs:
   check:
@@ -28,4 +29,5 @@ jobs:
       - run: yarn install --immutable
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
       - run: yarn run check

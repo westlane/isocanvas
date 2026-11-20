@@ -1,0 +1,71 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
+      - run: yarn install --immutable
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: yarn run check
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
+      - run: yarn install --immutable
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gate publish
+        id: gate
+        env:
+          PUBLISH_REGISTRY: https://npm.pkg.github.com
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ github.ref }}
+        run: node scripts/publish-gate.mjs --soft
+
+      - name: Build
+        if: steps.gate.outputs.publish == 'true'
+        run: yarn build
+
+      - name: Publish to GitHub Packages
+        if: steps.gate.outputs.publish == 'true'
+        run: npm publish --registry https://npm.pkg.github.com --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

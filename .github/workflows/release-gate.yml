@@ -1,0 +1,24 @@
+name: release-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
+      - name: Version ahead of registry
+        env:
+          PUBLISH_REGISTRY: https://npm.pkg.github.com
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-version-ahead.mjs
