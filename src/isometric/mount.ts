@@ -1,25 +1,43 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
-import { type IsometricCanvas, IsometricPath } from "ic-canvas";
+import {
+  type IsometricCanvas,
+  IsometricGroup,
+  IsometricPath,
+} from "@elchininet/isometric";
 import type { ArtboardPlaneStage, ArtboardUserSize, PlaneBoxSpec } from "../types/artboard.js";
-import type { IsoBoxSpec, IsoFaceId } from "../types/diagram.js";
+import type { IsoBoxSpec, IsoFaceId, IsometricOrientation } from "../types/diagram.js";
 import type { IsoCanvasColors } from "../types/theme.js";
 import { setViewportCenteredMeet, writeViewBoxToSvg } from "../camera/view-box/attributes.js";
 import { writeViewBoxHomeMetadata } from "../camera/view-box/baseline.js";
 import { viewBoxForMountedCubeCanvas } from "../layout/artboard-outline.js";
 import { artboardPlaneToIsoGround } from "./diagram-user.js";
-import { readIsometricOrientationFromCanvas } from "./orientation.js";
+import { readIsometricOrientationFromCanvas, isometricCanvasMountHost } from "./orientation.js";
 import { isoBoxSpecsOnArtboardGround } from "./plane-layout.js";
 import {
-  createLocalIsoBoxParts,
   mountAnchoredFace,
   mountIsoBoxOnStageShell,
   mountNodeLabel,
 } from "./cube/box-parts.js";
+import {
+  createLocalIsoPrismParts,
+} from "./prism-parts.js";
 import { ISO_CUBE_MOUNT_FACE_ORDER } from "./cube/cube-faces.js";
 import { isoAnchorPaintDepth, isoFacePaintOrder } from "./cube/cube.js";
+import { readIsoCubeLabelTheme, uniformIsoCubeTopLabelFontSizePx } from "./cube/canvas-text-style.js";
 import { stackLayerPresentationByBoxId, elevateStackLayersAboveArtboardGround } from "./cube/stack-opacity.js";
-import { addArtboardStageShell, createArtboardStageShell } from "./stage/stage-shell.js";
+import {
+  addArtboardStageShell,
+  createArtboardStageShell,
+  DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME,
+  mountArtboardPlaneGridShellsOnCanvas,
+  mountArtboardPlaneRowShellsOnCanvas,
+  mountArtboardShellOnCanvas,
+  type ArtboardStageShellChrome,
+} from "./stage/stage-shell.js";
+import type { PlaneRowColumnSpec, PlaneRowMountPlan } from "../stage/plane-row-mount.js";
+import type { PlaneGridMountPlan } from "../stage/plane-grid-mount.js";
 
 /** One deferred paint step on a cube canvas, ordered by `depth` then `layer`. */
 export type IsoCanvasMountEntry = {
@@ -77,7 +95,7 @@ function artboardStageMountEntries(stage: ArtboardPlaneStage): IsoCanvasMountEnt
       layer: 0,
       mount: (canvas) => {
         const orientation = readIsometricOrientationFromCanvas(canvas);
-        addArtboardStageShell(canvas, createArtboardStageShell(stage, orientation), stage);
+        addArtboardStageShell(canvas, createArtboardStageShell(stage, orientation, "full"), stage);
       },
     },
   ];
@@ -86,6 +104,8 @@ function artboardStageMountEntries(stage: ArtboardPlaneStage): IsoCanvasMountEnt
 function isoBoxMountEntries(
   specs: readonly IsoBoxSpec[],
   colors: IsoCanvasColors,
+  labelFontSizePx: number,
+  orientation: IsometricOrientation,
   options?: { omitBottomFace?: boolean },
 ): IsoCanvasMountEntry[] {
   const specsSorted = [...specs].sort(
@@ -93,9 +113,26 @@ function isoBoxMountEntries(
   );
   const entries: IsoCanvasMountEntry[] = [];
   for (const spec of specsSorted) {
-    const { faces, label } = createLocalIsoBoxParts(spec, colors);
+    const { faces, recessWalls, frontLight, topGloss, bottomRims, label } = createLocalIsoPrismParts(
+      spec,
+      colors,
+      orientation,
+      labelFontSizePx,
+    );
     for (const id of ISO_CUBE_MOUNT_FACE_ORDER) {
       if (options?.omitBottomFace && id === "bottom") {
+        continue;
+      }
+      if (recessWalls.length > 0 && (id === "back" || id === "left")) {
+        if (id === "back") {
+          recessWalls.forEach((wall, index) => {
+            entries.push({
+              depth: isoFacePaintOrder(spec, "back") + index * 0.00001,
+              layer: FACE_LAYER.back,
+              mount: (c) => mountAnchoredFace(c, spec, wall),
+            });
+          });
+        }
         continue;
       }
       const rect = faces[id];
@@ -104,6 +141,30 @@ function isoBoxMountEntries(
         layer: FACE_LAYER[id],
         mount: (c) => mountAnchoredFace(c, spec, rect),
       });
+      if (id === "front") {
+        entries.push({
+          depth: isoFacePaintOrder(spec, "front") + 0.0005,
+          layer: FACE_LAYER.front,
+          mount: (c) => mountAnchoredFace(c, spec, frontLight),
+        });
+      }
+      if (id === "top") {
+        entries.push({
+          depth: isoFacePaintOrder(spec, "top") + 0.001,
+          layer: FACE_LAYER.top,
+          mount: (c) => mountAnchoredFace(c, spec, topGloss),
+        });
+        entries.push({
+          depth: isoFacePaintOrder(spec, "front") + 0.002,
+          layer: FACE_LAYER.front,
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.bottom),
+        });
+        entries.push({
+          depth: isoFacePaintOrder(spec, "left") + 0.002,
+          layer: FACE_LAYER.left,
+          mount: (c) => mountAnchoredFace(c, spec, bottomRims.left),
+        });
+      }
     }
     entries.push({
       depth: isoFacePaintOrder(spec, "top"),
@@ -171,11 +232,18 @@ export function mountPlaneBoxesOnCanvas(
   canvas: IsometricCanvas,
   boxes: readonly PlaneBoxSpec[],
   colors: IsoCanvasColors,
-  options: { stage: ArtboardPlaneStage },
+  options: {
+    stage: ArtboardPlaneStage;
+    omitArtboardShell?: boolean;
+    artboardShellChrome?: ArtboardStageShellChrome;
+    planeRowMount?: PlaneRowMountPlan;
+    planeGridMount?: PlaneGridMountPlan;
+    artboardCollection?: PlaneRowColumnSpec;
+  },
 ): void {
   const stage = options.stage;
   const orientation = readIsometricOrientationFromCanvas(canvas);
-  const shell = createArtboardStageShell(stage, orientation);
+  const themeScope = isometricCanvasMountHost(canvas);
   const stageGround = artboardPlaneToIsoGround(stage.x, stage.y, orientation, stage);
   const planeBoxes = elevateStackLayersAboveArtboardGround(boxes);
   const stackLayers = stackLayerPresentationByBoxId(planeBoxes);
@@ -186,15 +254,58 @@ export function mountPlaneBoxesOnCanvas(
     }
     return (a.elevation ?? 0) - (b.elevation ?? 0);
   });
+  const shellChrome =
+    options.artboardShellChrome ?? DEFAULT_DIAGRAM_ARTBOARD_SHELL_CHROME;
+  const planeRowMount = options.planeRowMount;
+  const planeGridMount = options.planeGridMount;
+  const mountTarget = options.omitArtboardShell
+    ? (() => {
+        const anchor = new IsometricGroup({
+          left: stageGround.left,
+          right: stageGround.right,
+          top: 0,
+        });
+        canvas.addChild(anchor);
+        return anchor;
+      })()
+    : planeGridMount && planeGridMount.cells.length > 0
+      ? mountArtboardPlaneGridShellsOnCanvas(
+          canvas,
+          stage,
+          planeGridMount,
+          orientation,
+          shellChrome,
+        )
+      : planeRowMount && planeRowMount.columns.length > 0
+        ? mountArtboardPlaneRowShellsOnCanvas(
+            canvas,
+            stage,
+            planeRowMount,
+            orientation,
+            shellChrome,
+          )
+        : mountArtboardShellOnCanvas(
+            canvas,
+            stage,
+            orientation,
+            shellChrome,
+            options.artboardCollection,
+          );
+  const uniformLabelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, {
+    orientation,
+    themeScope,
+  });
+  const themeLabelFontSizePx = readIsoCubeLabelTheme(themeScope).fontSizePx;
   for (const spec of specs) {
     const stackLayer = stackLayers.get(spec.id);
-    mountIsoBoxOnStageShell(shell, spec, stageGround, colors, {
+    const labelFontSizePx = spec.omitCubeLabel ? themeLabelFontSizePx : uniformLabelFontSizePx;
+    mountIsoBoxOnStageShell(mountTarget, spec, stageGround, colors, {
       omitBottomFace: true,
       orientation,
+      labelFontSizePx,
       ...(stackLayer ? { stackLayer } : {}),
     });
   }
-  addArtboardStageShell(canvas, shell, stage);
 }
 
 /** Low-level mount when anchors are already in ic-canvas ground space. */
@@ -204,6 +315,9 @@ export function mountIsoBoxesOnCanvas(
   colors: IsoCanvasColors,
   options?: { artboardUserSize?: ArtboardUserSize; artboardDivisions?: number },
 ): void {
+  const orientation = readIsometricOrientationFromCanvas(canvas);
+  const themeScope = isometricCanvasMountHost(canvas);
+  const labelFontSizePx = uniformIsoCubeTopLabelFontSizePx(specs, { orientation, themeScope });
   const entries: IsoCanvasMountEntry[] = [];
   if (options?.artboardUserSize) {
     entries.push(
@@ -218,7 +332,7 @@ export function mountIsoBoxesOnCanvas(
       }),
     );
   }
-  entries.push(...isoBoxMountEntries(specs, colors));
+  entries.push(...isoBoxMountEntries(specs, colors, labelFontSizePx, orientation));
   mountEntriesInPaintOrder(canvas, entries);
 }
 

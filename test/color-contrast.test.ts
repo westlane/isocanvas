@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
 import {
@@ -7,6 +8,7 @@ import {
   isoCanvasThemeFromLogTheme,
   isoSolidFaceStrokeCssFromFill,
   ISO_SOLID_FACE_STROKE_DARKEN,
+  ISO_SOLID_FACE_STROKE_OPACITY,
   MIN_ARTBOARD_CANVAS_CONTRAST_RATIO,
   artboardSurfaceFillOnCanvas,
   blendHexWithBlack,
@@ -15,6 +17,7 @@ import {
   wireframeIsoNodeStroke,
   wireframeGridStrokeOnCanvas,
   wireframeStrokeOnSurface,
+  themeToCssCustomProperties,
 } from "@westlane/isocanvas";
 import { BUILT_IN_THEMES } from "@westlane/pino-blanc/themes";
 
@@ -136,12 +139,20 @@ describe("artboardSurfaceFillOnCanvas", () => {
 });
 
 describe("isoSolidFaceStrokeCssFromFill", () => {
-  it("is a slightly darkened face fill at 50% opacity", () => {
+  it("light themes derive dot fill in CSS from grid-line ink (see theme/layout/artboard-grid.css)", () => {
+    const iso = isoCanvasThemeFromLogTheme(BUILT_IN_THEMES["gruvbox-light"]!);
+    const props = themeToCssCustomProperties(iso);
+    expect(props["--ic-wireframe-grid-stroke"]).toBeTruthy();
+    expect(props["--ic-dot-grid-dot"]).toBeUndefined();
+  });
+
+  it("is a slightly darkened face fill at configured stroke opacity", () => {
     const iso = isoCanvasThemeFromLogTheme(BUILT_IN_THEMES["solarized-dark"]!);
     const fill = iso.colors.isoRightFill;
     const tinted = blendHexWithBlack(fill, ISO_SOLID_FACE_STROKE_DARKEN);
+    const pct = Math.round(ISO_SOLID_FACE_STROKE_OPACITY * 100);
     expect(isoSolidFaceStrokeCssFromFill(fill)).toBe(
-      `color-mix(in oklch, ${tinted} 50%, transparent)`,
+      `color-mix(in oklch, ${tinted} ${pct}%, transparent)`,
     );
     expect(relativeLuminanceFromHex(tinted)).toBeLessThan(relativeLuminanceFromHex(fill));
   });

@@ -1,8 +1,17 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBox } from "./core.js";
 
-/** Portable diagram interchange (e.g. domainspec kernel export). Render with `src/isometric/` helpers in apps. */
+/** Portable diagram interchange from a host domain model. Render with `src/isometric/` helpers in apps. */
+
+/** Default iso extrusion footprint (rectangular pillow cube). */
+export const ISO_PRISM_CUBE = "cube" as const;
+
+/** Flat-top hexagonal prism (same mount pipeline and CSS as cube). */
+export const ISO_PRISM_HEXAGON = "hexagon" as const;
+
+export type IsoPrismKind = typeof ISO_PRISM_CUBE | typeof ISO_PRISM_HEXAGON;
 
 export type DiagramSceneNode = {
   id: string;
@@ -11,6 +20,35 @@ export type DiagramSceneNode = {
   y: number;
   w: number;
   h: number;
+  /** Optional thin companion slab rendered under the main cube (same footprint). */
+  foundationSlab?: {
+    label: string;
+    fill: string;
+    stroke: string;
+  };
+  /** Per-node iso face fills (continuous row / merged artboards). */
+  cubeFaceColors?: DiagramCubeFaceColors;
+  /** Extrusion footprint shape (default {@link ISO_PRISM_CUBE}). */
+  isoPrism?: IsoPrismKind;
+  /** Iso-canvas ground `top` offset (stacked layers at the same footprint). */
+  elevation?: number;
+  /** Optional extrusion height in iso units (default from footprint). */
+  extrusionHeight?: number;
+  /** When set, row relayout moves one node per group; peers share its x/y. */
+  stackGroupId?: string;
+  /** Hide top-face label (stack layers below the top). */
+  omitCubeLabel?: boolean;
+};
+
+/** Lit face paint for one domain cube (overrides theme {@link IsoCanvasColors} at mount). */
+export type DiagramCubeFaceColors = {
+  top: string;
+  front: string;
+  right: string;
+  left: string;
+  bottom: string;
+  labelFill?: string;
+  edgeStroke?: string;
 };
 
 export type DiagramSceneEdge = {
@@ -22,6 +60,12 @@ export type DiagramSceneEdge = {
 
 export type DiagramScene = {
   viewBox?: ViewBox;
+  /** Macro grid divisions used when placing nodes (must match render artboard stage). */
+  divisions?: number;
+  /** Fixed row bands for lattice row layout (defaults to clustered node rows). */
+  gridRows?: number;
+  /** Fixed columns per row for space-between layout (defaults to {@link DIAGRAM_SCENE_ROW_GRID_COLS}). */
+  gridCols?: number;
   nodes: DiagramSceneNode[];
   edges?: DiagramSceneEdge[];
 };
@@ -37,6 +81,13 @@ export type IsoBoxSpec = {
   height: number;
   /** Vertical offset from ground anchor in iso units. */
   elevation?: number;
+  /** Uniform face fill (e.g. companion slab). */
+  monoFaceFill?: string;
+  cubeFaceColors?: DiagramCubeFaceColors;
+  compactLabel?: boolean;
+  planeBoxRole?: "domain" | "foundationSlab";
+  omitCubeLabel?: boolean;
+  isoPrism?: IsoPrismKind;
 };
 
 export type IsoFaceId = "bottom" | "back" | "left" | "side" | "front" | "top";

@@ -1,12 +1,15 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { createLoroFieldPersistenceAdapter } from "./adapter.js";
 import {
   importLoroDocFromLocalStorage,
   persistLoroDocToLocalStorage,
 } from "./doc-bytes-storage.js";
-import type { LoroFieldPersistenceOptions } from "../../types/plugins.js";
-import type { LoroFieldPersistenceAdapter } from "../../types/plugins.js";
+import type {
+  LoroFieldPersistenceAdapter,
+  LoroFieldPersistenceOptions,
+} from "../loro-types.js";
 
 export type LoroFieldPersistenceWithLocalDocBytesOptions<TSnapshot> =
   LoroFieldPersistenceOptions<TSnapshot> & {

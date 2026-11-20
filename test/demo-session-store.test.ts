@@ -1,5 +1,6 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
 // @vitest-environment happy-dom
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, beforeEach } from "vitest";
 import { LoroDoc } from "loro.js";
@@ -9,7 +10,7 @@ import {
   importLoroDocFromStorage,
   loroDocBytesStorageKey,
   persistLoroDocToStorage,
-} from "@westlane/isocanvas";
+} from "@westlane/isocanvas/persistence";
 import {
   applyDemoSessionSnapshot,
   buildDemoSessionSnapshot,

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -6,21 +7,18 @@ import {
   DEFAULT_ISO_CANVAS_THEME,
   mergeTheme,
   themeToCssCustomProperties,
-  ZUI_THEME_CSS_VARS,
+  IC_THEME_CSS_VARS,
 } from "@westlane/isocanvas";
 
 describe("theme manager", () => {
   it("maps colors and radius to watch CSS variables", () => {
     const props = themeToCssCustomProperties(DEFAULT_ISO_CANVAS_THEME);
-    expect(props[ZUI_THEME_CSS_VARS.accent]).toBe("#9333ea");
-    expect(props[ZUI_THEME_CSS_VARS.clusterRx]).toBe("0px");
-    expect(props[ZUI_THEME_CSS_VARS.isoShadowOpacity]).toBe("0.42");
-    expect(props[ZUI_THEME_CSS_VARS.dotGridDot]).toBe(
-      "color-mix(in oklch, #e2e8f0 30%, transparent)",
-    );
-    expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeWidth]).toBe("1px");
-    expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeTop]).toMatch(/^color-mix\(in oklch,/);
-    expect(props[ZUI_THEME_CSS_VARS.isoFaceStrokeRecess]).toMatch(/^color-mix\(in oklch,/);
+    expect(props[IC_THEME_CSS_VARS.accent]).toBe("#9333ea");
+    expect(props[IC_THEME_CSS_VARS.clusterRx]).toBe("0px");
+    expect(props[IC_THEME_CSS_VARS.isoShadowOpacity]).toBe("0.42");
+    expect(props[IC_THEME_CSS_VARS.isoFaceStrokeWidth]).toBe("1px");
+    expect(props[IC_THEME_CSS_VARS.isoFaceStrokeTop]).toMatch(/^color-mix\(in oklch,/);
+    expect(props[IC_THEME_CSS_VARS.isoFaceStrokeRecess]).toMatch(/^color-mix\(in oklch,/);
   });
 
   it("applies theme to a host element", () => {
@@ -31,7 +29,7 @@ describe("theme manager", () => {
       radius: { clusterRx: 8 },
     });
     manager.apply();
-    expect(host.style.setProperty).toHaveBeenCalledWith("--zui-accent", "#2563eb");
+    expect(host.style.setProperty).toHaveBeenCalledWith("--ic-accent", "#2563eb");
     expect(host.style.setProperty).toHaveBeenCalledWith("--ic-theme-cluster-rx", "8px");
   });
 

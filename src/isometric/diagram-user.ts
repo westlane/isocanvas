@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { artboardUserToPlane } from "../layout/artboard-coords.js";
 import { DEFAULT_ARTBOARD_USER_SIZE } from "../layout/artboard.js";

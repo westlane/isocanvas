@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBoxBaseline } from "../types/camera.js";
 import type { Box2d } from "../types/core.js";
@@ -36,11 +37,19 @@ export const DEFAULT_ARTBOARD_USER_SIZE: ArtboardUserSize = {
 /** Iso artboard ground divisions (3×3 macro grid on the demo stage). */
 export const DEFAULT_ARTBOARD_GRID_DIVISIONS = 3;
 
-/** Fainter sub-guides splitting each macro cell (3×3 inside each of the 3×3). */
-export const DEFAULT_ARTBOARD_GRID_SUBDIVISIONS = 3;
+/** Fainter sub-guides inside each macro cell (3 per macro edge → 9×9 plane lines). */
+export const DEFAULT_ARTBOARD_GRID_SUBDIVISIONS = 9;
 
-/** Dots per side inside each macro grid cell (centered, none on the guide lines). */
+/** Dots per side inside each macro grid cell (studs on the finest lattice). */
 export const DEFAULT_ARTBOARD_DOTS_PER_CELL = 9;
+
+/**
+ * `cell-center` — dots in cell centers; division guides on boundaries (default).
+ * `intersection` — dots on boundaries; guides between (alternate).
+ */
+export type ArtboardDotLatticePhase = "intersection" | "cell-center";
+
+export const DEFAULT_ARTBOARD_DOT_LATTICE_PHASE: ArtboardDotLatticePhase = "cell-center";
 
 export type CreateArtboardOptions = {
   userSize?: ArtboardUserSize;
@@ -84,6 +93,16 @@ export function createArtboard(options: CreateArtboardOptions = {}): ArtboardEle
 
   root.appendChild(content);
   return { root, surface: null, grid: null, content, userSize };
+}
+
+/** Keep logical user size in sync after layout changes (camera baseline + CSS vars). */
+export function applyArtboardUserSize(root: HTMLElement, userSize: ArtboardUserSize): void {
+  root.dataset.artboardWidth = String(userSize.width);
+  root.dataset.artboardHeight = String(userSize.height);
+  root.style.setProperty("--ic-artboard-user-width", String(userSize.width));
+  root.style.setProperty("--ic-artboard-user-height", String(userSize.height));
+  root.style.setProperty("--ic-artboard-width", `${userSize.width}px`);
+  root.style.setProperty("--ic-artboard-height", `${userSize.height}px`);
 }
 
 /** Plane-space bounds for camera/grid (viewBox top-left); see {@link artboardUserToPlane} for user coords. */

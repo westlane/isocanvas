@@ -1,24 +1,39 @@
-name: CI
+name: ci
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
+    branches: [main, dev]
+  push:
+    branches: [dev, main]
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: yarn
-      - run: corepack enable
+          fetch-depth: 0
       - uses: actions/checkout@v4
         with:
           repository: westlane/pino-blanc
           path: pino-blanc
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+      - name: Build portal devDep (pino-blanc)
+        run: |
+          yarn --cwd pino-blanc install --immutable
+          yarn --cwd pino-blanc build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
       - run: yarn install --immutable
-      - run: yarn typecheck
-      - run: yarn test
+      # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
+      - run: yarn run check

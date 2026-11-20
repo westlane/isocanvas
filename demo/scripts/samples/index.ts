@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 export { mountCardGrid } from "./card-grid.js";
 export { mountCardStack, DEMO_STACK_CENTER_LAYER_COUNT, DEMO_STACK_FOOTPRINT_DOT_INSET } from "./card-stack.js";

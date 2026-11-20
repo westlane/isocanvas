@@ -12,7 +12,6 @@
   aspect-ratio: var(--ic-artboard-user-width, 520) / var(--ic-artboard-user-height, 320);
   border-radius: 4px;
   overflow: hidden;
-  --ic-artboard-surface-fill: color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc));
 }
 
 /* Frame-only artboard: iso ground lives in the cube SVG (`mountArtboardGroundOnCanvas`). */
@@ -27,6 +26,253 @@
   padding: 0;
   display: block;
   place-items: unset;
+}
+
+.ic-canvas-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+.ic-canvas-stage > .ic-artboard {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  top: 0;
+  transform: none;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
+
+.ic-canvas-stage > .ic-artboard[hidden] {
+  display: none !important;
+}
+
+.ic-canvas-stage--layout-row,
+.ic-canvas-stage--layout-stack {
+  perspective: 1600px;
+  perspective-origin: 50% 45%;
+  overflow: hidden;
+}
+
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  max-width: min(100%, calc(var(--ic-artboard-user-width, 520) * 1px + 2rem));
+  margin-inline: auto;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous] {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+  perspective: none;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous] > .ic-canvas-stage-row {
+  display: grid;
+  grid-template-columns: repeat(var(--ic-row-column-count, 3), minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: stretch;
+  justify-items: stretch;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin-inline: 0;
+  gap: var(--ic-stage-row-gap, 6px);
+  padding: 0.35rem 0.5rem;
+  box-sizing: border-box;
+  transform: none;
+  transform-style: flat;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row {
+  grid-template-columns: repeat(var(--ic-grid-column-count, 2), minmax(0, 1fr));
+  /* label rows (max-content) + one full-height diagram row for the plane-row host */
+  grid-template-rows: repeat(var(--ic-grid-row-count, 1), max-content) minmax(0, 1fr);
+  row-gap: calc(var(--ic-stage-row-gap, 6px) + var(--ic-grid-label-band-px, 0px));
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row
+  > .ic-artboard:not([data-ic-plane-row-host]) {
+  grid-row: calc(var(--ic-grid-cell-row, 0) + 1) / span var(--ic-grid-cell-row-span, 1);
+  grid-column: calc(var(--ic-grid-cell-column, 0) + 1) / span var(--ic-grid-cell-column-span, 1);
+  height: auto;
+  max-height: none;
+  aspect-ratio: unset;
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous][data-ic-stage-row-grid]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host] {
+  grid-row: calc(var(--ic-grid-row-count, 1) + 1) / -1;
+  grid-column: 1 / -1;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard:not([data-ic-plane-row-host]) {
+  grid-row: 1;
+  grid-column: calc(var(--ic-row-column-index, 0) + 1);
+  height: auto;
+  max-height: none;
+  aspect-ratio: unset;
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard:not([data-ic-plane-row-host])
+  > .ic-artboard-content {
+  display: none;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host] {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: unset;
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host][data-ic-frame-only] {
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host]
+  > .ic-artboard-content {
+  display: block;
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-plane-row-host]
+  > .ic-artboard-content
+  > svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.ic-canvas-stage--layout-row[data-ic-stage-row-continuous]
+  > .ic-canvas-stage-row
+  > .ic-artboard[data-ic-artboard-label]::before {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.45rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(120, 113, 108, 0.12);
+}
+
+.ic-canvas-stage-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: var(--ic-stage-row-gap, 20px);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--ic-stage-pitch, 42) * 1deg))
+    rotateZ(calc(var(--ic-stage-bearing, 0) * 1deg));
+}
+
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row > .ic-artboard {
+  position: relative;
+  inset: unset;
+  left: auto;
+  top: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ic-canvas-stage--layout-row > .ic-canvas-stage-row > .ic-artboard {
+  position: relative;
+  inset: unset;
+  left: auto;
+  top: auto;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: var(--ic-artboard-user-width, 520) / var(--ic-artboard-user-height, 320);
+  max-width: none;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ic-canvas-stage--layout-row > .ic-canvas-stage-row > .ic-artboard.is-panning,
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row > .ic-artboard.is-panning {
+  cursor: grabbing;
+}
+
+.ic-canvas-stage--layout-row > .ic-canvas-stage-row > .ic-artboard[hidden],
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row > .ic-artboard[hidden] {
+  display: none !important;
+}
+
+.ic-canvas-stage--layout-row > .ic-canvas-stage-row > .ic-artboard > .ic-artboard-content,
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row > .ic-artboard > .ic-artboard-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ic-canvas-stage--layout-row > .ic-canvas-stage-row > .ic-artboard[data-ic-artboard-label]::before,
+.ic-canvas-stage--layout-stack > .ic-canvas-stage-row > .ic-artboard[data-ic-artboard-label]::before {
+  content: attr(data-ic-artboard-label);
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #57534e;
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(120, 113, 108, 0.14);
 }
 
 .ic-artboard > .ic-artboard-content {
@@ -48,33 +294,81 @@
   --ic-artboard-guide-line: transparent;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide) {
+svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
   display: none;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
-  fill: var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc)));
-  stroke: none;
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
+  display: block;
+  stroke: var(--ic-grid-lines-stroke) !important;
+  stroke-width: 1.25px !important;
+  fill: none !important;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face {
-  stroke: none;
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-guide {
+  opacity: var(--ic-grid-lines-macro-opacity);
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-subguide {
+  opacity: var(--ic-grid-lines-sub-opacity);
+}
+
+[data-ic-grid-lines="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path.ic-artboard-fineguide {
+  opacity: var(--ic-grid-lines-fine-opacity);
+}
+
+[data-ic-grid-lines="on"] .ic-artboard .ic-dot-grid-surface,
+[data-ic-wireframe="on"] .ic-artboard .ic-dot-grid-surface {
+  --ic-artboard-guide-line: unset;
+}
+
+/* Frame-only diagrams: division guides live in the cube SVG (iso ground), not CSS plane overlays. */
+
+.ic-artboard[data-ic-grid-lines="on"][data-ic-frame-only] > .ic-artboard-content > :is(svg, .diagram-host),
+[data-ic-grid-lines="on"] .ic-artboard[data-ic-frame-only] > .ic-artboard-content > :is(svg, .diagram-host) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Iso artboard shell paths — paint tokens in theme/tokens.css (--ic-artboard-*-fill, *-seam-stroke, --ic-artboard-slab-filter). */
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face,
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
   pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  path:is(.ic-artboard-outline, .ic-artboard-face--front, .ic-artboard-face--side) {
+  stroke-width: var(--ic-artboard-face-seam-stroke-width);
+  vector-effect: non-scaling-stroke;
+  paint-order: fill stroke;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
+  fill: var(--ic-artboard-top-fill);
+  stroke: var(--ic-artboard-top-seam-stroke);
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
-  fill: var(
-    --ic-artboard-front-fill,
-    color-mix(in oklch, var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 88%, black)
-  );
+  fill: var(--ic-artboard-front-face-fill);
+  stroke: var(--ic-artboard-front-seam-stroke);
+  filter: var(--ic-artboard-slab-filter);
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
-  fill: var(
-    --ic-artboard-side-fill,
-    color-mix(in oklch, var(--ic-artboard-surface-fill, color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc))) 94%, black)
-  );
+  fill: var(--ic-artboard-side-face-fill);
+  stroke: var(--ic-artboard-side-seam-stroke);
+  filter: var(--ic-artboard-slab-filter);
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
@@ -90,7 +384,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-color: var(--ic-artboard-surface-fill);
+  background-color: var(--ic-artboard-top-fill);
   background-image:
     linear-gradient(
       to right,
@@ -137,27 +431,49 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline-layer {
 }
 
 /*
- * Iso artboard ground (cube SVG). Mount code sets geometry + class only; the library's default
- * presentation attributes lose to these class rules, so no !important is needed here.
+ * Iso artboard ground (cube SVG). Geometry from mount; stroke from theme/layout/artboard-grid.css.
  */
-.ic-artboard-guide,
-.ic-artboard-subguide {
-  stroke: var(--ic-artboard-outline, var(--ic-dot-grid-border, #94a3b8));
-  stroke-width: 1;
+svg[data-diagram-renderer="ic-cube-canvas"] :is(path.ic-artboard-guide, path.ic-artboard-subguide, path.ic-artboard-fineguide) {
+  stroke: var(--ic-grid-lines-stroke);
+  stroke-width: 1.25px;
   vector-effect: non-scaling-stroke;
   fill: none;
-  opacity: 0.85;
   pointer-events: none;
-}
-
-.ic-artboard-subguide {
-  opacity: 0.3;
 }
 
 .ic-artboard-dot-grid {
   pointer-events: none;
 }
 
-.ic-artboard-dot {
-  fill: var(--ic-dot-grid-dot, color-mix(in oklch, var(--ic-dot-grid-border, #94a3b8) 30%, transparent));
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-dot {
+  fill: var(--ic-dot-grid-dot);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge,
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge-side {
+  stroke: none;
+  vector-effect: non-scaling-stroke;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-collection-label-badge-side {
+  filter: var(--ic-artboard-slab-filter);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-collection-label {
+  --ic-label-fill: var(--ic-artboard-collection-badge-fg, #ffffff);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-artboard-collection-label tspan {
+  fill: var(--ic-artboard-collection-badge-fg, #ffffff);
+  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  stroke: none;
+  paint-order: fill;
+  text-anchor: middle;
+  dominant-baseline: central;
 }

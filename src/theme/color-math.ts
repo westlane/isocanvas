@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 export function normalizeHex(hex: string): string {
   const clean = hex.trim().replace("#", "");
@@ -383,9 +384,19 @@ export function dotGridDotCssFromBorder(borderHex: string): string {
   return `color-mix(in oklch, ${normalizeHex(borderHex)} ${pct}%, transparent)`;
 }
 
-/** Solid iso card edge — slightly darker than that face fill, at 50% opacity. */
-export const ISO_SOLID_FACE_STROKE_DARKEN = 0.08;
-export const ISO_SOLID_FACE_STROKE_OPACITY = 0.5;
+/** Light canvases: dots share grid-line hue, slightly lifted toward white. */
+export const LIGHT_DOT_GRID_LINE_WHITEN = 0.04;
+export const LIGHT_DOT_GRID_DOT_OPACITY = 0.58;
+
+export function dotGridDotCssFromGridLineInk(gridLineInkHex: string): string {
+  const lighter = blendHexWithWhite(normalizeHex(gridLineInkHex), LIGHT_DOT_GRID_LINE_WHITEN);
+  const pct = Math.round(LIGHT_DOT_GRID_DOT_OPACITY * 100);
+  return `color-mix(in oklch, ${lighter} ${pct}%, transparent)`;
+}
+
+/** Solid iso card edge — slightly darker than that face fill. */
+export const ISO_SOLID_FACE_STROKE_DARKEN = 0.11;
+export const ISO_SOLID_FACE_STROKE_OPACITY = 0.78;
 
 export function isoSolidFaceStrokeCssFromFill(faceFillHex: string): string {
   const tinted = blendHexWithBlack(normalizeHex(faceFillHex), ISO_SOLID_FACE_STROKE_DARKEN);
@@ -416,8 +427,8 @@ export function wireframeLabelFillOnCanvas(
   return wireframeIsoNodeStroke(surfaceHex, preferredInkHex);
 }
 
-/** Layout guides on the frosted artboard in wireframe mode. */
-export const WIREFRAME_ARTBOARD_GUIDE_LINE_OPACITY = 0.24;
+/** Layout guides on the frosted artboard in wireframe mode (scheme fallback; CSS owns live values). */
+export const WIREFRAME_ARTBOARD_GUIDE_LINE_OPACITY = 0.16;
 
 export function wireframeArtboardGuideLineCss(
   canvasSurfaceHex: string,
@@ -510,7 +521,7 @@ export function isoSlabVisibleFacesFromTop(
   };
 }
 
-/** Minimum contrast between canvas `--zui-surface` and the artboard panel top. */
+/** Minimum contrast between canvas `--ic-surface` and the artboard panel top. */
 export const MIN_ARTBOARD_CANVAS_CONTRAST_RATIO = 1.12;
 
 /** Light canvas: panel reads as paper — slightly **darker** than the desk, never a white wash. */
@@ -552,6 +563,11 @@ export function artboardSurfaceFillOnCanvas(
   return artboardFillDistinctFromCanvas(surfaceHex, appearance);
 }
 
+/** Lit rim on the artboard front slab silhouette (mix toward white from the panel top). */
+export function artboardFrontEdgeLightCss(artboardTopFillHex: string): string {
+  return `color-mix(in oklch, ${normalizeHex(artboardTopFillHex)} 46%, white)`;
+}
+
 /** Visible iso box faces derived from one scheme accent via light/dark shading only. */
 export type IsoFaceFillSet = {
   top: string;
@@ -565,15 +581,15 @@ export type IsoFaceFillSet = {
 const ISO_FACE_SHADE_LIGHT = {
   topWhite: 0.56,
   frontWhite: 0.34,
-  sideBlack: 0.16,
-  recessBlack: 0.24,
+  sideBlack: 0.09,
+  recessBlack: 0.19,
 } as const;
 
 const ISO_FACE_SHADE_DARK = {
   topWhite: 0.26,
   frontBlack: 0.06,
-  sideBlack: 0.2,
-  recessBlack: 0.32,
+  sideBlack: 0.14,
+  recessBlack: 0.28,
 } as const;
 
 export function isoFaceFillsFromSchemeAccent(

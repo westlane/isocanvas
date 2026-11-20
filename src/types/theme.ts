@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** Diagram + iso face colors (applied as CSS custom properties on `.diagram-host`). */
 export type IsoCanvasColors = {

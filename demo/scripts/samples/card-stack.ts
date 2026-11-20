@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import {
   artboardDivisionPitch,
@@ -85,7 +86,9 @@ function planeBoxesForColumn(column: DemoStackColumn): PlaneBoxSpec[] {
     const isTop = layerIndex === 0;
     return {
       id: `stack-${column.idPrefix}-${layer}`,
-      label: isTop ? DEMO_STACK_TOP_LABEL[column.idPrefix] : String(layer),
+      label: isTop
+        ? (DEMO_STACK_TOP_LABEL[column.idPrefix] ?? column.idPrefix)
+        : String(layer),
       x: origin.x,
       y: origin.y,
       footprintAnchor: "back-left",
@@ -103,7 +106,10 @@ export function mountCardStack(host: HTMLElement, colors: IsoCanvasColors): SVGS
   const stage = defaultIsoArtboardStage();
   const boxes = DEMO_STACK_COLUMNS.flatMap((column) => planeBoxesForColumn(column));
 
-  mountPlaneBoxesOnCanvas(canvas, boxes, colors, { stage });
+  mountPlaneBoxesOnCanvas(canvas, boxes, colors, {
+    stage,
+    artboardShellChrome: "full",
+  });
 
   return decorateCubeCanvas(canvas);
 }

@@ -1,6 +1,6 @@
 # @westlane/isocanvas
 
-Isometric diagram canvas for browser ESM: viewBox zoom math, phased dot grid + drag snap, SVG bbox helpers, portable `DiagramScene` data, and **cube mounting** via the `ic-canvas` dependency (same package entry).
+Isometric diagram canvas for browser ESM: viewBox zoom math, phased dot grid + drag snap, SVG bbox helpers, portable `DiagramScene` data, and **cube mounting** via **`@elchininet/isometric`**.
 
 See [docs/architecture.md](docs/architecture.md) for the full layer model.
 
@@ -46,7 +46,7 @@ Or markup:
 </div>
 ```
 
-Flat surface (grid fills the stage without an artboard frame):
+Flat surface (grid fills the viewport without an artboard frame):
 
 ```ts
 import { createDotGridSurface } from "@westlane/isocanvas";
@@ -54,6 +54,73 @@ import { createDotGridSurface } from "@westlane/isocanvas";
 const { surface, grid } = createDotGridSurface({ sizePx: 18 });
 viewport.replaceChildren(surface);
 surface.appendChild(diagramHost);
+```
+
+## Stage (map-style)
+
+One container owns the viewport camera and a registry of artboards (like a Mapbox / MapTiler map with layers):
+
+```ts
+import { createIsoCanvasStage, renderDiagramScene } from "@westlane/isocanvas";
+
+const stage = createIsoCanvasStage({
+  className: "ic-stage-viewport",
+  artboards: [
+    { id: "main", embedDotGrid: false, contentId: "diagram-host" },
+    { id: "inset", embedDotGrid: false, userSize: { width: 520, height: 320 } },
+  ],
+  activeArtboardId: "main",
+});
+
+appViewport.replaceChildren(stage.container);
+stage.attachPanZoom({ surface: appViewport });
+
+const main = stage.getArtboard("main")!;
+renderDiagramScene(main.host, scene);
+stage.fitView();
+
+stage.setActiveArtboard("inset");
+stage.getArtboards(); // programmatic access to every artboard + host
+```
+
+Use `fitArtboard(id)` / `fitView()` for the default centered camera. Each artboard remembers its own view when you switch with `setActiveArtboard` in **single** layout.
+
+**Row layout** — every artboard stays visible, side by side, with a shared isometric tilt on the row. Row layout equalizes logical artboard height so content shares a baseline (`row.alignUserHeights`, default on).
+
+```ts
+import {
+  createIsoCanvasStage,
+  mountDiagramScenesOnIsoCanvasStage,
+} from "@westlane/isocanvas";
+
+const stage = createIsoCanvasStage({
+  layout: "row",
+  row: { gapPx: 20, pitchDeg: 42, bearingDeg: 0 },
+});
+
+mountDiagramScenesOnIsoCanvasStage(
+  stage,
+  [
+    { id: "person", label: "Person", scene: personScene, embedDotGrid: false },
+    { id: "place", label: "Place", scene: placeScene, embedDotGrid: false },
+  ],
+  { colors: theme.colors },
+);
+
+// Or manage the registry yourself:
+// syncIsoCanvasStageArtboardRegistry / renderDiagramScenesOnIsoCanvasStage
+
+stage.addArtboard({ id: "other", label: "Other", embedDotGrid: false });
+stage.setArtboardVisible("place", false); // hide column; diagram stays mounted
+stage.isArtboardVisible("place"); // false
+stage.setArtboardVisible("place", true);
+stage.removeArtboard("legacy"); // drops DOM + diagram for that id
+
+// Default: one global pan/zoom on the row (syncCamera defaults true).
+// Pass row: { syncCamera: false } for independent per-column cameras.
+
+stage.attachPanZoom({ surface: appViewport });
+stage.fitView();
 ```
 
 3. **Tune** on a parent:
@@ -112,13 +179,13 @@ Portable **`DiagramScene`** data (nodes + optional edges) lives in `src/types/di
 
 ```bash
 yarn install
-yarn typecheck
-yarn test
-yarn build
+yarn check          # typecheck, build, test, neutral-policy
 ```
 
-`@westlane/pino-blanc` is published to [GitHub Packages](https://github.com/westlane/pino-blanc). For local install, authenticate npm to `https://npm.pkg.github.com` (read packages), or clone [`pino-blanc`](https://github.com/westlane/pino-blanc) beside this repo and temporarily set `"@westlane/pino-blanc": "portal:../pino-blanc"` in `package.json` before `yarn install`.
+Install paths and package exports: [docs/architecture.md](docs/architecture.md#install).
 
-## Consumers
+Local **`yarn demo`** resolves **`src/`** via Vite aliases (not package `exports`).
 
-Local apps and `yarn demo` resolve the package entry to **`src/index.ts`**. Run `yarn build` only when you need emitted `dist/`.
+## License
+
+MIT — see [LICENSE](LICENSE). Applies to isocanvas **TypeScript/JavaScript** sources (SPDX headers on `.ts`/`.mjs`). **CSS** in this repo carries no copyright comment headers; palette scheme sheets under `theme/schemes/` are generated from pino-blanc built-ins (third-party palette names).

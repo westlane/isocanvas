@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { worldTransformFromViewBox } from "../camera/world/world-transform.js";
 import { DEFAULT_DOT_GRID_MARK_PX, DEFAULT_DOT_GRID_SIZE_PX } from "./surface.js";
@@ -84,8 +85,8 @@ export function dotGridWorldStyleFromViewBox(
   /** Half-cell phase only; viewBox pan lives in {@link planePanXPx} / `tx`, not here (avoids 2× pan on dots). */
   const phaseX = phasedScreenOffset(0, phaseScaled, cellPx);
   const phaseY = phasedScreenOffset(0, phaseScaled, cellPx);
-  const planePanX = insetAnchor + offsetX + tx;
-  const planePanY = insetAnchor + offsetY + ty;
+  const planePanX = insetAnchor + offsetX + tx - vb.x * scale;
+  const planePanY = insetAnchor + offsetY + ty - vb.y * scale;
   return {
     cellPx,
     phasePx: phaseScaled,

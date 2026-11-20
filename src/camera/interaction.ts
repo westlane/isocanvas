@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBox } from "../types/core.js";
 import { clamp } from "./view-box/clamp.js";
@@ -20,8 +21,8 @@ export function normalizedWheelDelta(
 }
 
 export function wheelZoomFactor(deltaY: number): number {
-  const clamped = clamp(deltaY, -100, 100);
-  return Math.exp(clamped * 0.001);
+  const clamped = clamp(deltaY, -120, 120);
+  return Math.exp(clamped * 0.002);
 }
 
 export function viewBoxZoomAtPoint(
@@ -57,6 +58,27 @@ export function viewBoxPanByWorldViewport(
     w: vb.w,
     h: vb.h,
   };
+}
+
+/** Map a client point into the SVG’s current viewBox user space (uses `getScreenCTM`). */
+export function viewBoxUserFromClientOnSvg(
+  svg: SVGSVGElement,
+  clientX: number,
+  clientY: number,
+): { x: number; y: number } | null {
+  const matrix = svg.getScreenCTM();
+  if (!matrix) {
+    return null;
+  }
+  const inverse = matrix.inverse();
+  if (!Number.isFinite(inverse.a)) {
+    return null;
+  }
+  const point = new DOMPoint(clientX, clientY).matrixTransform(inverse);
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+    return null;
+  }
+  return { x: point.x, y: point.y };
 }
 
 /** Map a screen point to viewBox user space (SVG `meet` + optional SVG offset in anchor space). */

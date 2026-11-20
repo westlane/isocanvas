@@ -1,0 +1,42 @@
+/* Artboard shell in wireframe — rebind resolved fills on the cube SVG, then paint like solid mode. */
+
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] {
+  --ic-artboard-top-fill: var(
+    --ic-wireframe-top-surface-fill,
+    color-mix(in oklch, var(--ic-wireframe-iso-stroke) 14%, transparent)
+  );
+  --ic-artboard-front-face-fill: var(
+    --ic-wireframe-front-face-fill,
+    color-mix(in oklch, var(--ic-wireframe-iso-stroke) 8%, transparent)
+  );
+  --ic-artboard-side-face-fill: var(
+    --ic-wireframe-side-face-fill,
+    color-mix(in oklch, var(--ic-wireframe-iso-stroke) 6%, transparent)
+  );
+}
+
+[data-ic-wireframe="on"]
+  svg[data-diagram-renderer="ic-cube-canvas"]
+  path:is(.ic-artboard-outline, .ic-artboard-face--front, .ic-artboard-face--side) {
+  stroke-width: var(--ic-artboard-face-seam-stroke-width) !important;
+  vector-effect: non-scaling-stroke;
+  paint-order: fill stroke;
+}
+
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-outline {
+  fill: var(--ic-artboard-top-fill) !important;
+  stroke: var(--ic-artboard-top-seam-stroke) !important;
+  filter: none;
+}
+
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--front {
+  fill: var(--ic-artboard-front-face-fill) !important;
+  stroke: var(--ic-artboard-front-seam-stroke) !important;
+  filter: var(--ic-artboard-slab-filter);
+}
+
+[data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] path.ic-artboard-face--side {
+  fill: var(--ic-artboard-side-face-fill) !important;
+  stroke: var(--ic-artboard-side-seam-stroke) !important;
+  filter: var(--ic-artboard-slab-filter);
+}

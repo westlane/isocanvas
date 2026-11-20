@@ -1,21 +1,216 @@
 /* Diagram surface paint — tokens inherit from `.diagram-host`. */
 
+@property --ic-iso-cube-front-light-spread {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+/* Toggled cube fills — computed on the SVG so scheme `--ic-*` vars resolve. */
+svg[data-diagram-renderer="ic-cube-canvas"] {
+  --ic-iso-cube-selected-pressed-tint: var(
+    --ic-iso-selected-front-fill,
+    var(--ic-iso-front-fill, #c4b5fd)
+  );
+  --ic-iso-cube-selected-left-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-left-tint-percent, 14%),
+    white
+  );
+  --ic-iso-cube-selected-front-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-front-fill, #ddd6fe)
+      calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-side-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-side-tint-percent, 40%),
+    white
+  );
+}
+
+/* Category columns set `--ic-iso-*` on the shell; re-derive pressed fills from those tokens. */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-category-theme] {
+  --ic-iso-cube-selected-pressed-tint: var(
+    --ic-iso-selected-front-fill,
+    var(--ic-iso-front-fill, #c4b5fd)
+  );
+  --ic-iso-cube-selected-left-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-left-tint-percent, 14%),
+    white
+  );
+  --ic-iso-cube-selected-front-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-front-fill, #ddd6fe)
+      calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
+    white
+  );
+  --ic-iso-cube-selected-side-pressed-fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-pressed-tint) var(--ic-iso-cube-selected-side-tint-percent, 40%),
+    white
+  );
+}
+
+/* Hex prism — idle: dark left → light right; lit (:active / .ic-node--selected): inverted. */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-vertical-shell-occluder,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-recess-occluder {
+  fill: var(--ic-hex-shade-dark, var(--ic-iso-left-fill, #8b5cf6)) !important;
+  opacity: 1 !important;
+  stroke: none !important;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-interior-cap {
+  fill: var(--ic-hex-shade-dark, var(--ic-iso-left-fill, #8b5cf6)) !important;
+  opacity: 1 !important;
+  stroke: none !important;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-hex-interior-cap {
+  fill: var(--ic-hex-shade-light, var(--ic-iso-top-fill, #e9d5ff)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] {
+  --ic-hex-shade-dark: var(--ic-iso-left-fill, #8b5cf6);
+  --ic-hex-shade-mid: var(--ic-iso-front-fill, #ddd6fe);
+  --ic-hex-shade-light: var(--ic-iso-top-fill, #e9d5ff);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="0"] {
+  --ic-hex-wall-fill: var(--ic-hex-shade-dark);
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="3"] {
+  --ic-hex-wall-fill: color-mix(in oklch, var(--ic-hex-shade-dark) 67%, var(--ic-hex-shade-mid));
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="4"] {
+  --ic-hex-wall-fill: color-mix(in oklch, var(--ic-hex-shade-dark) 33%, var(--ic-hex-shade-mid));
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--left[data-ic-hex-recess-edge="5"] {
+  --ic-hex-wall-fill: var(--ic-hex-shade-mid);
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+/* Left walls lighten idle → hover → pointer down → released (selected, lightest). */
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not([data-diagram-selectable="false"]):active
+  path.ic-iso-cube-face--left {
+  fill: color-mix(in oklch, var(--ic-hex-wall-fill) 45%, var(--ic-hex-shade-light)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-cube-face--side,
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not([data-diagram-selectable="false"]):active
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
+  path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected:hover:not(:active)
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"].ic-node--selected:hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+/* Idle hover: only the front-left wall (edge 3) brightens; every other face keeps its idle fill. */
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: var(--ic-hex-shade-light) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--front {
+  fill: var(--ic-hex-shade-mid) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--left {
+  fill: var(--ic-hex-wall-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--left[data-ic-hex-recess-edge="3"] {
+  fill: color-mix(
+    in oklch,
+    var(--ic-hex-wall-fill) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
-  --ic-label-fill: var(--zui-iso-label-fill, #212121);
+  --ic-label-fill: var(--ic-iso-label-fill, #212121);
   text-anchor: middle;
   dominant-baseline: central;
+  /* @elchininet/isometric uses one tspan; manual `\n` in label needs preserved line breaks */
+  white-space: pre-line;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label tspan {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-family: var(--ic-iso-cube-label-font-family);
   font-style: normal;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-weight: var(--ic-iso-cube-label-font-weight);
+  letter-spacing: calc(var(--ic-iso-cube-label-letter-spacing-em) * 1em);
+  line-height: var(--ic-iso-cube-label-line-height-em);
   fill: var(--ic-label-fill);
   stroke: none;
   paint-order: fill;
   text-anchor: middle;
   dominant-baseline: central;
+  white-space: pre-line;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] text:not(.ic-iso-cube-label) {
@@ -31,44 +226,110 @@ svg[data-diagram-renderer="ic-cube-canvas"] text tspan {
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face {
-  stroke-width: var(--ic-theme-iso-face-stroke-width, 1px);
+  stroke-width: var(
+    --ic-iso-cube-face-edge-stroke-width,
+    var(--ic-theme-iso-face-stroke-width, 1px)
+  );
+  stroke-opacity: var(--ic-iso-cube-visible-face-edge-stroke-opacity, 0.34);
+  fill-opacity: 1;
+  paint-order: stroke fill;
   vector-effect: non-scaling-stroke;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--top {
-  stroke: var(
-    --ic-iso-face-stroke-top,
-    color-mix(in oklch, var(--zui-iso-top-fill, #cbd5e1) 50%, transparent)
-  );
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-top-fill, #e9d5ff)
+      calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
+    black
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-top-gloss {
+  fill: var(--ic-iso-cube-top-gloss-color, #000) !important;
+  stroke: none;
+  pointer-events: none;
+  opacity: var(--ic-iso-cube-top-gloss-opacity, 0.012);
+  mix-blend-mode: var(--ic-iso-cube-top-gloss-blend, multiply);
+  transition: opacity 0.12s ease;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
-  stroke: var(
-    --ic-iso-face-stroke-front,
-    color-mix(in oklch, var(--zui-iso-front-fill, #cbd5e1) 50%, transparent)
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-front-fill, #ddd6fe)
+      calc(100% - var(--ic-iso-cube-front-face-edge-stroke-darken, 5%)),
+    black
+  ) !important;
+  stroke-opacity: var(--ic-iso-cube-front-face-edge-stroke-opacity, 0.16);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-front-light {
+  --ic-iso-cube-front-light-spread: 0%;
+  fill: var(--ic-iso-cube-selected-front-pressed-fill) !important;
+  stroke: none !important;
+  pointer-events: none;
+  transform-box: fill-box;
+  -webkit-mask-image: radial-gradient(
+    circle var(--ic-iso-cube-front-light-spread, 0%) at 50% 50%,
+    black,
+    transparent
   );
+  mask-image: radial-gradient(
+    circle var(--ic-iso-cube-front-light-spread, 0%) at 50% 50%,
+    black,
+    transparent
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition:
+    --ic-iso-cube-front-light-spread
+      var(--ic-iso-cube-front-light-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-front-light-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1)),
+    fill 0.12s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(
+    :active,
+    .ic-node--selected,
+    [aria-pressed="true"]
+  )
+  path.ic-iso-cube-front-light {
+  --ic-iso-cube-front-light-spread: var(--ic-iso-cube-front-light-spread-on, 118%);
+  transition:
+    --ic-iso-cube-front-light-spread
+      var(--ic-iso-cube-front-light-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-front-light-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1)),
+    fill 0.12s ease;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
-  stroke: var(
-    --ic-iso-face-stroke-side,
-    color-mix(in oklch, var(--zui-iso-right-fill, #cbd5e1) 50%, transparent)
-  );
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-right-fill, #c4b5fd)
+      calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
+    black
+  ) !important;
 }
 
-svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom {
-  stroke: var(
-    --ic-iso-face-stroke-bottom,
-    color-mix(in oklch, var(--zui-iso-bottom-fill, #cbd5e1) 50%, transparent)
-  );
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
+    black
+  ) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--back,
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--left {
-  stroke: var(
-    --ic-iso-face-stroke-recess,
-    color-mix(in oklch, var(--zui-iso-left-fill, #cbd5e1) 50%, transparent)
-  );
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-left-fill, #8b5cf6)
+      calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
+    black
+  ) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.node[data-object-id] :is(path, polygon, rect) {
@@ -81,14 +342,317 @@ svg[data-diagram-renderer="ic-cube-canvas"] > rect.ic-cube-canvas-bg {
   pointer-events: none;
 }
 
-g.node[data-object-id],
-g.node[data-object-id] :is(rect, line, path, polygon, polyline, text, tspan) {
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]) {
+  cursor: pointer;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]) path.ic-iso-cube-face {
+  pointer-events: all;
+  transition:
+    fill 0.12s ease,
+    stroke 0.12s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-diagram-selectable="false"] path.ic-iso-cube-face {
+  pointer-events: none;
+  transition: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-footprint-occluder {
+  fill: var(--ic-iso-cube-footprint-occluder-fill, var(--ic-artboard-top-fill, #f8fafc)) !important;
+  stroke: none !important;
+  opacity: 1;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-press-bottom {
+  fill: var(--ic-iso-cube-ground-shadow-fill) !important;
+  stroke: none !important;
+  opacity: var(--ic-iso-cube-ground-shadow-opacity-rest, 0.14);
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(var(--ic-iso-cube-press-bottom-scale-rest, 1));
+  transition:
+    fill var(--ic-iso-cube-press-bottom-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-press-bottom-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1)),
+    opacity var(--ic-iso-cube-press-bottom-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-press-bottom-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1)),
+    transform var(--ic-iso-cube-press-bottom-transition-duration-release, 0.14s)
+      var(--ic-iso-cube-press-bottom-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(:active, .ic-node--selected, [aria-pressed="true"])
+  path.ic-iso-cube-press-bottom {
+  fill: var(--ic-iso-cube-ground-shadow-fill-pressed) !important;
+  opacity: var(--ic-iso-cube-ground-shadow-opacity-pressed, 0.12);
+  transform: scale(var(--ic-iso-cube-press-bottom-scale, 0.97));
+  transition:
+    fill var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1)),
+    opacity var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1)),
+    transform var(--ic-iso-cube-press-bottom-transition-duration-press, 0.5s)
+      var(--ic-iso-cube-press-bottom-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"])
+  g.ic-iso-cube-volume {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-rest, 1),
+    var(--ic-iso-cube-volume-scale-y-rest, 1)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-release, 0.14s)
+    var(--ic-iso-cube-volume-transition-ease-release, cubic-bezier(0.2, 1.35, 0.4, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(
+    .ic-node--selected,
+    [aria-pressed="true"]
+  )
+  g.ic-iso-cube-volume {
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-pressed, 1.014),
+    var(--ic-iso-cube-volume-scale-y-pressed, 0.978)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-press, 0.5s)
+    var(--ic-iso-cube-volume-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active
+  g.ic-iso-cube-volume {
+  transform: scale(
+    var(--ic-iso-cube-volume-scale-x-active, 1.022),
+    var(--ic-iso-cube-volume-scale-y-active, 0.962)
+  );
+  transition: transform var(--ic-iso-cube-volume-transition-duration-press, 0.5s)
+    var(--ic-iso-cube-volume-transition-ease-press, cubic-bezier(0.32, 1.05, 0.58, 1));
+}
+
+/* Ground contact — bottom (front ground) + left base (side ground); no full footprint ring. */
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
+  fill: none !important;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+  stroke-width: var(--ic-iso-cube-bottom-rim-stroke-width, 1px);
+  transition:
+    stroke 0.12s ease,
+    stroke-opacity 0.12s ease;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim--bottom {
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-bottom-fill, #a78bfa)
+      calc(100% - var(--ic-iso-cube-bottom-edge-stroke-darken, 12%)),
+    black
+  ) !important;
+  stroke-opacity: var(--ic-iso-cube-bottom-rim-stroke-opacity-bottom, 0.18);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim--left {
+  stroke: color-mix(
+    in oklch,
+    var(--ic-iso-left-fill, #8b5cf6)
+      calc(100% - var(--ic-iso-cube-bottom-edge-stroke-darken, 12%)),
+    black
+  ) !important;
+  stroke-opacity: var(--ic-iso-cube-bottom-rim-stroke-opacity, 0.36);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(
+    :active,
+    .ic-node--selected,
+    [aria-pressed="true"]
+  )
+  path.ic-iso-cube-bottom-rim--left {
+  stroke-opacity: var(--ic-iso-cube-bottom-rim-stroke-opacity-pressed-left, 0.14);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"]
+  g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):is(
+    :active,
+    .ic-node--selected,
+    [aria-pressed="true"]
+  )
+  path.ic-iso-cube-bottom-rim--bottom {
+  stroke-opacity: var(--ic-iso-cube-bottom-rim-stroke-opacity-pressed-bottom, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-press-bottom {
+    transition-duration: 0.01ms;
+  }
+
+  svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-front-light {
+    transition-duration: 0.01ms;
+  }
+
+  svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-volume {
+    transition-duration: 0.01ms;
+  }
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--front {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-front-fill, #ddd6fe) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-right-fill, #c4b5fd) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-bottom-fill, #a78bfa) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--selected):not([data-diagram-selectable="false"]):hover:not(:active)
+  path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-left-fill, #8b5cf6) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    white
+  ) !important;
+}
+
+/* Toggled on — latched “pressed” using scheme selected face fills */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face:not(.ic-iso-cube-press-bottom) {
+  stroke-opacity: var(--ic-iso-cube-visible-face-edge-stroke-opacity-pressed, 0.44);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--front {
+  stroke-opacity: var(--ic-iso-cube-front-face-edge-stroke-opacity-pressed, 0.18);
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--top {
+  fill: var(--ic-iso-selected-top-fill, var(--ic-iso-top-fill, #ddd6fe)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--side {
+  fill: var(--ic-iso-cube-selected-side-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--left {
+  fill: var(--ic-iso-cube-selected-left-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--back {
+  fill: var(--ic-iso-cube-selected-left-pressed-fill) !important;
+}
+
+/* Pointer down — same face paint as toggled pressed (mouse click). */
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--top {
+  fill: var(--ic-iso-selected-top-fill, var(--ic-iso-top-fill, #ddd6fe)) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--side {
+  fill: var(--ic-iso-cube-selected-side-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: var(--ic-iso-cube-selected-bottom-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--back {
+  fill: var(--ic-iso-cube-selected-left-pressed-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label tspan {
+  --ic-label-fill: var(--ic-iso-label-fill, #212121);
+  fill: var(--ic-label-fill) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-front-light {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-front-pressed-fill)
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--side {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-side-pressed-fill)
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-bottom-pressed-fill)
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--left,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected:hover:not(:active) path.ic-iso-cube-face--back {
+  fill: color-mix(
+    in oklch,
+    var(--ic-iso-cube-selected-left-pressed-fill)
+      calc(100% - var(--ic-iso-cube-selected-hover-fill-mix, 6%)),
+    white
+  ) !important;
+}
+
+g.node[data-object-id]:not([data-diagram-selectable="false"]),
+g.node[data-object-id]:not([data-diagram-selectable="false"])
+  :is(rect, line, path, polygon, polyline, text, tspan) {
   cursor: pointer;
   pointer-events: all;
 }
 
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-diagram-selectable="false"] {
+  cursor: default;
+  pointer-events: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-foundation-slab-caption,
+svg[data-diagram-renderer="ic-cube-canvas"] .ic-foundation-slab-caption tspan {
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
+}
+
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell g.node[data-object-id] .ic-iso-cube-label,
+svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell g.node[data-object-id] .ic-iso-cube-label tspan {
+  pointer-events: none;
+}
+
 rect.align-bounds-guide {
-  stroke: var(--zui-accent, #7c3aed);
+  stroke: var(--ic-accent, #7c3aed);
   stroke-width: 1;
   stroke-dasharray: 4 3;
   vector-effect: non-scaling-stroke;
@@ -111,20 +675,20 @@ text.align-artboard-label {
 }
 
 line.align-active-guide {
-  stroke: var(--zui-accent, #7c3aed);
+  stroke: var(--ic-accent, #7c3aed);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   opacity: 0.95;
 }
 
 text.align-node-label {
-  fill: var(--zui-iso-label-fill, var(--zui-ink, #212121));
+  fill: var(--ic-iso-label-fill, var(--ic-ink, #212121));
   font-size: 13px;
   font-weight: 600;
   pointer-events: none;
 }
 
 g.node[data-object-id].align-node--selected > :is(rect, path):first-of-type {
-  stroke: var(--zui-accent, #7c3aed) !important;
+  stroke: var(--ic-accent, #7c3aed) !important;
   stroke-width: 2px !important;
 }

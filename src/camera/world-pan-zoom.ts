@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBox } from "../types/core.js";
 import { isValidViewBox, clamp } from "./view-box/clamp.js";
@@ -8,9 +9,12 @@ import {
   readWorldCameraFromHost,
   readWorldCameraViewport,
 } from "./world/apply-world-camera.js";
+import { applyWorldCameraViewBoxToHost } from "./world/view-box-host.js";
 import {
+  normalizedWheelDelta,
   viewBoxPanByWorldViewport,
   viewBoxUserFromClientInWorldViewport,
+  viewBoxUserFromClientOnSvg,
   viewBoxZoomAtPoint,
   wheelZoomFactor,
 } from "./interaction.js";
@@ -22,6 +26,8 @@ export type AttachWorldCameraPanZoomOptions = {
   host: HTMLElement;
   worldCamera?: WorldCameraLayerOptions;
   onViewBoxApplied?: (viewBox: ViewBox, context: { notify: boolean }) => void;
+  /** Fired when pointer pan ends (camera already on primary host). */
+  onPanEnd?: (viewBox: ViewBox) => void;
   resyncOnHostEvent?: string;
   spacePanClass?: string;
   panningClass?: string;
@@ -68,6 +74,7 @@ export function attachWorldCameraPanZoom(
   let panPointerId = -1;
   let lastPanX = 0;
   let lastPanY = 0;
+  let cachedMetrics: ReturnType<typeof viewportMetrics> = null;
 
   const viewportMetrics = (): {
     width: number;
@@ -103,12 +110,16 @@ export function attachWorldCameraPanZoom(
     };
   };
 
-  const applyCamera = (next: ViewBox, notify = true): void => {
+  const applyCamera = (next: ViewBox, notify = true, resyncLayout = false): void => {
     if (!isValidViewBox(next)) {
       return;
     }
     const clamped = clampViewBox(next);
-    applyWorldCameraToHost(options.host, clamped, options.worldCamera);
+    if (!resyncLayout && !notify) {
+      applyWorldCameraViewBoxToHost(options.host, clamped);
+    } else {
+      applyWorldCameraToHost(options.host, clamped, options.worldCamera);
+    }
     options.onViewBoxApplied?.(clamped, { notify });
   };
 
@@ -119,10 +130,10 @@ export function attachWorldCameraPanZoom(
     }
     const fromHost = readWorldCameraFromHost(options.host);
     if (fromHost) {
-      applyCamera(fromHost, false);
+      applyCamera(fromHost, false, true);
       return;
     }
-    applyCamera(readViewBoxFromSvg(svg), false);
+    applyCamera(readViewBoxFromSvg(svg), false, true);
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
@@ -152,6 +163,7 @@ export function attachWorldCameraPanZoom(
     panPointerId = event.pointerId;
     lastPanX = event.clientX;
     lastPanY = event.clientY;
+    cachedMetrics = viewportMetrics();
     options.surface.classList.add(panningClass);
     options.surface.setPointerCapture(event.pointerId);
     event.preventDefault();
@@ -167,16 +179,20 @@ export function attachWorldCameraPanZoom(
     }
     const dx = event.clientX - lastPanX;
     const dy = event.clientY - lastPanY;
+    if (dx === 0 && dy === 0) {
+      return;
+    }
     lastPanX = event.clientX;
     lastPanY = event.clientY;
-    const metrics = viewportMetrics();
+    const metrics = cachedMetrics ?? viewportMetrics();
     if (!metrics) {
       return;
     }
     const { width, height } = metrics;
-    const vb = readLogicalViewBoxFromHost(options.host, svg);
+    const fromHost = readWorldCameraFromHost(options.host);
+    const vb = fromHost ?? readLogicalViewBoxFromHost(options.host, svg);
     const align = viewBoxAlignFromSvg(svg);
-    applyCamera(viewBoxPanByWorldViewport(vb, dx, dy, width, height, align));
+    applyCamera(viewBoxPanByWorldViewport(vb, dx, dy, width, height, align), false);
   };
 
   const endPan = (event: PointerEvent): void => {
@@ -184,11 +200,18 @@ export function attachWorldCameraPanZoom(
       return;
     }
     panning = false;
+    cachedMetrics = null;
     options.surface.classList.remove(panningClass);
     try {
       options.surface.releasePointerCapture(panPointerId);
     } catch {
       /* ignore */
+    }
+    const svg = hostSvg(options.host);
+    if (svg) {
+      const vb = readLogicalViewBoxFromHost(options.host, svg);
+      options.onPanEnd?.(vb);
+      options.onViewBoxApplied?.(vb, { notify: true });
     }
   };
 
@@ -206,30 +229,37 @@ export function attachWorldCameraPanZoom(
       return;
     }
     event.preventDefault();
-    const vb = readLogicalViewBoxFromHost(options.host, svg);
+    const fromHost = readWorldCameraFromHost(options.host);
+    const vb = fromHost ?? readLogicalViewBoxFromHost(options.host, svg);
     const align = viewBoxAlignFromSvg(svg);
-    const { x: userX, y: userY } = viewBoxUserFromClientInWorldViewport(
-      event.clientX,
-      event.clientY,
-      anchorRect,
-      vb,
-      width,
-      height,
-      offsetX,
-      offsetY,
-      align,
-    );
+    const fromSvg = viewBoxUserFromClientOnSvg(svg, event.clientX, event.clientY);
+    const { x: userX, y: userY } =
+      fromSvg ??
+      viewBoxUserFromClientInWorldViewport(
+        event.clientX,
+        event.clientY,
+        anchorRect,
+        vb,
+        width,
+        height,
+        offsetX,
+        offsetY,
+        align,
+      );
     if (event.shiftKey) {
       applyCamera(
         viewBoxPanByWorldViewport(vb, event.deltaX, event.deltaY, width, height, align),
+        false,
       );
       return;
     }
-    const factor = wheelZoomFactor(event.deltaY);
-    applyCamera(viewBoxZoomAtPoint(vb, userX, userY, factor));
+    const deltaY = normalizedWheelDelta(event.deltaY, event.deltaMode, height);
+    const factor = wheelZoomFactor(deltaY);
+    applyCamera(viewBoxZoomAtPoint(vb, userX, userY, factor), false);
   };
 
   const capture = { capture: true };
+  const wheelOpts = { passive: false, capture: true } as const;
   const onContextMenu = (event: Event): void => {
     event.preventDefault();
   };
@@ -238,7 +268,7 @@ export function attachWorldCameraPanZoom(
   options.surface.addEventListener("pointermove", onPointerMove, capture);
   options.surface.addEventListener("pointerup", endPan, capture);
   options.surface.addEventListener("pointercancel", endPan, capture);
-  options.surface.addEventListener("wheel", onWheel, { passive: false });
+  options.surface.addEventListener("wheel", onWheel, wheelOpts);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("resize", resyncWorld);
@@ -254,7 +284,7 @@ export function attachWorldCameraPanZoom(
     options.surface.removeEventListener("pointermove", onPointerMove, capture);
     options.surface.removeEventListener("pointerup", endPan, capture);
     options.surface.removeEventListener("pointercancel", endPan, capture);
-    options.surface.removeEventListener("wheel", onWheel);
+    options.surface.removeEventListener("wheel", onWheel, wheelOpts);
     window.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("keyup", onKeyUp);
     window.removeEventListener("resize", resyncWorld);

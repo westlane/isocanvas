@@ -1,23 +1,38 @@
 {
   "name": "@westlane/isocanvas",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
   "type": "module",
-  "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "packageManager": "yarn@4.9.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/westlane/isocanvas.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./persistence": {
+      "types": "./dist/persistence/index.d.ts",
+      "import": "./dist/persistence/index.js",
+      "default": "./dist/persistence/index.js"
+    },
+    "./layout": {
+      "types": "./dist/layout-entry.d.ts",
+      "import": "./dist/layout-entry.js",
+      "default": "./dist/layout-entry.js"
+    },
+    "./theme/color-math": {
+      "types": "./dist/theme/color-math.d.ts",
+      "import": "./dist/theme/color-math.js",
+      "default": "./dist/theme/color-math.js"
     },
     "./dot-grid.css": "./theme/layout/dot-grid.css",
     "./layout.css": "./theme/layout/layout.css",
@@ -25,27 +40,42 @@
     "./canvas-chrome.css": "./theme/canvas-chrome.css",
     "./theme/tokens.css": "./theme/tokens.css",
     "./theme/schemes.css": "./theme/schemes.css",
+    "./theme/schemes/*": "./theme/schemes/*",
     "./theme/diagram-surfaces.css": "./theme/diagram-surfaces.css",
     "./theme/wireframe.css": "./theme/wireframe.css"
   },
   "files": [
-    "src",
+    "dist",
     "theme",
     "README.md",
+    "LICENSE",
     "docs/architecture.md",
     "docs/persistence.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "rm -rf dist && tsc -p tsconfig.json",
     "demo": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.check.json",
     "test": "vitest run",
-    "build:theme-schemes": "IC_GENERATE=1 vitest run"
+    "check": "yarn typecheck && yarn build && yarn test && yarn check:neutral",
+    "check:neutral": "node scripts/check-neutral.mjs",
+    "build:theme-schemes": "IC_GENERATE=1 vitest run",
+    "prepack": "yarn build",
+    "prepublishOnly": "yarn check",
+    "prepare": "node scripts/prepare.mjs",
+    "publish:github": "yarn check && yarn npm publish --access public"
   },
   "sideEffects": false,
   "dependencies": {
-    "ic-canvas": "npm:@elchininet/isometric@^4.0.0",
+    "@elchininet/isometric": "^4.0.0"
+  },
+  "peerDependencies": {
     "loro.js": "^0.4.0"
+  },
+  "peerDependenciesMeta": {
+    "loro.js": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=22"
@@ -53,9 +83,10 @@
   "devDependencies": {
     "@types/feather-icons": "^4",
     "@types/node": "^22.15.0",
-    "@westlane/pino-blanc": "github:westlane/pino-blanc",
+    "@westlane/pino-blanc": "portal:./pino-blanc",
     "feather-icons": "^4.29.2",
     "happy-dom": "^20.0.10",
+    "loro.js": "^0.4.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.0",
     "vitest": "^3.2.0"

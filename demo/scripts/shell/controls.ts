@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Theme / orientation chrome controls and keyboard shortcuts. */
 
 import { getDemoLogger, refreshDemoLoggers } from "../log.js";
@@ -6,9 +7,11 @@ import { getDemoIsometricOrientation } from "../session.js";
 import {
   currentDemoAppearance,
   currentDemoFamilyLabel,
+  currentDemoGridLines,
   currentDemoWireframe,
   cycleDemoThemeFamily,
   toggleDemoAppearance,
+  toggleDemoGridLines,
   toggleDemoWireframe,
 } from "../theme.js";
 import { createFeatherIcon, type DemoShellElements } from "./elements.js";
@@ -26,7 +29,7 @@ export function wireDemoChromeControls(
     onIsoOrientationToggle: () => void;
   },
 ): DemoChromeControls {
-  const { themeFamily, themeAppearance, themeWireframe, isoOrientationFlip } = shell;
+  const { themeFamily, themeAppearance, themeGridLines, themeWireframe, isoOrientationFlip } = shell;
 
   function syncThemeControls(): void {
     const family = currentDemoFamilyLabel();
@@ -49,6 +52,17 @@ export function wireDemoChromeControls(
     themeWireframe.replaceChildren(createFeatherIcon("hexagon"));
     themeWireframe.setAttribute("aria-label", on ? "Wireframe mode on" : "Wireframe mode off");
     themeWireframe.title = on ? "Disable wireframe (W)" : "Enable wireframe (W)";
+
+    const gridOn = currentDemoGridLines();
+    themeGridLines.setAttribute("aria-pressed", gridOn ? "true" : "false");
+    themeGridLines.replaceChildren(createFeatherIcon("grid"));
+    themeGridLines.setAttribute(
+      "aria-label",
+      gridOn ? "Layout grid lines on" : "Layout grid lines off",
+    );
+    themeGridLines.title = gridOn
+      ? "Hide layout grid lines (G)"
+      : "Show layout grid lines (G)";
   }
 
   function syncIsoOrientationControl(): void {
@@ -101,6 +115,13 @@ export function wireDemoChromeControls(
     getDemoLogger("theme").info("Wireframe toggled", { wireframe: on });
   });
 
+  themeGridLines.addEventListener("click", () => {
+    const on = toggleDemoGridLines();
+    syncThemeControls();
+    themeGridLines.focus();
+    getDemoLogger("theme").info("Grid lines toggled", { gridLines: on });
+  });
+
   isoOrientationFlip.addEventListener("click", () => {
     options.onIsoOrientationToggle();
     syncIsoOrientationControl();
@@ -116,6 +137,7 @@ export function wireDemoChromeControls(
 export function bindDemoKeyboardShortcuts(handlers: {
   cycleTheme: () => void;
   toggleAppearance: () => void;
+  toggleGridLines: () => void;
   toggleWireframe: () => void;
   toggleIsoOrientation: () => void;
 }): void {
@@ -144,6 +166,11 @@ export function bindDemoKeyboardShortcuts(handlers: {
     if (event.key === "w" || event.key === "W") {
       event.preventDefault();
       handlers.toggleWireframe();
+      return;
+    }
+    if (event.key === "g" || event.key === "G") {
+      event.preventDefault();
+      handlers.toggleGridLines();
       return;
     }
     if (event.key === "o" || event.key === "O") {

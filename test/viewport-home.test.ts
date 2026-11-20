@@ -1,8 +1,13 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
 // @vitest-environment happy-dom
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
-import { viewBoxFitArtboardUserBox, viewBoxFitSvgContent } from "@westlane/isocanvas";
+import {
+  viewBoxFitArtboardUserBox,
+  viewBoxFitPointsAroundCenter,
+  viewBoxFitSvgContent,
+} from "@westlane/isocanvas";
 
 describe("viewBoxFitSvgContent", () => {
   it("centers padded artboard user box on baseline aspect", () => {
@@ -33,5 +38,22 @@ describe("viewBoxFitSvgContent", () => {
     expect(vb.w / vb.h).toBeCloseTo(640 / 360, 5);
     expect(vb.w).toBeLessThanOrEqual(640);
     expect(vb.w).toBeGreaterThanOrEqual(640 * 0.99);
+  });
+
+  it("viewBoxFitPointsAroundCenter keeps even margins for a skewed quad", () => {
+    const points = [
+      { x: 0, y: 40 },
+      { x: 200, y: 0 },
+      { x: 260, y: 120 },
+      { x: 40, y: 160 },
+    ];
+    const center = { x: 130, y: 80 };
+    const vb = viewBoxFitPointsAroundCenter(points, center, { baseW: 640, baseH: 360 }, { paddingPx: 10 });
+    expect(vb.x + vb.w / 2).toBeCloseTo(center.x, 5);
+    expect(vb.y + vb.h / 2).toBeCloseTo(center.y, 5);
+    const marginLeft = Math.min(...points.map((p) => p.x - vb.x));
+    const marginRight = Math.min(...points.map((p) => vb.x + vb.w - p.x));
+    expect(marginLeft).toBeCloseTo(marginRight, 5);
+    expect(marginLeft).toBeGreaterThanOrEqual(9.5);
   });
 });

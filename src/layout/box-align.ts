@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { readViewBoxFromSvg } from "../camera/view-box/attributes.js";
 import { unionBox } from "./box2d.js";

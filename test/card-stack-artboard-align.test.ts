@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, beforeEach } from "vitest";
 import {
@@ -90,7 +91,7 @@ describe("card stack plane placement", () => {
     host.remove();
   });
 
-  it("renders smaller label type on lower stack cards", () => {
+  it("uses the same label font size on every stack card", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     mountCardStack(host, demoThemeManager().getTheme().colors);
@@ -98,7 +99,10 @@ describe("card stack plane placement", () => {
       const tspan = host.querySelector(`g.node[data-object-id="${id}"] g.ic-iso-cube-label tspan`);
       return Number.parseFloat(tspan?.getAttribute("font-size") ?? "0");
     };
-    expect(labelFontSize("stack-center-1")).toBeGreaterThan(labelFontSize("stack-center-7"));
+    const bottom = labelFontSize("stack-center-1");
+    const top = labelFontSize("stack-center-7");
+    expect(bottom).toBeGreaterThan(0);
+    expect(top).toBe(bottom);
     host.remove();
   });
 });

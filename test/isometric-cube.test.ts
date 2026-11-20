@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { IsometricCanvas, PlaneView } from "ic-canvas";
+import { IsometricCanvas, PlaneView } from "@elchininet/isometric";
 import {
   DEFAULT_ISO_CANVAS_COLORS,
   DEFAULT_CUBE_CANVAS_SCALE,
@@ -21,6 +22,7 @@ import {
   isoBoxSpecFromPlaneBox,
   isoCubeFaceRectLayout,
   isoCubeFaceRectLayoutForPlaneTopLeft,
+  isoFootprintMarginBottomLayout,
   ISO_CUBE_MOUNT_FACE_ORDER,
   ISO_GRID_AXIS_X,
   mountIsoBoxesOnCanvas,
@@ -28,6 +30,7 @@ import {
   themedCubeFaceColors,
   userPxToIsoUnits,
   renderDiagramScene,
+  DIAGRAM_NODE_FOOTPRINT,
   type DiagramScene,
   type IsoBoxSpec,
 } from "@westlane/isocanvas";
@@ -43,9 +46,30 @@ import { initDemoTheme, demoThemeManager } from "../demo/scripts/theme.js";
 const DIAGRAM_SCENE_FIXTURE: DiagramScene = {
   viewBox: { x: 0, y: 0, w: 232, h: 280 },
   nodes: [
-    { id: "library", label: "Library", x: 32, y: 32, w: 168, h: 56 },
-    { id: "book", label: "Book", x: 32, y: 112, w: 168, h: 56 },
-    { id: "author", label: "Author", x: 32, y: 192, w: 168, h: 56 },
+    {
+      id: "library",
+      label: "Library",
+      x: 32,
+      y: 32,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
+    {
+      id: "book",
+      label: "Book",
+      x: 32,
+      y: 112,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
+    {
+      id: "author",
+      label: "Author",
+      x: 32,
+      y: 192,
+      w: DIAGRAM_NODE_FOOTPRINT.widthPx,
+      h: DIAGRAM_NODE_FOOTPRINT.depthPx,
+    },
   ],
   edges: [
     { id: "library->book", from: "library", to: "book", label: "contains" },
@@ -72,21 +96,21 @@ describe("isometric cube (library shape)", () => {
     return demoThemeManager().getTheme().colors;
   }
 
-  it("maps 168px diagram width to 2 iso units", () => {
-    expect(userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX)).toBe(2);
-    expect(userPxToIsoUnits(DEMO_CARD_USER_DEPTH_PX)).toBe(1.25);
-    expect(demoCardFootprintIso()).toEqual({ width: 2, depth: 1.25 });
+  it("maps demo card diagram footprint to iso units", () => {
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    const depthIso = userPxToIsoUnits(DEMO_CARD_USER_DEPTH_PX);
+    expect(widthIso).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / ISO_DIAGRAM_PX_PER_UNIT, 9);
+    expect(depthIso).toBe(2.25);
+    expect(demoCardFootprintIso()).toEqual({ width: widthIso, depth: 2.25 });
     expect(ISO_DIAGRAM_PX_PER_UNIT).toBe(84);
   });
 
   it("scale projects front face width to diagram pixels", () => {
-    const scale = scaleForFootprintWidth(DEMO_CARD_USER_WIDTH_PX, 2);
-    expect(scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / (2 * ISO_GRID_AXIS_X), 5);
-    expect(DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(scale, 5);
-    expect(2 * ISO_GRID_AXIS_X * DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(
-      DEMO_CARD_USER_WIDTH_PX,
-      4,
-    );
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    const scale = scaleForFootprintWidth(DEMO_CARD_USER_WIDTH_PX, widthIso);
+    expect(scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX / (widthIso * ISO_GRID_AXIS_X), 5);
+    expect(DEFAULT_CUBE_CANVAS_SCALE).toBeCloseTo(scaleForFootprintWidth(ISO_DIAGRAM_PX_PER_UNIT, 1), 5);
+    expect(widthIso * ISO_GRID_AXIS_X * scale).toBeCloseTo(DEMO_CARD_USER_WIDTH_PX, 4);
   });
 
   it("orders faces bottom through top at the same anchor", () => {
@@ -124,7 +148,8 @@ describe("isometric cube (library shape)", () => {
   });
 
   it("extrusion scales with footprint", () => {
-    expect(extrusionHeightForFootprint(2, 1.25)).toBeCloseTo(0.9, 5);
+    const widthIso = userPxToIsoUnits(DEMO_CARD_USER_WIDTH_PX);
+    expect(extrusionHeightForFootprint(widthIso, 2.25)).toBeCloseTo(1.62, 5);
   });
 
   it("themed faces map all six sides to theme tokens", () => {
@@ -160,9 +185,10 @@ describe("isometric cube (library shape)", () => {
     const svg = mountCardGrid(host, activeShowcaseColors());
     expect(svg.getAttribute("data-diagram-renderer")).toBe(DIAGRAM_RENDERER);
     expect(host.querySelectorAll("g.node[data-object-id]")).toHaveLength(9);
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(45);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(54);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--top[d]")).toHaveLength(9);
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face--bottom[d]")).toHaveLength(0);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face--bottom[d]")).toHaveLength(9);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-press-bottom[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-artboard-outline[d]")).toHaveLength(1);
     expect(host.querySelectorAll("path.ic-artboard-outline-layer[d]")).toHaveLength(1);
     expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(4);
@@ -188,7 +214,7 @@ describe("isometric cube (library shape)", () => {
     paintIsometricOrientation(host, "rotated");
     document.body.appendChild(host);
     mountCardGrid(host, activeShowcaseColors());
-    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(45);
+    expect(host.querySelectorAll("svg path.ic-iso-cube-face[d]")).toHaveLength(54);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--front[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--side[d]")).toHaveLength(9);
     expect(host.querySelectorAll("svg path.ic-iso-cube-face--top[d]")).toHaveLength(9);
@@ -272,8 +298,9 @@ describe("isometric cube (library shape)", () => {
     expect(axisAlignedBox).toBe(false);
     const cardTop = svg.querySelector("path.ic-iso-cube-face--top");
     expect(cardTop).toBeTruthy();
-    const topPts = pathPoints(cardTop!.getAttribute("d") ?? "");
-    expect(topPts.length).toBeGreaterThanOrEqual(4);
+    const topD = cardTop!.getAttribute("d") ?? "";
+    expect(topD).toMatch(/[CA]/);
+    expect(pathPoints(topD).length).toBeGreaterThanOrEqual(1);
     host.remove();
   });
 
@@ -372,12 +399,70 @@ describe("isometric cube (library shape)", () => {
     }
   });
 
+  it("isoFootprintMarginBottomLayout at zero margin matches base bottom", () => {
+    const w = 2;
+    const d = 1.25;
+    const h = 0.9;
+    const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", w, d, h);
+    const aligned = isoFootprintMarginBottomLayout(w, d, h, "default", 0);
+    expect(aligned).toEqual(base);
+  });
+
+  it("isoFootprintMarginBottomLayout expands bottom by equal plane margin", () => {
+    const w = 2;
+    const d = 1.25;
+    const h = 0.9;
+    const m = 0.08;
+    const base = isoCubeFaceRectLayoutForPlaneTopLeft("bottom", w, d, h);
+    const spread = isoFootprintMarginBottomLayout(w, d, h, "default", m);
+    expect(spread.width).toBeCloseTo((base.width ?? 0) + 2 * m);
+    expect(spread.height).toBeCloseTo((base.height ?? 0) + 2 * m);
+    expect(spread.left).toBeCloseTo((base.left ?? 0) - m);
+    expect(spread.right).toBeCloseTo((base.right ?? 0) - m);
+  });
+
   it("renders diagram scene nodes", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
     const svg = renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors());
     expect(svg.getAttribute("data-diagram-renderer")).toBe(DIAGRAM_RENDERER);
     expect(host.querySelectorAll("g.node[data-object-id]")).toHaveLength(3);
+    host.remove();
+  });
+
+  it("renders diagram scene with default artboard shell (slab, dots, guide overlay)", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors());
+    expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();
+    expect(host.querySelectorAll("path.ic-artboard-face--front[d]")).toHaveLength(1);
+    expect(host.querySelectorAll("path.ic-artboard-guide[d]")).toHaveLength(4);
+    host.remove();
+  });
+
+  it("renders artboard ground when scene divisions is 4 (class diagram row band)", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const scene: DiagramScene = {
+      viewBox: { x: 0, y: 0, w: 1000, h: 1000 },
+      divisions: 4,
+      nodes: DIAGRAM_SCENE_FIXTURE.nodes,
+      ...(DIAGRAM_SCENE_FIXTURE.edges !== undefined
+        ? { edges: DIAGRAM_SCENE_FIXTURE.edges }
+        : {}),
+    };
+    expect(() => renderDiagramScene(host, scene, activeShowcaseColors())).not.toThrow();
+    expect(host.querySelector("g.ic-artboard-dot-grid")).toBeTruthy();
+    host.remove();
+  });
+
+  it("renders macro guides when artboardShellChrome is full", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    renderDiagramScene(host, DIAGRAM_SCENE_FIXTURE, activeShowcaseColors(), {
+      artboardShellChrome: "full",
+    });
+    expect(host.querySelectorAll("path.ic-artboard-guide[d]").length).toBeGreaterThan(0);
     host.remove();
   });
 });

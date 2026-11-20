@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { bindDemoKeyboardShortcuts, wireDemoChromeControls } from "./shell/controls.js";
 import {
@@ -13,25 +14,28 @@ import { attachViewportDebug } from "./shell/viewport-debug.js";
 import { getDemoLogger } from "./log.js";
 import {
   applyDemoIsometricOrientationToHost,
+  demoWorldCameraLayerOptions,
   getArtboardSlice,
   getDemoSessionPersistenceAdapter,
   hydrateDemoSession,
   installDemoSessionPersistence,
   persistDemoSession,
-  applyDemoCanvasCameraToHost,
   canvasRouteKey,
   captureDemoCanvasCameraFromDom,
   getDemoCanvasCamera,
   resetDemoBaseline,
   setArtboardSlice,
+  setDemoCanvasCamera,
   toggleDemoIsometricOrientation,
 } from "./session.js";
 import {
   bootstrapDemoChromeFromStorage,
-  cycleDemoThemeFamily,
+  currentDemoGridLines,
   initDemoTheme,
   toggleDemoAppearance,
+  toggleDemoGridLines,
   toggleDemoWireframe,
+  cycleDemoThemeFamily,
 } from "./theme.js";
 import {
   ALL_DEMO_TOOLS,
@@ -43,15 +47,18 @@ import {
   type DemoToolRoute,
 } from "./tools.js";
 import {
-  applyDemoHomeView,
   applyViewportFromHash,
-  applyViewportFromUrlFrame,
-  attachInfiniteCanvasViewport,
+  attachDemoIsoStageViewport,
   bindViewportUrlSync,
   parseViewportUrlFrame,
+  restoreDemoViewportAfterToolMount,
   syncRouteHashForTool,
 } from "./viewport.js";
-import { createArtboard, DEFAULT_ARTBOARD_USER_SIZE } from "@westlane/isocanvas";
+import {
+  applyGridLinesMode,
+  createIsoCanvasStage,
+  DEFAULT_ARTBOARD_USER_SIZE,
+} from "@westlane/isocanvas";
 
 bootstrapDemoChromeFromStorage();
 
@@ -67,18 +74,30 @@ const {
   viewTitle: viewTitleEl,
 } = shell;
 
-const artboard = createArtboard({
-  userSize: DEFAULT_ARTBOARD_USER_SIZE,
-  contentId: "diagram-host",
-  embedDotGrid: false,
+const isoStage = createIsoCanvasStage({
+  className: "ic-stage-viewport",
+  worldCamera: demoWorldCameraLayerOptions(),
+  artboards: [
+    {
+      id: "main",
+      userSize: DEFAULT_ARTBOARD_USER_SIZE,
+      contentId: "diagram-host",
+      embedDotGrid: false,
+    },
+  ],
 });
-viewportEl.replaceChildren(artboard.root);
-const hostEl = artboard.content;
+viewportEl.replaceChildren(isoStage.container);
+const hostEl = isoStage.getArtboard("main")!.host;
 hostEl.classList.add("diagram-host");
 const log = getDemoLogger("demo");
 
 initDemoTheme(document.documentElement);
+applyGridLinesMode(hostEl, currentDemoGridLines());
+applyGridLinesMode(hostEl.closest(".ic-artboard") ?? hostEl, currentDemoGridLines());
 installDemoSessionPersistence();
+if (import.meta.hot?.data.demoCanvasCamera) {
+  setDemoCanvasCamera(import.meta.hot.data.demoCanvasCamera);
+}
 hydrateDemoSession();
 applyDemoIsometricOrientationToHost(hostEl);
 log.info("Demo shell ready", {
@@ -113,6 +132,11 @@ bindDemoKeyboardShortcuts({
     chrome.syncThemeControls();
     shell.themeWireframe.focus();
   },
+  toggleGridLines: () => {
+    toggleDemoGridLines();
+    chrome.syncThemeControls();
+    shell.themeGridLines.focus();
+  },
   toggleIsoOrientation: () => {
     toggleDemoIsometricOrientation(hostEl);
     persistDemoSession();
@@ -123,15 +147,15 @@ bindDemoKeyboardShortcuts({
 });
 
 const viewportDebug = attachViewportDebug(hostEl);
-attachInfiniteCanvasViewport({
-  surface: frameEl,
-  viewport: viewportEl,
-  host: hostEl,
-});
 bindViewportUrlSync({
   host: hostEl,
   viewport: viewportEl,
   routeHash: () => toolRouteHash(activeRoute),
+});
+attachDemoIsoStageViewport({
+  stage: isoStage,
+  surface: frameEl,
+  notifyHost: hostEl,
 });
 
 function routesEqual(a: DemoToolRoute, b: DemoToolRoute): boolean {
@@ -194,6 +218,7 @@ async function selectToolRoute(route: DemoToolRoute): Promise<void> {
     departing: departingKey,
   });
   const pendingView = parseViewportUrlFrame(window.location.hash);
+  const sameRouteRemount = routesEqual(departingRoute, route);
   syncRouteHashForTool(route);
   renderToolNav();
   document.title = `isocanvas — ${tool.label}`;
@@ -217,11 +242,7 @@ async function selectToolRoute(route: DemoToolRoute): Promise<void> {
       return;
     }
     viewportDebug.refresh();
-    if (pendingView) {
-      applyViewportFromUrlFrame(hostEl, pendingView);
-    } else {
-      applyDemoHomeView(hostEl);
-    }
+    restoreDemoViewportAfterToolMount(hostEl, { pendingView, sameRouteRemount });
     hostEl.dispatchEvent(new CustomEvent("viewport-debug-tick", { bubbles: true }));
     persistDemoSession();
     getDemoLogger("demo").info("Tool mounted", { route: canvasKey, toolId: tool.id });
@@ -282,6 +303,13 @@ void selectToolRoute(activeRoute).catch((error: unknown) => {
 });
 
 if (import.meta.hot) {
+  import.meta.hot.dispose((data) => {
+    captureDemoCanvasCameraFromDom(hostEl);
+    const camera = getDemoCanvasCamera();
+    if (camera) {
+      data.demoCanvasCamera = camera;
+    }
+  });
   import.meta.hot.accept(
     [
       "./tools.js",

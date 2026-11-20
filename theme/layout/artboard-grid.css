@@ -1,0 +1,43 @@
+/**
+ * Artboard dots + division guides — one recipe for every theme.
+ * Schemes / theme apply only set ink: `--ic-wireframe-grid-stroke`, `--ic-dot-grid-border`.
+ */
+
+:root {
+  --ic-grid-line-ink: var(--ic-wireframe-grid-stroke, var(--ic-dot-grid-border, #64748b));
+  --ic-grid-lines-stroke-mix: 78%;
+  --ic-artboard-guide-line-mix: 48%;
+  --ic-dot-grid-dot-mix: 46%;
+  --ic-grid-lines-macro-opacity: 0.98;
+  --ic-grid-lines-sub-opacity: 0.52;
+  --ic-grid-lines-fine-opacity: 0.28;
+  --ic-dot-grid-dot-ink: var(--ic-grid-line-ink);
+
+  --ic-grid-lines-stroke: color-mix(
+    in oklch,
+    var(--ic-grid-line-ink) var(--ic-grid-lines-stroke-mix),
+    transparent
+  );
+  --ic-artboard-guide-line: color-mix(
+    in oklch,
+    var(--ic-grid-line-ink) var(--ic-artboard-guide-line-mix),
+    transparent
+  );
+  --ic-dot-grid-dot: color-mix(
+    in oklch,
+    var(--ic-dot-grid-dot-ink) var(--ic-dot-grid-dot-mix),
+    transparent
+  );
+  --ic-wireframe-dot-grid-fill: var(--ic-dot-grid-dot);
+  --ic-wireframe-artboard-guide-line: var(--ic-artboard-guide-line);
+}
+
+:root:is([data-ic-theme$="-light"], [data-demo-appearance="light"]) {
+  --ic-grid-lines-stroke-mix: 68%;
+  --ic-artboard-guide-line-mix: 52%;
+  --ic-dot-grid-dot-mix: 78%;
+  --ic-dot-grid-dot-ink: color-mix(in oklch, var(--ic-grid-line-ink) 90%, white);
+  --ic-grid-lines-macro-opacity: 1;
+  --ic-grid-lines-sub-opacity: 0.58;
+  --ic-grid-lines-fine-opacity: 0.34;
+}

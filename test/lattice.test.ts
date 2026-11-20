@@ -1,14 +1,20 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
 import {
   artboardDivisionPitch,
   artboardLatticeCellIsoGround,
+  artboardPlaneBottomLeftInsetPoint,
+  artboardPlaneCollectionLabelBottomLeftFloatAnchor,
   artboardDotStep,
   artboardPlaneCellFirstDot,
   artboardPlaneCellFootprintAtTopLeftDot,
   artboardPlaneCellOrigin,
   artboardSnapFootprintToDots,
+  enforcePlaneBoxOnArtboardLattice,
+  artboardPlaneGridLineStep,
+  defaultLatticeStage,
   DEFAULT_ARTBOARD_DOTS_PER_CELL,
   artboardUserSizeForLattice,
   artboardUserToPlane,
@@ -59,6 +65,13 @@ describe("artboard lattice layout", () => {
     expect(dot.y).toBeCloseTo(corner.y + step / 2, 9);
   });
 
+  it("intersection phase pins studs on cell corners", () => {
+    const corner = artboardPlaneCellOrigin(1, 2, macroPitch);
+    const dot = artboardPlaneCellFirstDot(1, 2, macroPitch, DEFAULT_ARTBOARD_DOTS_PER_CELL, "intersection");
+    expect(dot.x).toBeCloseTo(corner.x, 9);
+    expect(dot.y).toBeCloseTo(corner.y, 9);
+  });
+
   it("shifts top-left dot pin by whole dot steps", () => {
     const step = artboardDotStep(macroPitch);
     const base = artboardPlaneCellFootprintAtTopLeftDot(1, 1, macroPitch);
@@ -76,8 +89,8 @@ describe("artboard lattice layout", () => {
       { widthPx: DEMO_CARD_USER_WIDTH_PX, depthPx: DEMO_CARD_USER_DEPTH_PX },
       macroPitch,
     );
-    expect(snapped.widthPx).toBeCloseTo(5 * step.xPx, 9);
-    expect(snapped.depthPx).toBeCloseTo(3 * step.yPx, 9);
+    expect(snapped.widthPx).toBeCloseTo(8 * step.xPx, 9);
+    expect(snapped.depthPx).toBeCloseTo(5 * step.yPx, 9);
     expect(artboardSnapFootprintToDots({ widthPx: 1, depthPx: 1 }, macroPitch).widthPx).toBeCloseTo(
       step.xPx,
       9,
@@ -105,6 +118,18 @@ describe("artboard lattice layout", () => {
     expect(artboardPlaneCellOrigin(0, 0, pitch, { origin: "bottom-left", artboardHeight: h })).toEqual(
       artboardUserToPlane(0, 0, h),
     );
+  });
+
+  it("collection label anchor uses each artboard column SW pin", () => {
+    const stage = { x: 500, y: 0, width: 400, height: 300, divisions: 3 };
+    const inset = artboardPlaneBottomLeftInsetPoint(stage, 2);
+    const anchor = artboardPlaneCollectionLabelBottomLeftFloatAnchor(stage, {
+      marginDots: 2,
+      floatBelowPx: 16,
+    });
+    expect(anchor.x).toBeCloseTo(500 + inset.x, 6);
+    expect(anchor.y).toBeCloseTo(inset.y + 16, 6);
+    expect(inset.x).toBeLessThan(stage.width * 0.1);
   });
 
   it("orders back row before front row for iso paint", () => {
@@ -140,5 +165,27 @@ describe("artboard lattice layout", () => {
       { col: 2, row: 0 },
       { col: 1, row: 1 },
     ]);
+  });
+
+  it("enforcePlaneBoxOnArtboardLattice is idempotent on the default stage", () => {
+    const stage = defaultLatticeStage();
+    const lineStep = artboardPlaneGridLineStep(stage).xPx;
+    const box = {
+      id: "n",
+      label: "n",
+      x: 41.2,
+      y: 88.7,
+      width: 170,
+      depth: 58,
+      height: 0.5,
+      footprintAnchor: "back-left" as const,
+    };
+    const once = enforcePlaneBoxOnArtboardLattice(box, stage);
+    const twice = enforcePlaneBoxOnArtboardLattice(once, stage);
+    expect(twice).toEqual(once);
+    expect(once.x % lineStep).toBeCloseTo(0, 9);
+    expect(once.y % lineStep).toBeCloseTo(0, 9);
+    expect(once.width % lineStep).toBeCloseTo(0, 9);
+    expect(once.depth % lineStep).toBeCloseTo(0, 9);
   });
 });

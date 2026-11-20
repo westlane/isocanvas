@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ArtboardPlaneStage, PlaneBoxSpec } from "../types/artboard.js";
 import type { IsoBoxSpec, IsometricOrientation } from "../types/diagram.js";
@@ -64,6 +65,12 @@ export function isoBoxSpecFromPlaneBox(
     depth,
     height,
     ...(box.elevation !== undefined ? { elevation: box.elevation } : {}),
+    ...(box.monoFaceFill !== undefined ? { monoFaceFill: box.monoFaceFill } : {}),
+    ...(box.cubeFaceColors !== undefined ? { cubeFaceColors: box.cubeFaceColors } : {}),
+    ...(box.compactLabel ? { compactLabel: true } : {}),
+    ...(box.planeBoxRole !== undefined ? { planeBoxRole: box.planeBoxRole } : {}),
+    ...(box.omitCubeLabel ? { omitCubeLabel: true } : {}),
+    ...(box.isoPrism !== undefined ? { isoPrism: box.isoPrism } : {}),
   };
 }
 

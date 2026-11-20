@@ -1,7 +1,8 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ArtboardUserSize } from "../types/artboard.js";
-import type { ViewBox } from "../types/core.js";
+import type { Box2d, ViewBox } from "../types/core.js";
 
 /**
  * Artboard user space: origin at the bottom-left of the logical frame, +x right, +y up.
@@ -70,4 +71,13 @@ export function viewBoxForArtboardPlaneIsoCanvas(
     w: maxX - minX + paddingPx * 2,
     h: maxY - minY + paddingPx * 2,
   };
+}
+
+/** Axis-aligned iso artboard footprint in SVG user space (after ic-cube-canvas origin shift). */
+export function artboardPlaneIsoContentBox(
+  userSize: ArtboardUserSize,
+  paddingPx = 0,
+): Box2d {
+  const frame = viewBoxForArtboardPlaneIsoCanvas(userSize, paddingPx);
+  return { x: frame.x, y: frame.y, width: frame.w, height: frame.h };
 }

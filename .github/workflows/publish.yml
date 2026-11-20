@@ -1,0 +1,82 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: pino-blanc
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+      - name: Build portal devDep (pino-blanc)
+        run: |
+          yarn --cwd pino-blanc install --immutable
+          yarn --cwd pino-blanc build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn run check
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: westlane/pino-blanc
+          path: pino-blanc
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+      - name: Build portal devDep (pino-blanc)
+        run: |
+          yarn --cwd pino-blanc install --immutable
+          yarn --cwd pino-blanc build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
+      - run: yarn install --immutable
+
+      - name: Gate publish
+        id: gate
+        env:
+          PUBLISH_REGISTRY: https://npm.pkg.github.com
+          GITHUB_REF: ${{ github.ref }}
+        run: node scripts/publish-gate.mjs --soft
+
+      - name: Build
+        if: steps.gate.outputs.publish == 'true'
+        run: yarn build
+
+      - name: Publish to GitHub Packages
+        if: steps.gate.outputs.publish == 'true'
+        run: npm publish --registry https://npm.pkg.github.com --access public

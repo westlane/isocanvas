@@ -1,29 +1,32 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Demo session snapshot, persistence adapters, and in-memory artboard slices. */
 
 import {
   applyWorldCameraToHost as applyWorldCameraCore,
   canvasCameraFromSvg,
+  DEFAULT_ISOMETRIC_ORIENTATION,
+  paintIsometricOrientation,
+  readViewBoxBaselineFromSvg,
+  readWorldCameraFromHost,
+  toggleIsometricOrientation,
+  VIEWPORT_CAMERA_CHANGE_EVENT,
+  type CanvasCamera,
+  type IsometricOrientation,
+  type ViewBoxBaseline,
+  type ViewportCameras,
+  type WorldCameraLayerOptions,
+} from "@westlane/isocanvas";
+import {
   createLoroFieldPersistenceWithLocalDocBytes,
   createLocalStoragePersistenceAdapter,
   createMemoryPersistenceAdapter,
   createPersistenceRegistry,
   createSessionStoragePersistenceAdapter,
   createWebStoragePersistenceAdapter,
-  DEFAULT_ISOMETRIC_ORIENTATION,
-  paintIsometricOrientation,
-  readViewBoxFromSvg,
-  readViewBoxBaselineFromSvg,
-  readWorldCameraFromHost,
   snapshotFromVersionedValue,
-  toggleIsometricOrientation,
-  type CanvasCamera,
-  type IsometricOrientation,
   type PersistenceAdapter,
-  type ViewBoxBaseline,
-  type ViewportCameras,
-  type WorldCameraLayerOptions,
-} from "@westlane/isocanvas";
+} from "@westlane/isocanvas/persistence";
 import { getDemoLogger } from "./log.js";
 
 export function canvasRouteKey(route: { groupId: string; itemId: string }): string {
@@ -143,6 +146,7 @@ export function applyDemoViewportCamerasToStore(cameras: ViewportCameras): void 
 
 export function notifyDemoCanvasCameraChanged(host: HTMLElement): void {
   captureDemoCanvasCameraFromDom(host);
+  host.dispatchEvent(new CustomEvent(VIEWPORT_CAMERA_CHANGE_EVENT, { bubbles: true }));
   host.dispatchEvent(new CustomEvent("viewport-debug-tick", { bubbles: true }));
 }
 

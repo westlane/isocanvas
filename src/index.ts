@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 export * from "./camera/view-box/baseline.js";
 export * from "./camera/fit/center-artboard-view.js";
@@ -7,11 +8,16 @@ export * from "./camera/interaction.js";
 export * from "./camera/view-box/attributes.js";
 export * from "./camera/view-box/clamp.js";
 export * from "./camera/viewport-cameras.js";
+export * from "./camera/viewport-url-sync.js";
+export * from "./camera/diagram-viewport-persistence.js";
 export * from "./camera/world-pan-zoom.js";
+export * from "./camera/world/linked-world-camera.js";
 export * from "./camera/world/apply-world-camera.js";
 export * from "./camera/world/world-transform.js";
 export * from "./camera/world/world-viewport.js";
 export * from "./diagram/render-scene.js";
+export * from "./diagram/scene-lattice-layout.js";
+export * from "./diagram/diagram-document.js";
 export * from "./extensions/host.js";
 export * from "./layout/snap/diagram-snap.js";
 export * from "./layout/snap/drag-snap.js";
@@ -26,12 +32,21 @@ export * from "./isometric/cube/cube-faces.js";
 export * from "./isometric/cube/cube.js";
 export * from "./isometric/diagram-user.js";
 export * from "./isometric/stage/ground-local.js";
+export * from "./isometric/prism-parts.js";
 export * from "./isometric/mount.js";
+export {
+  ISO_PRISM_CUBE,
+  ISO_PRISM_HEXAGON,
+  IC_ISO_PRISM_ATTR,
+  isIsoHexagonPrism,
+  normalizeIsoPrismKind,
+} from "./isometric/hexagon/hex.js";
 export * from "./isometric/orientation.js";
 export * from "./isometric/plane-layout.js";
 export * from "./isometric/stage/stage.js";
 export * from "./layout/artboard-coords.js";
 export * from "./layout/artboard-outline.js";
+export * from "./layout/artboard-ground-path.js";
 export * from "./layout/artboard.js";
 export * from "./layout/box-align.js";
 export * from "./layout/box2d.js";
@@ -41,17 +56,15 @@ export * from "./layout/snap/smart-guides.js";
 export * from "./layout/snap/snap-axis.js";
 export * from "./layout/snap/snap-point.js";
 export * from "./layout/spacing-tokens.js";
-export * from "./persistence/loro/adapter.js";
-export * from "./persistence/loro/doc-bytes-storage.js";
-export * from "./persistence/loro/install-local-doc-bytes.js";
-export * from "./persistence/memory.js";
-export * from "./persistence/registry.js";
-export * from "./persistence/snapshot.js";
-export * from "./persistence/web-storage.js";
+export * from "./layout/diagram-node-footprint.js";
+export * from "./layout/diagram-node-label-footprint.js";
+export * from "./motion/index.js";
+export * from "./diagram/scene-node-cube-sizing.js";
 export * from "./svg/svg-bbox.js";
 export * from "./theme/color-math.js";
 export * from "./theme/css-vars.js";
 export * from "./theme/defaults.js";
+export * from "./theme/grid-lines-mode.js";
 export * from "./theme/log-theme-bridge.js";
 export * from "./theme/manager.js";
 export * from "./theme/merge.js";
@@ -63,4 +76,5 @@ export type * from "./types/diagram.js";
 export type * from "./types/grid.js";
 export type * from "./types/plugins.js";
 export type * from "./types/theme.js";
-export * from "./viewport/world-camera-layers.js";
+export * from "./stage/index.js";
+export type * from "./types/stage.js";

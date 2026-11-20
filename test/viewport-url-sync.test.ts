@@ -1,18 +1,24 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
 // @vitest-environment happy-dom
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import { describe, expect, it } from "vitest";
 import {
   buildViewHashSuffixFromCameras,
-  mergeRouteHash,
+  mergeLocationHashWithViewport,
   parseViewportUrlFrame,
   stripViewFromHashFragment,
-  syncRouteHashForTool,
-} from "../demo/scripts/viewport.js";
+  syncBaseHashPreservingViewport,
+} from "../src/camera/viewport-url-sync.js";
 
 describe("viewport url sync", () => {
   it("parseViewportUrlFrame reads zoom/center and rejects extra segments", () => {
     expect(parseViewportUrlFrame("#showcase/card-grid&view=1.25/260/160")).toEqual({
+      zoom: 1.25,
+      cx: 260,
+      cy: 160,
+    });
+    expect(parseViewportUrlFrame("#view=1.25/260/160")).toEqual({
       zoom: 1.25,
       cx: 260,
       cy: 160,
@@ -34,23 +40,31 @@ describe("viewport url sync", () => {
     expect(stripViewFromHashFragment("#showcase/card-grid&view=2/100/50")).toBe(
       "showcase/card-grid",
     );
+    expect(stripViewFromHashFragment("#view=2/100/50")).toBe("");
   });
 
-  it("mergeRouteHash appends view suffix", () => {
-    const hash = mergeRouteHash(
-      "#showcase/card-stack",
-      {
-        canvas: { viewBox: { x: 50, y: 30, w: 260, h: 160 } },
-      },
-      520,
-    );
+  it("mergeLocationHashWithViewport appends view suffix", () => {
+    const cameras = {
+      canvas: { viewBox: { x: 50, y: 30, w: 260, h: 160 } },
+    };
+    const hash = mergeLocationHashWithViewport("#showcase/card-stack", cameras, 520);
     expect(hash).toBe("#showcase/card-stack&view=2/180/110");
+    expect(mergeLocationHashWithViewport("#", cameras, 520)).toBe("#view=2/180/110");
   });
 
-  it("syncRouteHashForTool keeps view suffix on reload", () => {
-    window.location.hash =
-      "#showcase/card-stack&view=1.25/260/160";
-    syncRouteHashForTool({ groupId: "showcase", itemId: "card-stack" });
+  it("syncBaseHashPreservingViewport keeps view suffix on reload", () => {
+    window.location.hash = "#showcase/card-stack&view=1.25/260/160";
+    syncBaseHashPreservingViewport({
+      baseHash: "#showcase/card-stack",
+      hashMatchesBase: (raw, base) =>
+        raw === base || raw.startsWith(`${base}&view=`),
+    });
     expect(window.location.hash).toBe("#showcase/card-stack&view=1.25/260/160");
+  });
+
+  it("syncBaseHashPreservingViewport keeps view-only hash on reload", () => {
+    window.location.hash = "#view=1.25/260/160";
+    syncBaseHashPreservingViewport({ baseHash: "#" });
+    expect(window.location.hash).toBe("#view=1.25/260/160");
   });
 });

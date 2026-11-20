@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 import type { ViewBox } from "../../types/core.js";
 import type { WorldViewBoxAlign } from "../../types/camera.js";
@@ -18,15 +19,43 @@ export function readViewBoxFromSvg(svg: SVGSVGElement): ViewBox {
 /** `preserveAspectRatio` for framing artboard content centered in the viewport (SVG meet). */
 export const VIEWPORT_CENTERED_MEET = "xMidYMid meet";
 
+export const VIEWPORT_LEFT_BOTTOM_MEET = "xMinYMin meet";
+
 export function setViewportCenteredMeet(svg: SVGSVGElement): void {
   svg.setAttribute("preserveAspectRatio", VIEWPORT_CENTERED_MEET);
 }
 
-export function writeViewBoxToSvg(svg: SVGSVGElement, viewBox: ViewBox): void {
-  svg.setAttribute("viewBox", [viewBox.x, viewBox.y, viewBox.w, viewBox.h].join(" "));
-  if (!svg.getAttribute("preserveAspectRatio")) {
-    svg.setAttribute("preserveAspectRatio", VIEWPORT_CENTERED_MEET);
+export function setViewportLeftBottomMeet(svg: SVGSVGElement): void {
+  svg.setAttribute("preserveAspectRatio", VIEWPORT_LEFT_BOTTOM_MEET);
+}
+
+function applyViewportMeet(svg: SVGSVGElement): void {
+  if (svg.dataset.icViewportMeet === "min") {
+    setViewportLeftBottomMeet(svg);
+    return;
   }
+  setViewportCenteredMeet(svg);
+}
+
+export function writeViewBoxToSvg(svg: SVGSVGElement, viewBox: ViewBox): void {
+  const next = [viewBox.x, viewBox.y, viewBox.w, viewBox.h].join(" ");
+  if (svg.getAttribute("viewBox") === next) {
+    return;
+  }
+  svg.setAttribute("viewBox", next);
+  applyViewportMeet(svg);
+}
+
+const VIEWBOX_EPS = 1e-9;
+
+/** Cheap guard before touching DOM during synced multi-host camera updates. */
+export function viewBoxesNearlyEqual(a: ViewBox, b: ViewBox): boolean {
+  return (
+    Math.abs(a.x - b.x) < VIEWBOX_EPS &&
+    Math.abs(a.y - b.y) < VIEWBOX_EPS &&
+    Math.abs(a.w - b.w) < VIEWBOX_EPS &&
+    Math.abs(a.h - b.h) < VIEWBOX_EPS
+  );
 }
 
 /** Match {@link worldTransformFromViewBox} / SVG `preserveAspectRatio` meet alignment. */

@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 
 /** When `"on"`, diagram surface CSS renders stencil outlines instead of filled shapes. */
 export const IC_WIREFRAME_DATA_ATTR = "data-ic-wireframe";

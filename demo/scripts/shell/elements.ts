@@ -1,4 +1,5 @@
-// Copyright (C) 2026 West Lane - All Rights Reserved
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 West Lane
 /** Demo shell DOM, icons, buttons, and mount error display. */
 
 import feather from "feather-icons";
@@ -14,6 +15,7 @@ export type DemoShellElements = {
   toolbarOptions: HTMLElement;
   isoOrientationFlip: HTMLButtonElement;
   themeFamily: HTMLButtonElement;
+  themeGridLines: HTMLButtonElement;
   themeWireframe: HTMLButtonElement;
   themeAppearance: HTMLButtonElement;
 };
@@ -189,6 +191,10 @@ export function mountDemoShell(): DemoShellElements {
   const themeFamily = toolBtn("demo-theme-family", "theme-family");
   themeFamily.setAttribute("aria-label", "Cycle palette");
   themeFamily.title = "Cycle palette (T)";
+  const themeGridLines = toolBtn("demo-theme-grid-lines", "theme-grid-lines");
+  themeGridLines.setAttribute("aria-pressed", "true");
+  themeGridLines.setAttribute("aria-label", "Layout grid lines on");
+  themeGridLines.title = "Toggle layout grid lines (G)";
   const themeWireframe = toolBtn("demo-theme-wireframe", "theme-wireframe");
   themeWireframe.setAttribute("aria-pressed", "false");
   themeWireframe.setAttribute("aria-label", "Wireframe mode off");
@@ -197,7 +203,7 @@ export function mountDemoShell(): DemoShellElements {
   themeAppearance.dataset.appearance = "dark";
   themeAppearance.setAttribute("aria-label", "Switch to light mode");
   themeAppearance.title = "Toggle light/dark (L)";
-  themeToggles.append(themeFamily, themeWireframe, themeAppearance);
+  themeToggles.append(themeFamily, themeGridLines, themeWireframe, themeAppearance);
   sidebarFooter.append(themeToggles, isoOrientationFlip);
 
   sidebar.append(sidebarBody, sidebarFooter);
@@ -214,6 +220,7 @@ export function mountDemoShell(): DemoShellElements {
     toolbarOptions,
     isoOrientationFlip,
     themeFamily,
+    themeGridLines,
     themeWireframe,
     themeAppearance,
   };
