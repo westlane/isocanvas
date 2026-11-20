@@ -97,6 +97,8 @@ const stage = createIsoCanvasStage({
   layout: "row",
   row: { gapPx: 20, pitchDeg: 42, bearingDeg: 0 },
 });
+
+mountDiagramScenesOnIsoCanvasStage(
   stage,
   [
     { id: "person", label: "Person", scene: personScene, embedDotGrid: false },
@@ -180,23 +182,7 @@ yarn install
 yarn check          # typecheck, build, test, neutral-policy
 ```
 
-`yarn build` emits **`dist/`** (required for npm `exports`; `pretest` / `prepack` run it automatically). Published tarballs ship **`dist/` + `theme/`** only (no `src/`).
-
-Demo-only: **`@westlane/pino-blanc`** is a dev **portal** on [`../pino-blanc`](../pino-blanc) (sibling checkout). CI clones the same repo beside this one.
-
-## Consumers
-
-| Need | Import | Also install |
-| --- | --- | --- |
-| Canvas, grid, snap, iso mount | `@westlane/isocanvas` | (includes `@elchininet/isometric`) |
-| ViewBox in `localStorage` | `saveDiagramViewportToStorage` / `restoreDiagramViewportFromStorage` | — |
-| Shareable pan/zoom in URL hash (`&view=zoom/cx/cy`) | `bindViewportUrlSync`, `parseViewportUrlFrame` | — |
-| Artboard lattice layout only | `@westlane/isocanvas/layout` | — |
-| Session / Loro adapters | `@westlane/isocanvas/persistence` | `loro.js` (peer; optional at install) |
-| Full demo chrome CSS | `@westlane/isocanvas/canvas-chrome.css` | — |
-| One palette | `@westlane/isocanvas/theme/schemes/dark/gruvbox.css` (etc.) | third-party palette CSS — not relicensed by isocanvas; prefer single imports over `theme/schemes.css` |
-
-After `yarn add @westlane/isocanvas`, run **`yarn build`** inside the package if you install from git without a prebuilt `dist/`. Registry installs run `prepack` at publish time.
+Install paths and package exports: [docs/architecture.md](docs/architecture.md#install).
 
 Local **`yarn demo`** resolves **`src/`** via Vite aliases (not package `exports`).
 

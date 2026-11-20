@@ -521,7 +521,7 @@ export function isoSlabVisibleFacesFromTop(
   };
 }
 
-/** Minimum contrast between canvas `--zui-surface` and the artboard panel top. */
+/** Minimum contrast between canvas `--ic-surface` and the artboard panel top. */
 export const MIN_ARTBOARD_CANVAS_CONTRAST_RATIO = 1.12;
 
 /** Light canvas: panel reads as paper — slightly **darker** than the desk, never a white wash. */

@@ -36,7 +36,7 @@ function hexVerticalEdgeIndicesForFace(face: IsoFaceId): readonly number[] {
   }
 }
 
-/** All vertical edges painted with cube recess / `--zui-iso-left-fill`. */
+/** All vertical edges painted with cube recess / `--ic-iso-left-fill`. */
 export function isoHexLeftVerticalEdgeIndices(): readonly number[] {
   return [0, 3, 4, 5];
 }

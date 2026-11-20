@@ -14,15 +14,16 @@ const config = JSON.parse(
 );
 
 const deny = new Set(config.denyWordHashes);
+const denyWorkingTree = new Set(config.denyWordHashesWorkingTree ?? []);
 
 function tokenize(text) {
   return text.toLowerCase().match(/[a-z][a-z0-9_-]*/g) ?? [];
 }
 
-function checkTokens(label, text) {
+function checkTokens(label, text, extraDeny = deny) {
   for (const token of tokenize(text)) {
     const hash = createHash("sha256").update(token, "utf8").digest("hex");
-    if (deny.has(hash)) {
+    if (extraDeny.has(hash)) {
       throw new Error(`${label} contains neutral-policy token hash match (${token})`);
     }
   }
@@ -75,6 +76,7 @@ function checkSpdxHeaders() {
 }
 
 function checkWorkingTree() {
+  const workingTreeDeny = new Set([...deny, ...denyWorkingTree]);
   for (const file of walk(repoRoot)) {
     if (file.endsWith(".png") || file.endsWith(".lock")) {
       continue;
@@ -83,9 +85,9 @@ function checkWorkingTree() {
     if (/^src\/.*\.(js|d\.ts)(\.map)?$/.test(rel)) {
       continue;
     }
-    checkTokens(file, file);
+    checkTokens(file, file, workingTreeDeny);
     if (/\.(ts|md|json|yml|yaml|mjs|js|css|html)$/.test(file)) {
-      checkTokens(file, readFileSync(file, "utf8"));
+      checkTokens(file, readFileSync(file, "utf8"), workingTreeDeny);
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@westlane/isocanvas",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
   "type": "module",
   "license": "MIT",
@@ -83,17 +83,12 @@
   "devDependencies": {
     "@types/feather-icons": "^4",
     "@types/node": "^22.15.0",
-    "@westlane/pino-blanc": "portal:../pino-blanc",
+    "@westlane/pino-blanc": "^0.1.5",
     "feather-icons": "^4.29.2",
     "happy-dom": "^20.0.10",
     "loro.js": "^0.4.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.0",
     "vitest": "^3.2.0"
-  },
-  "dependenciesMeta": {
-    "@westlane/pino-blanc@0.1.4": {
-      "unplugged": true
-    }
   }
 }

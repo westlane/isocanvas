@@ -100,7 +100,7 @@
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
   --ic-label-fill: var(
     --ic-wireframe-label-fill,
-    var(--ic-wireframe-iso-stroke, var(--zui-iso-label-fill, #212121))
+    var(--ic-wireframe-iso-stroke, var(--ic-iso-label-fill, #212121))
   );
 }
 
@@ -109,7 +109,7 @@
 [data-ic-wireframe="on"] svg[data-diagram-renderer="ic-cube-canvas"] text:not(.ic-iso-cube-label) tspan {
   fill: var(
     --ic-label-fill,
-    var(--ic-wireframe-label-fill, var(--ic-wireframe-iso-stroke, var(--zui-iso-label-fill, #212121)))
+    var(--ic-wireframe-label-fill, var(--ic-wireframe-iso-stroke, var(--ic-iso-label-fill, #212121)))
   ) !important;
 }
 

@@ -42,7 +42,7 @@ describe("renderDiagramScene cubeFaceColors", () => {
       .querySelector('[data-object-id="member"]')
       ?.closest(".ic-iso-cube-shell");
     expect(shell?.getAttribute("data-ic-cube-category-theme")).toBe("true");
-    expect((shell as HTMLElement | null)?.style.getPropertyValue("--zui-iso-front-fill").trim()).toBe(
+    expect((shell as HTMLElement | null)?.style.getPropertyValue("--ic-iso-front-fill").trim()).toBe(
       "#ddd6fe",
     );
   });

@@ -15,7 +15,7 @@ import {
 } from "../src/layout/lattice-plane.js";
 import { DEFAULT_ARTBOARD_GRID_DIVISIONS } from "../src/layout/artboard.js";
 
-/** Class-diagram footprint (domainspec NODE_FOOTPRINT). */
+/** Class-diagram node footprint (`DIAGRAM_NODE_FOOTPRINT`). */
 const NODE = DIAGRAM_NODE_FOOTPRINT;
 
 describe("artboard row space-between", () => {

@@ -7,7 +7,7 @@ import {
   isoSolidFaceStrokeCssFromFill,
   isLightHex,
 } from "../../theme/color-math.js";
-import { ZUI_THEME_CSS_VARS } from "../../theme/css-vars.js";
+import { IC_THEME_CSS_VARS } from "../../theme/css-vars.js";
 
 /** Shell carries category face tokens; pressed/hover CSS reads these instead of scheme defaults. */
 export const IC_CUBE_CATEGORY_THEME_ATTR = "data-ic-cube-category-theme";
@@ -17,7 +17,7 @@ type CategoryThemeShell = {
   style: { setProperty(name: string, value: string): void };
 };
 
-const ZUI_FACE_VARS: readonly Exclude<keyof DiagramCubeFaceColors, "edgeStroke">[] = [
+const IC_FACE_VARS: readonly Exclude<keyof DiagramCubeFaceColors, "edgeStroke">[] = [
   "top",
   "front",
   "right",
@@ -26,22 +26,22 @@ const ZUI_FACE_VARS: readonly Exclude<keyof DiagramCubeFaceColors, "edgeStroke">
   "labelFill",
 ];
 
-const ZUI_VAR_BY_KEY: Record<
+const IC_VAR_BY_KEY: Record<
   Exclude<keyof DiagramCubeFaceColors, "edgeStroke">,
-  `--zui-iso-${string}`
+  `--ic-iso-${string}`
 > = {
-  top: "--zui-iso-top-fill",
-  front: "--zui-iso-front-fill",
-  right: "--zui-iso-right-fill",
-  left: "--zui-iso-left-fill",
-  bottom: "--zui-iso-bottom-fill",
-  labelFill: "--zui-iso-label-fill",
+  top: "--ic-iso-top-fill",
+  front: "--ic-iso-front-fill",
+  right: "--ic-iso-right-fill",
+  left: "--ic-iso-left-fill",
+  bottom: "--ic-iso-bottom-fill",
+  labelFill: "--ic-iso-label-fill",
 };
 
 const FACE_STROKE_VAR_BY_FILL: Readonly<
   Record<
     "top" | "front" | "right" | "left" | "bottom",
-    (typeof ZUI_THEME_CSS_VARS)[
+    (typeof IC_THEME_CSS_VARS)[
       | "isoFaceStrokeTop"
       | "isoFaceStrokeFront"
       | "isoFaceStrokeSide"
@@ -49,11 +49,11 @@ const FACE_STROKE_VAR_BY_FILL: Readonly<
       | "isoFaceStrokeBottom"]
   >
 > = {
-  top: ZUI_THEME_CSS_VARS.isoFaceStrokeTop,
-  front: ZUI_THEME_CSS_VARS.isoFaceStrokeFront,
-  right: ZUI_THEME_CSS_VARS.isoFaceStrokeSide,
-  left: ZUI_THEME_CSS_VARS.isoFaceStrokeRecess,
-  bottom: ZUI_THEME_CSS_VARS.isoFaceStrokeBottom,
+  top: IC_THEME_CSS_VARS.isoFaceStrokeTop,
+  front: IC_THEME_CSS_VARS.isoFaceStrokeFront,
+  right: IC_THEME_CSS_VARS.isoFaceStrokeSide,
+  left: IC_THEME_CSS_VARS.isoFaceStrokeRecess,
+  bottom: IC_THEME_CSS_VARS.isoFaceStrokeBottom,
 };
 
 function applyCategoryFaceStrokesFromFills(
@@ -74,7 +74,7 @@ function applyCategoryFaceStrokesFromFills(
   if (front !== undefined) {
     const appearance = isLightHex(front) ? "light" : "dark";
     shell.style.setProperty(
-      ZUI_THEME_CSS_VARS.isoEdgeStroke,
+      IC_THEME_CSS_VARS.isoEdgeStroke,
       darkerSurfaceBorderStroke(front, appearance),
     );
   }
@@ -86,14 +86,14 @@ export function applyCategoryCubeThemeToShell(
   colors: DiagramCubeFaceColors,
 ): void {
   shell.setAttribute(IC_CUBE_CATEGORY_THEME_ATTR, "true");
-  for (const key of ZUI_FACE_VARS) {
+  for (const key of IC_FACE_VARS) {
     const value = colors[key];
     if (value === undefined) {
       continue;
     }
-    shell.style.setProperty(ZUI_VAR_BY_KEY[key], value);
+    shell.style.setProperty(IC_VAR_BY_KEY[key], value);
   }
   applyCategoryFaceStrokesFromFills(shell, colors);
-  shell.style.setProperty("--zui-iso-selected-top-fill", colors.top);
-  shell.style.setProperty("--zui-iso-selected-front-fill", colors.front);
+  shell.style.setProperty("--ic-iso-selected-top-fill", colors.top);
+  shell.style.setProperty("--ic-iso-selected-front-fill", colors.front);
 }

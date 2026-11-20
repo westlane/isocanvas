@@ -15,10 +15,10 @@
   /* Page chrome — light schemes: dark key color desk; dark schemes: accent wash on surface. */
   --ic-canvas-chrome-bg: color-mix(
     in oklch,
-    var(--zui-accent-dark, #3b0764) 72%,
+    var(--ic-accent-dark, #3b0764) 72%,
     black
   );
-  --ic-canvas-chrome-fg: color-mix(in oklch, white 92%, var(--zui-accent, #9333ea));
+  --ic-canvas-chrome-fg: color-mix(in oklch, white 92%, var(--ic-accent, #9333ea));
   --ic-canvas-chrome-fg-muted: color-mix(in oklch, var(--ic-canvas-chrome-fg) 68%, transparent);
   --ic-canvas-chrome-grain-opacity: 0.085;
   --ic-canvas-chrome-grain-size: 168px;
@@ -28,7 +28,7 @@
   --ic-artboard-slab-shadow-soft: color-mix(in oklch, black 14%, transparent);
   --ic-artboard-slab-filter: drop-shadow(0 7px 14px var(--ic-artboard-slab-shadow))
     drop-shadow(0 3px 6px var(--ic-artboard-slab-shadow-soft));
-  --ic-artboard-surface-fill-fallback: color-mix(in oklch, black 11%, var(--zui-surface, #f8fafc));
+  --ic-artboard-surface-fill-fallback: color-mix(in oklch, black 11%, var(--ic-surface, #f8fafc));
   --ic-artboard-front-fill-fallback: color-mix(
     in oklch,
     var(--ic-artboard-surface-fill, var(--ic-artboard-surface-fill-fallback)) 88%,
@@ -63,9 +63,9 @@
     var(--ic-artboard-face-seam-tint)
   );
   --ic-artboard-face-seam-stroke-width: 0.75px;
-  --ic-surface-muted: var(--zui-surface, #f8fafc);
-  --ic-ink: var(--zui-ink, #1e293b);
-  --ic-ink-muted: var(--zui-ink-muted, #64748b);
+  --ic-surface-muted: var(--ic-surface, #f8fafc);
+  --ic-ink: var(--ic-ink, #1e293b);
+  --ic-ink-muted: var(--ic-ink-muted, #64748b);
 
   /* Iso cube toggle — fill + footprint-aligned press bottom (no shell transform) */
   --ic-iso-cube-hover-fill-mix: 12%;
@@ -86,7 +86,7 @@
   );
   --ic-iso-cube-ground-shadow-fill-pressed: color-mix(
     in oklch,
-    var(--zui-iso-front-fill, var(--zui-iso-top-fill, var(--ic-artboard-top-fill)))
+    var(--ic-iso-front-fill, var(--ic-iso-top-fill, var(--ic-artboard-top-fill)))
       calc(100% - var(--ic-iso-cube-ground-shadow-darken-pressed, 16%)),
     black
   );
@@ -188,14 +188,14 @@
   --ic-dot-grid-macro-align: plane;
   --ic-dot-grid-projection: orthogonal;
   --ic-dot-grid-surface: transparent;
-  --ic-dot-grid-surface-fallback: color-mix(in oklch, var(--zui-surface, #f8fafc) 92%, #ffffff);
+  --ic-dot-grid-surface-fallback: color-mix(in oklch, var(--ic-surface, #f8fafc) 92%, #ffffff);
 
   /* Demo shell chrome (values derived from diagram tokens when scheme is active) */
   --demo-chrome-inset: 14px;
   --demo-view-title-offset-y: 36px;
   --demo-view-title-offset-x: 28px;
-  --demo-chrome-bg: var(--zui-surface, #002b36);
-  --demo-chrome-fg: var(--zui-iso-label-fill, #eee8d5);
+  --demo-chrome-bg: var(--ic-surface, #002b36);
+  --demo-chrome-fg: var(--ic-iso-label-fill, #eee8d5);
   --demo-chrome-fg-muted: color-mix(in oklch, var(--demo-chrome-fg) 65%, transparent);
   --demo-chrome-control-bg: color-mix(in oklch, var(--demo-chrome-bg) 88%, var(--demo-chrome-fg) 12%);
   --demo-chrome-divider: color-mix(in oklch, var(--demo-chrome-fg) 11%, transparent);
@@ -213,10 +213,10 @@
 :root:is([data-ic-theme$="-dark"], [data-demo-appearance="dark"]) {
   --ic-canvas-chrome-bg: color-mix(
     in oklch,
-    var(--zui-accent, #9333ea) 32%,
-    var(--zui-surface, #1e1e2e)
+    var(--ic-accent, #9333ea) 32%,
+    var(--ic-surface, #1e1e2e)
   );
-  --ic-canvas-chrome-fg: var(--zui-ink, #cdd6f4);
-  --ic-canvas-chrome-fg-muted: var(--zui-ink-muted, #a6adc8);
+  --ic-canvas-chrome-fg: var(--ic-ink, #cdd6f4);
+  --ic-canvas-chrome-fg-muted: var(--ic-ink-muted, #a6adc8);
   --ic-canvas-chrome-grain-opacity: 0.06;
 }

@@ -54,7 +54,7 @@ body {
   letter-spacing: 0.14em;
   line-height: 1.15;
   text-transform: uppercase;
-  color: var(--demo-chrome-fg, var(--zui-iso-label-fill, #eee8d5));
+  color: var(--demo-chrome-fg, var(--ic-iso-label-fill, #eee8d5));
   text-shadow: 0 1px 2px color-mix(in oklch, var(--demo-chrome-bg, #002b36) 55%, transparent);
 }
 
@@ -166,7 +166,7 @@ body {
   background: var(--demo-glass-bg);
   backdrop-filter: blur(var(--demo-glass-blur)) saturate(var(--demo-glass-saturate));
   -webkit-backdrop-filter: blur(var(--demo-glass-blur)) saturate(var(--demo-glass-saturate));
-  color: var(--demo-chrome-fg, var(--zui-iso-label-fill, #0f172a));
+  color: var(--demo-chrome-fg, var(--ic-iso-label-fill, #0f172a));
   border: var(--demo-glass-border);
   box-shadow: var(--demo-glass-highlight), var(--demo-glass-elevation);
   pointer-events: auto;
@@ -211,14 +211,14 @@ body {
 }
 
 .demo-tool-btn:hover:not([aria-selected="true"]):not([aria-pressed="true"]) {
-  background: color-mix(in oklch, var(--zui-accent, #7c3aed) 12%, transparent);
+  background: color-mix(in oklch, var(--ic-accent, #7c3aed) 12%, transparent);
   color: var(--demo-chrome-fg, #334155);
 }
 
 .demo-tool-btn[aria-selected="true"],
 .demo-tool-btn[aria-pressed="true"] {
-  background: color-mix(in oklch, var(--zui-accent, #7c3aed) 22%, transparent);
-  color: var(--zui-accent-deep, #5b21b6);
+  background: color-mix(in oklch, var(--ic-accent, #7c3aed) 22%, transparent);
+  color: var(--ic-accent-deep, #5b21b6);
 }
 
 .demo-tool-icon {

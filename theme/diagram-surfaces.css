@@ -6,11 +6,11 @@
   initial-value: 0%;
 }
 
-/* Toggled cube fills — computed on the SVG so scheme `--zui-*` vars resolve. */
+/* Toggled cube fills — computed on the SVG so scheme `--ic-*` vars resolve. */
 svg[data-diagram-renderer="ic-cube-canvas"] {
   --ic-iso-cube-selected-pressed-tint: var(
-    --zui-iso-selected-front-fill,
-    var(--zui-iso-front-fill, #c4b5fd)
+    --ic-iso-selected-front-fill,
+    var(--ic-iso-front-fill, #c4b5fd)
   );
   --ic-iso-cube-selected-left-pressed-fill: color-mix(
     in oklch,
@@ -19,13 +19,13 @@ svg[data-diagram-renderer="ic-cube-canvas"] {
   );
   --ic-iso-cube-selected-front-pressed-fill: color-mix(
     in oklch,
-    var(--zui-iso-front-fill, #ddd6fe)
+    var(--ic-iso-front-fill, #ddd6fe)
       calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
     white
   );
   --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
     in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa)
+    var(--ic-iso-bottom-fill, #a78bfa)
       calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
     white
   );
@@ -36,11 +36,11 @@ svg[data-diagram-renderer="ic-cube-canvas"] {
   );
 }
 
-/* Category columns set `--zui-iso-*` on the shell; re-derive pressed fills from those tokens. */
+/* Category columns set `--ic-iso-*` on the shell; re-derive pressed fills from those tokens. */
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-category-theme] {
   --ic-iso-cube-selected-pressed-tint: var(
-    --zui-iso-selected-front-fill,
-    var(--zui-iso-front-fill, #c4b5fd)
+    --ic-iso-selected-front-fill,
+    var(--ic-iso-front-fill, #c4b5fd)
   );
   --ic-iso-cube-selected-left-pressed-fill: color-mix(
     in oklch,
@@ -49,13 +49,13 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-cat
   );
   --ic-iso-cube-selected-front-pressed-fill: color-mix(
     in oklch,
-    var(--zui-iso-front-fill, #ddd6fe)
+    var(--ic-iso-front-fill, #ddd6fe)
       calc(100% - var(--ic-iso-cube-selected-front-pressed-fill-mix, 9%)),
     white
   );
   --ic-iso-cube-selected-bottom-pressed-fill: color-mix(
     in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa)
+    var(--ic-iso-bottom-fill, #a78bfa)
       calc(100% - var(--ic-iso-cube-selected-bottom-pressed-fill-mix, 9%)),
     white
   );
@@ -69,14 +69,14 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-cube-cat
 /* Hex prism — idle: dark left → light right; lit (:active / .ic-node--selected): inverted. */
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-vertical-shell-occluder,
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-recess-occluder {
-  fill: var(--ic-hex-shade-dark, var(--zui-iso-left-fill, #8b5cf6)) !important;
+  fill: var(--ic-hex-shade-dark, var(--ic-iso-left-fill, #8b5cf6)) !important;
   opacity: 1 !important;
   stroke: none !important;
   pointer-events: none;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-hex-interior-cap {
-  fill: var(--ic-hex-shade-dark, var(--zui-iso-left-fill, #8b5cf6)) !important;
+  fill: var(--ic-hex-shade-dark, var(--ic-iso-left-fill, #8b5cf6)) !important;
   opacity: 1 !important;
   stroke: none !important;
   pointer-events: none;
@@ -85,13 +85,13 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-pris
 svg[data-diagram-renderer="ic-cube-canvas"]
   g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"]:is(.ic-node--selected, :active)
   path.ic-iso-hex-interior-cap {
-  fill: var(--ic-hex-shade-light, var(--zui-iso-top-fill, #e9d5ff)) !important;
+  fill: var(--ic-hex-shade-light, var(--ic-iso-top-fill, #e9d5ff)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] {
-  --ic-hex-shade-dark: var(--zui-iso-left-fill, #8b5cf6);
-  --ic-hex-shade-mid: var(--zui-iso-front-fill, #ddd6fe);
-  --ic-hex-shade-light: var(--zui-iso-top-fill, #e9d5ff);
+  --ic-hex-shade-dark: var(--ic-iso-left-fill, #8b5cf6);
+  --ic-hex-shade-mid: var(--ic-iso-front-fill, #ddd6fe);
+  --ic-hex-shade-light: var(--ic-iso-top-fill, #e9d5ff);
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell[data-ic-iso-prism="hexagon"] path.ic-iso-cube-face--front {
@@ -192,7 +192,7 @@ svg[data-diagram-renderer="ic-cube-canvas"]
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] .ic-iso-cube-label {
-  --ic-label-fill: var(--zui-iso-label-fill, #212121);
+  --ic-label-fill: var(--ic-iso-label-fill, #212121);
   text-anchor: middle;
   dominant-baseline: central;
   /* @elchininet/isometric uses one tspan; manual `\n` in label needs preserved line breaks */
@@ -239,7 +239,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face {
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--top {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-top-fill, #e9d5ff)
+    var(--ic-iso-top-fill, #e9d5ff)
       calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
     black
   ) !important;
@@ -257,7 +257,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-top-gloss {
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--front {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-front-fill, #ddd6fe)
+    var(--ic-iso-front-fill, #ddd6fe)
       calc(100% - var(--ic-iso-cube-front-face-edge-stroke-darken, 5%)),
     black
   ) !important;
@@ -307,7 +307,7 @@ svg[data-diagram-renderer="ic-cube-canvas"]
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-right-fill, #c4b5fd)
+    var(--ic-iso-right-fill, #c4b5fd)
       calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
     black
   ) !important;
@@ -316,7 +316,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--side {
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa)
+    var(--ic-iso-bottom-fill, #a78bfa)
       calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
     black
   ) !important;
@@ -326,7 +326,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--back,
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-face--left {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-left-fill, #8b5cf6)
+    var(--ic-iso-left-fill, #8b5cf6)
       calc(100% - var(--ic-iso-cube-visible-face-edge-stroke-darken, 8%)),
     black
   ) !important;
@@ -448,7 +448,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim {
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim--bottom {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa)
+    var(--ic-iso-bottom-fill, #a78bfa)
       calc(100% - var(--ic-iso-cube-bottom-edge-stroke-darken, 12%)),
     black
   ) !important;
@@ -458,7 +458,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim--bottom 
 svg[data-diagram-renderer="ic-cube-canvas"] path.ic-iso-cube-bottom-rim--left {
   stroke: color-mix(
     in oklch,
-    var(--zui-iso-left-fill, #8b5cf6)
+    var(--ic-iso-left-fill, #8b5cf6)
       calc(100% - var(--ic-iso-cube-bottom-edge-stroke-darken, 12%)),
     black
   ) !important;
@@ -503,7 +503,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--se
   path.ic-iso-cube-face--front {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-front-fill, #ddd6fe) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    var(--ic-iso-front-fill, #ddd6fe) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
     white
   ) !important;
 }
@@ -512,7 +512,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--se
   path.ic-iso-cube-face--side {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-right-fill, #c4b5fd) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    var(--ic-iso-right-fill, #c4b5fd) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
     white
   ) !important;
 }
@@ -521,7 +521,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--se
   path.ic-iso-cube-face--bottom:not(.ic-iso-cube-press-bottom) {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-bottom-fill, #a78bfa) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    var(--ic-iso-bottom-fill, #a78bfa) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
     white
   ) !important;
 }
@@ -532,7 +532,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not(.ic-node--se
   path.ic-iso-cube-face--back {
   fill: color-mix(
     in oklch,
-    var(--zui-iso-left-fill, #8b5cf6) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
+    var(--ic-iso-left-fill, #8b5cf6) calc(100% - var(--ic-iso-cube-hover-fill-mix, 12%)),
     white
   ) !important;
 }
@@ -547,7 +547,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--top {
-  fill: var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe)) !important;
+  fill: var(--ic-iso-selected-top-fill, var(--ic-iso-top-fill, #ddd6fe)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected path.ic-iso-cube-face--side {
@@ -568,7 +568,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selecte
 
 /* Pointer down — same face paint as toggled pressed (mouse click). */
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--top {
-  fill: var(--zui-iso-selected-top-fill, var(--zui-iso-top-fill, #ddd6fe)) !important;
+  fill: var(--ic-iso-selected-top-fill, var(--ic-iso-top-fill, #ddd6fe)) !important;
 }
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagram-selectable="false"]):active path.ic-iso-cube-face--side {
@@ -586,7 +586,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell:not([data-diagra
 
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label,
 svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell.ic-node--selected .ic-iso-cube-label tspan {
-  --ic-label-fill: var(--zui-iso-label-fill, #212121);
+  --ic-label-fill: var(--ic-iso-label-fill, #212121);
   fill: var(--ic-label-fill) !important;
 }
 
@@ -652,7 +652,7 @@ svg[data-diagram-renderer="ic-cube-canvas"] g.ic-iso-cube-shell g.node[data-obje
 }
 
 rect.align-bounds-guide {
-  stroke: var(--zui-accent, #7c3aed);
+  stroke: var(--ic-accent, #7c3aed);
   stroke-width: 1;
   stroke-dasharray: 4 3;
   vector-effect: non-scaling-stroke;
@@ -675,20 +675,20 @@ text.align-artboard-label {
 }
 
 line.align-active-guide {
-  stroke: var(--zui-accent, #7c3aed);
+  stroke: var(--ic-accent, #7c3aed);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   opacity: 0.95;
 }
 
 text.align-node-label {
-  fill: var(--zui-iso-label-fill, var(--zui-ink, #212121));
+  fill: var(--ic-iso-label-fill, var(--ic-ink, #212121));
   font-size: 13px;
   font-weight: 600;
   pointer-events: none;
 }
 
 g.node[data-object-id].align-node--selected > :is(rect, path):first-of-type {
-  stroke: var(--zui-accent, #7c3aed) !important;
+  stroke: var(--ic-accent, #7c3aed) !important;
   stroke-width: 2px !important;
 }

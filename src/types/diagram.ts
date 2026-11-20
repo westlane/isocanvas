@@ -3,7 +3,7 @@
 
 import type { ViewBox } from "./core.js";
 
-/** Portable diagram interchange (e.g. domainspec kernel export). Render with `src/isometric/` helpers in apps. */
+/** Portable diagram interchange from a host domain model. Render with `src/isometric/` helpers in apps. */
 
 /** Default iso extrusion footprint (rectangular pillow cube). */
 export const ISO_PRISM_CUBE = "cube" as const;

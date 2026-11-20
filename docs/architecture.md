@@ -2,6 +2,22 @@
 
 Layered stack for portable `DiagramScene` data plus canvas/viewport infrastructure.
 
+## Install
+
+Scoped **`@westlane`** packages install from GitHub Packages. Copy [`.npmrc.example`](../.npmrc.example) to `.npmrc` and set `NODE_AUTH_TOKEN` (or `//npm.pkg.github.com/:_authToken`) when installing outside a preconfigured consumer monorepo.
+
+| Need | Import | Also install |
+| --- | --- | --- |
+| Canvas, grid, snap, iso mount | `@westlane/isocanvas` | (includes `@elchininet/isometric`) |
+| ViewBox in `localStorage` | `saveDiagramViewportToStorage` / `restoreDiagramViewportFromStorage` | — |
+| Shareable pan/zoom in URL hash (`&view=zoom/cx/cy`) | `bindViewportUrlSync`, `parseViewportUrlFrame` | — |
+| Artboard lattice layout only | `@westlane/isocanvas/layout` | — |
+| Session / Loro adapters | `@westlane/isocanvas/persistence` | `loro.js` (peer; optional at install) |
+| Full demo chrome CSS | `@westlane/isocanvas/canvas-chrome.css` | — |
+| One palette | `@westlane/isocanvas/theme/schemes/dark/gruvbox.css` (etc.) | third-party palette CSS — not relicensed by isocanvas; prefer single imports over `theme/schemes.css` |
+
+Registry tarballs ship **`dist/` + `theme/`** (`prepack` runs `yarn build`). Git checkouts without `dist/` run `yarn build` after install (`prepare` builds when `dist/index.js` is missing).
+
 ## Source layout (`src/`)
 
 | Path | Role |
@@ -28,7 +44,7 @@ Layered stack for portable `DiagramScene` data plus canvas/viewport infrastructu
 
 | Layer | Responsibility | Technology |
 | --- | --- | --- |
-| **Relationships** | Entities, edges, layout | Domain model (e.g. domainspec kernel) |
+| **Relationships** | Entities, edges, layout | Host domain model |
 | **Diagram presentation** | Iso boxes, edges | `@elchininet/isometric` + `src/isometric/mount.ts` |
 | **Camera** | Pan/zoom | SVG `viewBox`, optional world `translate`/`scale` |
 | **Grid & snap** | Dot grid + drag snap | `src/grid/*`, `snap-axis`, `snap-point` |

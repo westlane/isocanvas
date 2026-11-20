@@ -59,18 +59,6 @@ export default defineConfig({
         find: "@westlane/isocanvas",
         replacement: path.join(rootDir, "src/index.ts"),
       },
-      {
-        find: "@westlane/pino-blanc/themes",
-        replacement: path.join(rootDir, "../pino-blanc/themes/index.ts"),
-      },
-      {
-        find: "@westlane/pino-blanc/browser",
-        replacement: path.join(rootDir, "../pino-blanc/src/browser.ts"),
-      },
-      {
-        find: "@westlane/pino-blanc",
-        replacement: path.join(rootDir, "../pino-blanc/src/index.ts"),
-      },
     ],
   },
   optimizeDeps: {
