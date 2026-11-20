@@ -1,6 +1,6 @@
 {
   "name": "@westlane/isocanvas",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "exports": {
     ".": {
@@ -62,7 +62,7 @@
     "check": "yarn typecheck && yarn build && yarn test && yarn check:neutral",
     "check:neutral": "node scripts/check-neutral.mjs",
     "build:theme-schemes": "IC_GENERATE=1 vitest run",
-    "publish:github": "yarn build && yarn npm publish --access restricted"
+    "publish:github": "yarn build && yarn npm publish --access public"
   },
   "sideEffects": false,
   "dependencies": {
