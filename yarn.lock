@@ -686,7 +686,7 @@ __metadata:
     "@elchininet/isometric": "npm:^4.0.0"
     "@types/feather-icons": "npm:^4"
     "@types/node": "npm:^22.15.0"
-    "@westlane/pino-blanc": "portal:../pino-blanc"
+    "@westlane/pino-blanc": "portal:./pino-blanc"
     feather-icons: "npm:^4.29.2"
     happy-dom: "npm:^20.0.10"
     loro.js: "npm:^0.4.0"
@@ -701,9 +701,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@westlane/pino-blanc@portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A.":
+"@westlane/pino-blanc@portal:./pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@westlane/pino-blanc@portal:../pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."
+  resolution: "@westlane/pino-blanc@portal:./pino-blanc::locator=%40westlane%2Fisocanvas%40workspace%3A."
   dependencies:
     js-yaml: "npm:^5.4.3"
     pino: "npm:^9.14.0"

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: westlane/pino-blanc
-          path: ../pino-blanc
+          path: pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: westlane/pino-blanc
-          path: ../pino-blanc
+          path: pino-blanc
       - name: Enable Corepack (Yarn 4)
         run: |
           corepack enable
