@@ -112,7 +112,7 @@ export function applyIsoCubeLabelMultilineTspans(
     ts.textContent = lines[i]!;
     ts.setAttribute("x", "0");
     ts.setAttribute("dy", i === 0 ? `${leadEm}em` : `${theme.lineHeightEm}em`);
-    for (const attr of [...template.attributes]) {
+    for (const attr of Array.from(template.attributes)) {
       if (TSPAN_POSITION_ATTRS.has(attr.name)) {
         continue;
       }

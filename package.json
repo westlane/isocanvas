@@ -10,7 +10,8 @@
     "url": "https://github.com/westlane/isocanvas.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "exports": {
     ".": {
@@ -60,7 +61,8 @@
     "test": "vitest run",
     "check": "yarn typecheck && yarn build && yarn test && yarn check:neutral",
     "check:neutral": "node scripts/check-neutral.mjs",
-    "build:theme-schemes": "IC_GENERATE=1 vitest run"
+    "build:theme-schemes": "IC_GENERATE=1 vitest run",
+    "publish:github": "yarn build && yarn npm publish --access restricted"
   },
   "sideEffects": false,
   "dependencies": {
