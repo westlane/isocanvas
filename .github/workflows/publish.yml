@@ -23,7 +23,6 @@ jobs:
           node-version: "22"
           cache: yarn
       - run: yarn install --immutable
-      - run: node scripts/ensure-pino-blanc-dist.mjs
       - run: yarn run check
 
   publish:

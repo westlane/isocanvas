@@ -24,6 +24,5 @@ jobs:
           node-version: "22"
           cache: yarn
       - run: yarn install --immutable
-      - run: node scripts/ensure-pino-blanc-dist.mjs
       # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
       - run: yarn run check

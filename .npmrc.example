@@ -1,4 +1,4 @@
 # When installing published @westlane/isocanvas from GitHub Packages in another project.
-# This repo’s devDependency pino-blanc comes from public GitHub git (no token).
+# Dev dep pino-blanc is pinned to registry.npmjs.org via package.json (`npm:` protocol).
 @westlane:registry=https://npm.pkg.github.com
 # //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
