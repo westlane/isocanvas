@@ -9,8 +9,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +26,8 @@ jobs:
         with:
           node-version: "22"
           cache: yarn
+          registry-url: https://npm.pkg.github.com
+          scope: "@westlane"
       - run: yarn install --immutable
       # `yarn run check` — avoid Yarn classic's built-in `yarn check`.
       - run: yarn run check
