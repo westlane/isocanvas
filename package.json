@@ -1,6 +1,6 @@
 {
   "name": "@westlane/isocanvas",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Isometric diagram canvas — viewport math, dot grid, drag snap, SVG bbox helpers, iso node decoration",
   "type": "module",
   "license": "MIT",
