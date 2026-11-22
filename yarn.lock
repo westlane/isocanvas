@@ -701,7 +701,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@westlane/pino-blanc@npm:@westlane/pino-blanc@^0.1.5, @westlane/pino-blanc@npm:^0.1.5":
+"@westlane/pino-blanc@npm:@westlane/pino-blanc@^0.1.5":
   version: 0.1.5
   resolution: "@westlane/pino-blanc@npm:0.1.5::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40westlane%2Fpino-blanc%2F0.1.5%2F71cb912e8bbbdd6bc2e58aca506c86811dff9440"
   dependencies:
